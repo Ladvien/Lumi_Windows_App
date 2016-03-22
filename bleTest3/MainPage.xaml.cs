@@ -10,6 +10,9 @@ using System.Threading;
 using Windows.UI.Xaml.Documents;
 using Windows.UI;
 using System.Diagnostics;
+using System.Threading.Tasks;
+using lumi;
+
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -21,6 +24,7 @@ namespace bleTest3
     public sealed partial class MainPage : Page
     {
         serialPortsExtended serialPorts = new serialPortsExtended();
+        tsb tsb = new tsb();
 
         public MainPage()
         {
@@ -43,6 +47,8 @@ namespace bleTest3
             // Have the serialPortsExtended object populate the combo boxes.
             serialPorts.populateComboBoxesWithPortSettings(cmbBaud, cmbDataBits, cmbStopBits, cmbParity, cmbHandshaking);
             serialPorts.loadMainDisplay(rtbMainDisplay);
+
+            tsb.init(serialPorts, rtbMainDisplay, pbSys);
 
         }
 
@@ -150,13 +156,17 @@ namespace bleTest3
             try
             {
                 //serialPorts.newWriter();
-               uint bytesWritten = await serialPorts.write("@@@");
-            } catch
+                //uint bytesWritten = await serialPorts.write("@@@");
+                await tsb.helloProcessing();
+            } catch (Exception ex)
             {
                 //await serialPorts.disposeStream();
-                Debug.WriteLine("Shit");
+                Debug.WriteLine(ex.Message);
             }
             
         }
+
+
     }
 }
+

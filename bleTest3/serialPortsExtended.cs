@@ -13,6 +13,7 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Documents;
 using Windows.UI;
+using Windows.Security.Cryptography;
 
 namespace bleTest3
 {
@@ -64,7 +65,7 @@ namespace bleTest3
         }
         public selectedSerialDeviceAttributes selectedDeviceAttributes = new selectedSerialDeviceAttributes();
 
-        public SerialDevice _serialDeviceItem;
+        private SerialDevice _serialDeviceItem;
         public SerialDevice serialDeviceItem
         {
             set { _serialDeviceItem = value;
@@ -73,6 +74,48 @@ namespace bleTest3
             }
             get { return _serialDeviceItem; }
         }
+
+        private byte[] _rxBuffer;
+        byte[] rxBuffer
+        {
+            set {
+                    IBuffer buffer = CryptographicBuffer.CreateFromByteArray(value);
+                    CryptographicBuffer.CopyToByteArray(buffer, out _rxBuffer);
+                }
+            get { return _rxBuffer; }
+
+        }
+
+        public byte[] getBytes(int numberOfBytes)
+        {
+            // 1. Get the characters to return: Range<0, numberOfBytes>
+            // 2. Remove the number of bytes from the buffer.
+            // 3. Return the wanted bytes.
+            if(rxBuffer.Length > 0)
+            {
+                byte[] returnBytes = rxBuffer.Take(numberOfBytes).ToArray();
+                rxBuffer = rxBuffer.Skip(numberOfBytes).Take(rxBuffer.Length - numberOfBytes).ToArray();
+                return returnBytes;
+            } else
+            {
+                byte[] empty =  {0x00};
+                return empty;
+            }
+
+        }
+
+        public int numberBufferedBytes()
+        {
+            if(rxBuffer != null)
+            {
+                return rxBuffer.Length;
+            } else
+            {
+                return 0;
+            }
+            
+        }
+
         #endregion properties
 
         #region methods
@@ -266,7 +309,7 @@ namespace bleTest3
                 selectedSerialDevice.ReadTimeout = TimeSpan.FromMilliseconds(1000);
                 // Create cancellation token object to close I/O operations when closing the device
                 ReadCancellationTokenSource = new CancellationTokenSource();
-                Listen();
+                //Listen();
                 return true;
             }
             return false;     
@@ -318,15 +361,17 @@ namespace bleTest3
 
             // Launch the task and wait
             UInt32 bytesRead = await loadAsyncTask;
-            byte[] bytesReadByteArray = new byte[bytesRead];
-            dataReaderObject.ReadBytes(bytesReadByteArray);
+            byte[] tempByteArray = new byte[bytesRead];
+            dataReaderObject.ReadBytes(tempByteArray);
+            rxBuffer = tempByteArray;
 
-            string fancyString = byteArrayToReadableString(bytesReadByteArray);
+            //string fancyString = byteArrayToReadableString(rxBuffer);
 
             if (bytesRead > 0)
             {
-              rtbMainDisplay.Blocks.Add(getParagraph(fancyString, Colors.Red));
+              //rtbMainDisplay.Blocks.Add(getParagraph(fancyString, Colors.Red));
             }
+
         }
 
         public async void Listen()
