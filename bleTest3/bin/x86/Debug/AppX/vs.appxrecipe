@@ -22,13 +22,13 @@
     <AppXManifest Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\bin\x86\Debug\Core\AppxManifest.xml">
       <PackagePath>AppxManifest.xml</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
-      <Modified>2016-03-22T11:57:24.507</Modified>
+      <Modified>2016-03-24T01:18:57.919</Modified>
     </AppXManifest>
   </ItemGroup>
   <ItemGroup>
     <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\bin\x86\Debug\lumi.exe">
       <PackagePath>entrypoint\lumi.exe</PackagePath>
-      <Modified>2016-03-22T11:57:22.801</Modified>
+      <Modified>2016-03-24T01:18:55.881</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\User\.nuget\packages\Microsoft.ApplicationInsights\1.0.0\lib\portable-win81+wpa81\Microsoft.ApplicationInsights.dll">
       <PackagePath>Microsoft.ApplicationInsights.dll</PackagePath>
@@ -506,11 +506,11 @@
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\bin\x86\Debug\resources.pri">
       <PackagePath>resources.pri</PackagePath>
-      <Modified>2016-03-22T02:23:19.316</Modified>
+      <Modified>2016-03-24T01:08:05.184</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\bin\x86\Debug\Core\lumi.exe">
       <PackagePath>lumi.exe</PackagePath>
-      <Modified>2016-03-22T11:57:24.505</Modified>
+      <Modified>2016-03-24T01:18:57.916</Modified>
     </AppxPackagedFile>
   </ItemGroup>
   <ItemGroup>

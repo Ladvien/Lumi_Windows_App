@@ -11,7 +11,9 @@ using Windows.UI.Xaml.Documents;
 using Windows.UI;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Windows.UI.ViewManagement;
 using lumi;
+
 
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
@@ -25,10 +27,12 @@ namespace bleTest3
     {
         serialPortsExtended serialPorts = new serialPortsExtended();
         tsb tsb = new tsb();
-
+        
         public MainPage()
         {
             this.InitializeComponent();
+            ApplicationView appView = ApplicationView.GetForCurrentView();
+            appView.Title = "Lumi";
 
             // Add the callback handlers for serialPortsExtended isntance
             serialPorts.Callback += new serialPortsExtended.CallBackEventHandler(updatePortComboBox);
@@ -46,7 +50,7 @@ namespace bleTest3
             serialPorts.ListAvailablePorts();
             // Have the serialPortsExtended object populate the combo boxes.
             serialPorts.populateComboBoxesWithPortSettings(cmbBaud, cmbDataBits, cmbStopBits, cmbParity, cmbHandshaking);
-            serialPorts.loadMainDisplay(rtbMainDisplay);
+            serialPorts.init(rtbMainDisplay);
 
             tsb.init(serialPorts, rtbMainDisplay, pbSys);
 
@@ -108,7 +112,7 @@ namespace bleTest3
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            connectionLabelBackGround.Background = getColoredBrush(Colors.LawnGreen);
+
         }
 
         public SolidColorBrush getColoredBrush(Color color)
@@ -144,9 +148,13 @@ namespace bleTest3
             if (serialPorts.openPort())
             {
                 btnTsbConnect.IsEnabled = true;
+                connectionLabelBackGround.Background = getColoredBrush(Colors.LawnGreen);
+                labelConnectionStatus.Text = "Connected";
             } else
             {
                 btnTsbConnect.IsEnabled = false;
+                connectionLabelBackGround.Background = getColoredBrush(Colors.Crimson);
+                labelConnectionStatus.Text = "Disconnected";
             }
             
         }

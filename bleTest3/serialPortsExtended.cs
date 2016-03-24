@@ -44,6 +44,7 @@ namespace bleTest3
         private ObservableCollection<DeviceInformation> listOfDevices = new ObservableCollection<DeviceInformation>();
         private ObservableCollection<SerialDevice> listOfPorts= new ObservableCollection<SerialDevice>();
         private CancellationTokenSource ReadCancellationTokenSource;
+
         #endregion fields
 
         #region properties
@@ -121,10 +122,13 @@ namespace bleTest3
         #region methods
 
         #region interface methods
-        public void loadMainDisplay(RichTextBlock paraMainDisplay)
+        public void init(RichTextBlock paraMainDisplay)
         {
             rtbMainDisplay = paraMainDisplay;
+
+
         }
+
 
         public SolidColorBrush getColoredBrush(Color color)
         {
@@ -275,6 +279,7 @@ namespace bleTest3
                     break;
             }
 
+
             //selectedDeviceAttributes.stopBits = (SerialStopBitCount)Enum.Parse(typeof(SerialStopBitCount), cmbStopBits.SelectedItem.ToString());
 
             selectedDeviceAttributes.parity = (SerialParity)Enum.Parse(typeof(SerialParity), cmbParity.SelectedItem.ToString());
@@ -309,7 +314,7 @@ namespace bleTest3
                 selectedSerialDevice.ReadTimeout = TimeSpan.FromMilliseconds(1000);
                 // Create cancellation token object to close I/O operations when closing the device
                 ReadCancellationTokenSource = new CancellationTokenSource();
-                //Listen();
+                //AlwaysListening();
                 return true;
             }
             return false;     
@@ -374,7 +379,45 @@ namespace bleTest3
 
         }
 
-        public async void Listen()
+        public async Task Listen(int timeOut)
+        {
+            try
+            {
+                if (selectedSerialDevice != null)
+                {
+                    dataReaderObject = new DataReader(selectedSerialDevice.InputStream);
+                    ReadCancellationTokenSource = new CancellationTokenSource(timeOut);
+
+                    // keep reading the serial input
+                    while (true)
+                    {
+                        await ReadAsync(ReadCancellationTokenSource.Token);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex.GetType().Name == "TaskCanceledException")
+                {
+                    //rtbMainDisplay.Blocks.Add(getParagraph("Timed out waiting for response.", Colors.Crimson));
+                }
+                else
+                {
+                    rtbMainDisplay.Blocks.Add(getParagraph(ex.Message, Colors.White));
+                }
+            }
+            finally
+            {
+                // Cleanup once complete
+                if (dataReaderObject != null)
+                {
+                    dataReaderObject.DetachStream();
+                    dataReaderObject = null;
+                }
+            }
+        }
+
+        public async void AlwaysListening()
         {
             try
             {
@@ -393,22 +436,22 @@ namespace bleTest3
             {
                 if (ex.GetType().Name == "TaskCanceledException")
                 {
-                    rtbMainDisplay.Blocks.Add(getParagraph("Reading task was cancelled.", Colors.Purple));
+                    rtbMainDisplay.Blocks.Add(getParagraph("Listening interrupted.  No longer listening.", Colors.Crimson));
                 }
                 else
                 {
                     rtbMainDisplay.Blocks.Add(getParagraph(ex.Message, Colors.White));
                 }
             }
-            //finally
-            //{
-            //    // Cleanup once complete
-            //    if (dataReaderObject != null)
-            //    {
-            //        dataReaderObject.DetachStream();
-            //        dataReaderObject = null;
-            //    }
-            //}
+            finally
+            {
+                // Cleanup once complete
+                if (dataReaderObject != null)
+                {
+                    dataReaderObject.DetachStream();
+                    dataReaderObject = null;
+                }
+            }
         }
 
         private void CloseDevice()
@@ -440,6 +483,11 @@ namespace bleTest3
 
             //Debug.Write(bytesReadByteArray[i].ToString("X2"));
             return charOrTwoCharHexString;
+        }
+
+        public void stopListening()
+        {
+            ReadCancellationTokenSource.Cancel();
         }
 
         public async Task disposeStream()

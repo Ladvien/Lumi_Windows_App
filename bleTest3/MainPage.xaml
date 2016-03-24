@@ -37,7 +37,7 @@
             		<Run Text="Serial Port"/>
                 </TextBlock>
                 <StackPanel x:Name="connectionLabelBackGround" Grid.Row="2" Background="Red"  Margin="3" Width="212">
-                    <TextBlock HorizontalAlignment="Center" TextAlignment="Center" FontSize="16"  Width="212" Margin="3" >
+                    <TextBlock x:Name="labelConnectionStatus" HorizontalAlignment="Center" TextAlignment="Center" FontSize="16"  Width="212" Margin="3" >
                     <Run Text="Disconnected"/>
                     </TextBlock>
                 </StackPanel>

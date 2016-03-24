@@ -240,21 +240,24 @@ namespace lumi
             int[] freeFlash = { 0x00, 0x00 };
             int[] eepromSize = { 0x00, 0x00 };
 
-            for (int i = 0; i < 3; i++)
-            {
-                await serialPorts.write("@@@");
-                mainDisplay.Blocks.Add(getParagraph(serialPorts.numberBufferedBytes().ToString(), Colors.Red));
-                byte[] rxBuffer = { 0x25, 0x25, 0x25 };//serialPorts.getBytes(17);
-                if (rxBuffer.Length > 0) { break; }
-            }
+            uint bytesWritten = await serialPorts.write("@@@");
 
+            try
+            {
+                await serialPorts.Listen(1500);
+            } catch (Exception ex)
+            {
+                mainDisplay.Blocks.Add(getParagraph(ex.Message, Colors.Red));
+            }
+            
             int numberOfBytes = serialPorts.numberBufferedBytes();
-            if(numberOfBytes > 16)
+            byte[] rxBuffer = serialPorts.getBytes(numberOfBytes);
+            if (numberOfBytes > 16)
             {
                 string tsbString = "";
-                tsbString = rxBuffer[0].ToString();
-                tsbString += rxBuffer[1].ToString();
-                tsbString += rxBuffer[2].ToString();
+                tsbString += (char)rxBuffer[0];
+                tsbString += (char)rxBuffer[1];
+                tsbString += (char)rxBuffer[2];
 
                 // ATtiny have all lower case, ATMega have upper case.  Not sure if it's expected.
                 if (tsbString.Contains("tsb") || tsbString.Contains("TSB") && rxBuffer.Length == 17)
@@ -304,12 +307,12 @@ namespace lumi
 
                     Paragraph tsbHanshakeInfo = getParagraph(
                               deviceSignatureValue.ToString()
-                         + "\nFirmware Date:  " + firmwareDateString
-                         + "\nStatus:         " + firmwareStatus.ToString("X2")
-                         + "\nSignature:      " + deviceSignature
-                         + "\nPage Size:      " + pageSizeString
-                         + "\nFlash Free:     " + flashLeft
-                         + "\nEEPROM size:    " + eeprom + "\n",
+                         + "\nFirmware Date:\t" + firmwareDateString
+                         + "\nStatus:\t\t" + firmwareStatus.ToString("X2")
+                         + "\nSignature:\t" + deviceSignature
+                         + "\nPage Size\t" + pageSizeString
+                         + "\nFlash Free:\t" + flashLeft
+                         + "\nEEPROM size:\t" + eeprom + "\n",
                          Colors.Azure);
                     mainDisplay.Blocks.Add(tsbHanshakeInfo);
                     commandInProgress = commands.none;
@@ -342,6 +345,7 @@ namespace lumi
 
             Paragraph p = new Paragraph();
             p.Foreground = getColoredBrush(color);
+            p.FontFamily = new FontFamily("Courier");
             Run r = new Run();
             r.Text = str;
             p.Inlines.Add(r);
