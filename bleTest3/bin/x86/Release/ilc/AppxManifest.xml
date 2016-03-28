@@ -10,7 +10,7 @@
   <Identity Name="d43802e8-a09d-4956-9b73-8c71366b48ea" Publisher="CN=TCHC" Version="1.0.0.0" ProcessorArchitecture="x86" />
   <mp:PhoneIdentity PhoneProductId="d43802e8-a09d-4956-9b73-8c71366b48ea" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
-    <DisplayName>bleTest3</DisplayName>
+    <DisplayName>Lumi</DisplayName>
     <PublisherDisplayName>TCHC</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
@@ -24,15 +24,17 @@
     <Resource Language="EN-US" />
   </Resources>
   <Applications>
-    <Application Id="App" Executable="lumi.exe" EntryPoint="bleTest3.App">
-      <uap:VisualElements DisplayName="bleTest3" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="bleTest3" BackgroundColor="transparent">
-        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" />
+    <Application Id="App" Executable="lumi.exe" EntryPoint="Lumi.App">
+      <uap:VisualElements DisplayName="Lumi" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="LUMI" BackgroundColor="transparent">
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png">
+        </uap:DefaultTile>
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
       </uap:VisualElements>
     </Application>
   </Applications>
   <Capabilities>
     <Capability Name="internetClient" />
+    <DeviceCapability Name="bluetooth" />
     <DeviceCapability Name="serialcommunication">
       <Device Id="any">
         <Function Type="name:serialPort" />

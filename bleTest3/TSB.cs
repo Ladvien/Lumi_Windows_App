@@ -15,7 +15,7 @@ using Windows.UI.Xaml.Documents;
 using Windows.UI;
 using bleTest3;
 
-namespace lumi
+namespace bleTest3
 {
     class tsb
     {

@@ -358,3 +358,4 @@ C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\obj\x86\Re
 C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\obj\x86\Release\ilc\intermediate\PreMergeILTransformed\lumi.pdb
 C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\obj\x86\Release\ilc\intermediate\rhbindargs.lumi.rsp
 C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\obj\x86\Release\ilc\intermediate\sgargs.rsp
+C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\obj\x86\Release\Lumi.csprojResolveAssemblyReference.cache

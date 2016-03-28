@@ -32,8 +32,8 @@ namespace bleTest3
     public class serialPortsExtended
     {
         #region fields
-
-        public delegate void CallBackEventHandler();
+        
+        public delegate void CallBackEventHandler(object sender, EventArgs args);
         public event CallBackEventHandler Callback;
 
         public RichTextBlock rtbMainDisplay;
@@ -71,7 +71,7 @@ namespace bleTest3
         {
             set { _serialDeviceItem = value;
                 listOfPorts.Add(value);
-                Callback();
+                Callback(this, null);
             }
             get { return _serialDeviceItem; }
         }
@@ -159,7 +159,7 @@ namespace bleTest3
         #endregion interface methods
 
         #region port setup
-        public async void ListAvailablePorts()
+        public async Task ListAvailablePorts()
         {
             // 1. Discover all device COM device IDs.
             // 2. Add all devices to a collection
@@ -304,17 +304,10 @@ namespace bleTest3
         {
             if(selectedSerialDevice != null)
             {
-                Debug.WriteLine(selectedSerialDevice.PortName);
-                Debug.WriteLine(selectedSerialDevice.BaudRate);
-                Debug.WriteLine(selectedSerialDevice.DataBits);
-                Debug.WriteLine(selectedSerialDevice.StopBits);
-                Debug.WriteLine(selectedSerialDevice.Parity);
-                Debug.WriteLine(selectedSerialDevice.Handshake);
                 selectedSerialDevice.WriteTimeout = TimeSpan.FromMilliseconds(1000);
                 selectedSerialDevice.ReadTimeout = TimeSpan.FromMilliseconds(1000);
                 // Create cancellation token object to close I/O operations when closing the device
                 ReadCancellationTokenSource = new CancellationTokenSource();
-                //AlwaysListening();
                 return true;
             }
             return false;     
@@ -454,7 +447,7 @@ namespace bleTest3
             }
         }
 
-        private void CloseDevice()
+        public async void CloseDevice()
         {
             if (selectedSerialDevice != null)
             {
@@ -463,6 +456,14 @@ namespace bleTest3
             selectedSerialDevice = null;
 
             listOfDevices.Clear();
+            try
+            {
+                await ListAvailablePorts();
+            } catch
+            {
+
+            }
+            
         }
 
         public string byteArrayToReadableString(byte[] byteArray)

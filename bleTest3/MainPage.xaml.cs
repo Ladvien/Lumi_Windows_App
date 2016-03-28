@@ -12,7 +12,9 @@ using Windows.UI;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Windows.UI.ViewManagement;
-using lumi;
+using bleTest3;
+using Windows.ApplicationModel;
+using Windows.UI.Core;
 
 
 
@@ -25,25 +27,31 @@ namespace bleTest3
     /// </summary>
     public sealed partial class MainPage : Page
     {
+
         serialPortsExtended serialPorts = new serialPortsExtended();
         tsb tsb = new tsb();
-        
+        blue blue = new blue();
+        private bool portOpen = false;
+        private CoreDispatcher dispatcher;
+
         public MainPage()
         {
             this.InitializeComponent();
+            dispatcher = Windows.UI.Core.CoreWindow.GetForCurrentThread().Dispatcher;
             ApplicationView appView = ApplicationView.GetForCurrentView();
             appView.Title = "Lumi";
 
             // Add the callback handlers for serialPortsExtended isntance
-            serialPorts.Callback += new serialPortsExtended.CallBackEventHandler(updatePortComboBox);
-            
+            serialPorts.Callback += new serialPortsExtended.CallBackEventHandler(serialPortCallback);
+            blue.Callback += new blue.CallBackEventHandler(blueCallback);
+
             // Until other thread reports COM port discovered
             btnConnect.IsEnabled = false;
             btnTsbConnect.IsEnabled = false;
             pvtPortSettings.IsEnabled = false;
 
             // Let the user know to wait while device thread returns.
-            clearMainDisplay();
+            //clearMainDisplay();
             rtbMainDisplay.Blocks.Add(getParagraph("Please wait while COM ports load...", Colors.White));
 
             // Start the port discovery.
@@ -53,13 +61,41 @@ namespace bleTest3
             serialPorts.init(rtbMainDisplay);
 
             tsb.init(serialPorts, rtbMainDisplay, pbSys);
+            blue.init();
+            
+            App.Current.Suspending += OnSuspending;
 
         }
+        
+        public async void close()
+        {
+            await blue.closeBleDevice();
+        }
 
-        public void updatePortComboBox()
+        public void serialPortCallback(object sender, EventArgs args)
         {
             // Callback from serialPort thread.
             populatePortComboBox();
+        }
+
+        public void blueCallback(object sender, blue.BlueEvent blueEvent)
+        {
+            switch (blueEvent)
+            {
+                case blue.BlueEvent.finishedConnecting:
+                    var ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                    {
+                        rtbMainDisplay.Blocks.Add(getParagraph("Finished connecting to Bluetooth", Colors.CadetBlue));
+                        labelConnectionStatus.Text = "Connected to Bluetooth LE";
+                        connectionLabelBackGround.Background = getColoredBrush(Colors.CadetBlue);
+                    });
+                    break;
+            }
+        }
+        
+        public void bleConnected()
+        {
+
         }
 
         private void populatePortComboBox()
@@ -108,11 +144,14 @@ namespace bleTest3
         public void clearMainDisplay()
         {
             rtbMainDisplay.Blocks.Clear();
+
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            clearMainDisplay();
 
+            blue.connect(132650140378082);
         }
 
         public SolidColorBrush getColoredBrush(Color color)
@@ -145,19 +184,33 @@ namespace bleTest3
 
         private void btnConnect_Click(object sender, RoutedEventArgs e)
         {
-            if (serialPorts.openPort())
+            if (!portOpen)
             {
-                btnTsbConnect.IsEnabled = true;
-                connectionLabelBackGround.Background = getColoredBrush(Colors.LawnGreen);
-                labelConnectionStatus.Text = "Connected";
+                if (serialPorts.openPort()) {
+                    btnTsbConnect.IsEnabled = true;
+                    connectionLabelBackGround.Background = getColoredBrush(Colors.LawnGreen);
+                    labelConnectionStatus.Text = "Connected";
+                    btnConnect.Content = "Disconnect";
+                    pvtPortSettings.IsEnabled = false;
+                    portOpen = true;
+                } else
+                {
+                    rtbMainDisplay.Blocks.Add(getParagraph("Unable to open port " + serialPorts.selectedDeviceAttributes.comPort, Colors.Crimson));
+                }
+
             } else
             {
                 btnTsbConnect.IsEnabled = false;
                 connectionLabelBackGround.Background = getColoredBrush(Colors.Crimson);
                 labelConnectionStatus.Text = "Disconnected";
+                btnConnect.Content = "Connect";
+                pvtPortSettings.IsEnabled = true;
+                serialPorts.CloseDevice();
+                portOpen = false;
             }
             
         }
+
 
         private async void Button_Click_1(object sender, RoutedEventArgs e)
         {
@@ -174,7 +227,17 @@ namespace bleTest3
             
         }
 
+        private async void OnSuspending(object sender, SuspendingEventArgs e)
+        {   
+            await blue.closeBleDevice();
+        }
+
+        public void displayText(string text, Color color)
+        {
+            rtbMainDisplay.Blocks.Add(getParagraph(text, color));
+        }
 
     }
+
 }
 

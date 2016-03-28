@@ -75,20 +75,9 @@ namespace bleTest3
                 rootFrame.Navigate(typeof(MainPage), e.Arguments);
             }
             // Ensure the current window is active
-            Window.Current.Activate();
-            
-             
+            Window.Current.Activate(); 
             
         }
-
-
-
-
-        /// <summary>
-        /// ListAvailablePorts
-        /// - Use SerialDevice.GetDeviceSelector to enumerate all serial devices
-        /// - Attaches the DeviceInformation to the ListBox source so that DeviceIds are displayed
-        /// </summary>
 
         /// <summary>
         /// Invoked when Navigation to a certain page fails
@@ -110,10 +99,10 @@ namespace bleTest3
         private void OnSuspending(object sender, SuspendingEventArgs e)
         {
             var deferral = e.SuspendingOperation.GetDeferral();
+
+
             //TODO: Save application state and stop any background activity
             deferral.Complete();
-
-
         }
     }
 }
