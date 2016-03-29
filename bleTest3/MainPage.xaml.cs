@@ -56,9 +56,12 @@ namespace bleTest3
 
             // Start the port discovery.
             serialPorts.ListAvailablePorts();
+            
             // Have the serialPortsExtended object populate the combo boxes.
             serialPorts.populateComboBoxesWithPortSettings(cmbBaud, cmbDataBits, cmbStopBits, cmbParity, cmbHandshaking);
             serialPorts.init(rtbMainDisplay);
+
+
 
             tsb.init(serialPorts, rtbMainDisplay, pbSys);
             blue.init();
@@ -150,8 +153,6 @@ namespace bleTest3
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             clearMainDisplay();
-
-            blue.connect(132650140378082);
         }
 
         public SolidColorBrush getColoredBrush(Color color)
@@ -184,31 +185,42 @@ namespace bleTest3
 
         private void btnConnect_Click(object sender, RoutedEventArgs e)
         {
-            if (!portOpen)
+            switch (cmbDeviceSelector.SelectedIndex)
             {
-                if (serialPorts.openPort()) {
-                    btnTsbConnect.IsEnabled = true;
-                    connectionLabelBackGround.Background = getColoredBrush(Colors.LawnGreen);
-                    labelConnectionStatus.Text = "Connected";
-                    btnConnect.Content = "Disconnect";
-                    pvtPortSettings.IsEnabled = false;
-                    portOpen = true;
-                } else
-                {
-                    rtbMainDisplay.Blocks.Add(getParagraph("Unable to open port " + serialPorts.selectedDeviceAttributes.comPort, Colors.Crimson));
-                }
+                case 0: // Serial Port
+                    if (!portOpen)
+                    {
+                        if (serialPorts.openPort())
+                        {
+                            btnTsbConnect.IsEnabled = true;
+                            connectionLabelBackGround.Background = getColoredBrush(Colors.LawnGreen);
+                            labelConnectionStatus.Text = "Connected";
+                            btnConnect.Content = "Disconnect";
+                            pvtPortSettings.IsEnabled = false;
+                            portOpen = true;
+                        }
+                        else
+                        {
+                            rtbMainDisplay.Blocks.Add(getParagraph("Unable to open port " + serialPorts.selectedDeviceAttributes.comPort, Colors.Crimson));
+                        }
 
-            } else
-            {
-                btnTsbConnect.IsEnabled = false;
-                connectionLabelBackGround.Background = getColoredBrush(Colors.Crimson);
-                labelConnectionStatus.Text = "Disconnected";
-                btnConnect.Content = "Connect";
-                pvtPortSettings.IsEnabled = true;
-                serialPorts.CloseDevice();
-                portOpen = false;
-            }
-            
+                    }
+                    else
+                    {
+                        btnTsbConnect.IsEnabled = false;
+                        connectionLabelBackGround.Background = getColoredBrush(Colors.Crimson);
+                        labelConnectionStatus.Text = "Disconnected";
+                        btnConnect.Content = "Connect";
+                        pvtPortSettings.IsEnabled = true;
+                        serialPorts.CloseDevice();
+                        portOpen = false;
+                    }
+                    break;
+                case 1: // Bluetooth LE
+                    blue.connect(132650140378082);
+                    break;
+
+            }   
         }
 
 
@@ -229,7 +241,7 @@ namespace bleTest3
 
         private async void OnSuspending(object sender, SuspendingEventArgs e)
         {   
-            await blue.closeBleDevice();
+            //await blue.closeBleDevice();
         }
 
         public void displayText(string text, Color color)

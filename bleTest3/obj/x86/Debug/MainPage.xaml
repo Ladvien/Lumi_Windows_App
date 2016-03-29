@@ -41,17 +41,21 @@
             		<Run Text="Serial Port"/>
                 </TextBlock>
                 <StackPanel x:ConnectionId='9' x:Name="connectionLabelBackGround" Grid.Row="2" Background="Red"  Margin="3" Width="212">
-                    <TextBlock x:ConnectionId='14' x:Name="labelConnectionStatus" HorizontalAlignment="Center" TextAlignment="Center" FontSize="16"  Width="212" Margin="3" >
+                    <TextBlock x:ConnectionId='17' x:Name="labelConnectionStatus" HorizontalAlignment="Center" TextAlignment="Center" FontSize="16"  Width="212" Margin="3" >
                     <Run Text="Disconnected"/>
                     </TextBlock>
                 </StackPanel>
                 <Button x:ConnectionId='10' x:Name="btnConnect" Grid.Row="3" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Connect"                         />
-                <Button x:ConnectionId='11' Grid.Row="4" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Clear"                     />
-                <TextBlock Grid.Row="5" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="20" Width="Auto" Height="Auto" Margin="3">
+                <ComboBox x:ConnectionId='11' x:Name="cmbDeviceSelector" SelectedIndex="0" Grid.Row="4" HorizontalAlignment="Center" Width="212">
+                    <ComboBoxItem x:ConnectionId='15' x:Name="cbiSerialPort">Serial Port</ComboBoxItem>
+                    <ComboBoxItem x:ConnectionId='16' x:Name="cbiBluetooth">Bluetooth</ComboBoxItem>
+                </ComboBox>
+                <Button x:ConnectionId='12' Grid.Row="5" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Clear"                     />
+                <TextBlock Grid.Row="6" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="20" Width="Auto" Height="Auto" Margin="3">
             		<Run Text="TinySafeBoot"/>
                 </TextBlock>
-                <Button x:ConnectionId='12' x:Name="btnTsbConnect" Grid.Row="6" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Conect to TSB"                       />
-                <ProgressBar x:ConnectionId='13' x:Name="pbSys" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="16"/>
+                <Button x:ConnectionId='13' x:Name="btnTsbConnect" Grid.Row="7" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Conect to TSB"                       />
+                <ProgressBar x:ConnectionId='14' x:Name="pbSys" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="16"/>
             </Grid>
             <Grid HorizontalAlignment="Left" Margin="250,0,0,0" Width="750" Height="720">
                 <Grid.RowDefinitions>

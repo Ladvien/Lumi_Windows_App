@@ -25,107 +25,77 @@ using Windows.UI.Core;
 
 namespace bleTest3
 {
-
-
     public class blue
     {
+        #region credits
+        // https://github.com/marknotgeorge/SpeedAndCadence/blob/master/SpeedAndCadence/Model/CsacService.cs
+        // https://social.msdn.microsoft.com/Forums/sqlserver/en-US/b98d77f2-bf5e-45fc-9495-1c444b54450e/uwpreconnecting-to-a-ble-csac-device-causes-exception?forum=wpdevelop
+        // https://github.com/Microsoft/Windows-universal-samples/tree/master/Samples/BluetoothAdvertisement/cs
+        //
+        //
+        #endregion credits
+
+        // Used for UI callback.
         public enum BlueEvent
         {
             finishedConnecting = 0,
         }
 
+        // Callback to the main UI.
         public BlueEvent blueEvent = new BlueEvent();
         public delegate void CallBackEventHandler(object sender, BlueEvent blueEvent);
         public event CallBackEventHandler Callback;
 
-        BluetoothLEAdvertisementWatcher watcher = new BluetoothLEAdvertisementWatcher();
+        // Bluetooth LE Discovery
+        BluetoothLEAdvertisementWatcher bleAdvertWatcher = new BluetoothLEAdvertisementWatcher();
+
+        // Bluetooth LE Connection
         BluetoothLEDevice bleDevice;
         GattCharacteristic readWriteCharacteristic;
         DataWriter writer = new DataWriter();
+
+        // Used for enumeration information.
         DeviceWatcher deviceWatcher;
 
-        RichTextBlock mainDisplay = new RichTextBlock();
-
+        // Used to determine discovery of BLE services.  
         int gattAddedCounter = 0;
-
+        // Used to workaround MS' crappy API.
         public bool pairedUnpairedThisSession = false;
 
-        private byte[] _txBuffer;
-        byte[] txBuffer
-        {
-            set
-            {
-                IBuffer buffer = CryptographicBuffer.CreateFromByteArray(value);
-                CryptographicBuffer.CopyToByteArray(buffer, out _txBuffer);
-            }
-            get { return _txBuffer; }
-
-        }
-
-        public byte[] bytesFromTxBuffer(int numberOfBytes)
-        {
-            // 1. Get the characters to return: Range<0, numberOfBytes>
-            // 2. Remove the number of bytes from the buffer.
-            // 3. Return the wanted bytes.
-            if (txBuffer.Length > 0)
-            {
-                byte[] returnBytes = txBuffer.Take(numberOfBytes).ToArray();
-                txBuffer = txBuffer.Skip(numberOfBytes).Take(txBuffer.Length - numberOfBytes).ToArray();
-                return returnBytes;
-            }
-            else
-            {
-                byte[] empty = { 0x00 };
-                return empty;
-            }
-
+        public bool isBluetoothAvailable()
+        {          
+            
+            return true;
         }
 
         public async void init()
         {
             // Create and initialize a new watcher instance.
-            watcher = new BluetoothLEAdvertisementWatcher();
+            bleAdvertWatcher = new BluetoothLEAdvertisementWatcher();
 
-            // Part 1B: Configuring the signal strength filter for proximity scenarios
-
-            // Configure the signal strength filter to only propagate events when in-range
-            // Please adjust these values if you cannot receive any advertisement 
-            // Set the in-range threshold to -70dBm. This means advertisements with RSSI >= -70dBm 
-            // will start to be considered "in-range".
-            //watcher.SignalStrengthFilter.InRangeThresholdInDBm = -70;
-
-            // Set the out-of-range threshold to -75dBm (give some buffer). Used in conjunction with OutOfRangeTimeout
-            // to determine when an advertisement is no longer considered "in-range"
-            //watcher.SignalStrengthFilter.OutOfRangeThresholdInDBm = -75;
-
-            // Set the out-of-range timeout to be 2 seconds. Used in conjunction with OutOfRangeThresholdInDBm
-            // to determine when an advertisement is no longer considered "in-range"
-            watcher.SignalStrengthFilter.OutOfRangeTimeout = TimeSpan.FromMilliseconds(4000);
-
-            // By default, the sampling interval is set to zero, which means there is no sampling and all
-            // the advertisement received is returned in the Received event
-
-            // End of watcher configuration. There is no need to comment out any code beyond this point.
+            // Watcher created for determination of enumeration of connected BLE.  This is needed
+            // for the workaround to Microsoft's crappy BLE API.
             deviceWatcher = DeviceInformation.CreateWatcher();
             deviceWatcher.EnumerationCompleted += DeviceWatcher_EnumerationCompleted;
             deviceWatcher.Added += DeviceWatcher_Added;
             deviceWatcher.Removed += DeviceWatcher_Removed;
             deviceWatcher.Updated += DeviceWatcher_Updated;
-            //deviceWatcher.
             deviceWatcher.Start();
-            watcher = new BluetoothLEAdvertisementWatcher();
-            //watcher.ScanningMode = BluetoothLEScanningMode.Active;
 
-            watcher.Received += OnAdvertisementReceived;
-            watcher.Stopped += OnAdvertisementWatcherStopped;
+            bleAdvertWatcher.Received += OnAdvertisementReceived;
+            bleAdvertWatcher.Stopped += OnAdvertisementWatcherStopped;
 
+            bleAdvertWatcher.Start();
 
         }
+
+        #region devicewatcher
 
         private void DeviceWatcher_Updated(DeviceWatcher sender, DeviceInformationUpdate args)
         {
             if (bleDevice != null)
             {
+
                 if (bleDevice.DeviceId == args.Id)
                 {
                     Debug.WriteLine("Total Gatts added: "+gattAddedCounter);
@@ -167,47 +137,59 @@ namespace bleTest3
         private void DeviceWatcher_EnumerationCompleted(DeviceWatcher sender, object args)
         {
             
-            Debug.WriteLine("Enumerated");
         }
 
-        private void BleDevice_ConnectionStatusChanged(BluetoothLEDevice sender, object args)
-        {
-            Debug.WriteLine("Conn. Changed: "+ sender.ConnectionStatus);
-        }
+        #endregion devicewatcher
 
-        private async void OnAdvertisementReceived(BluetoothLEAdvertisementWatcher watcher, BluetoothLEAdvertisementReceivedEventArgs eventArgs)
+        #region BLEadvertisementWatcher
+
+        private void OnAdvertisementReceived(BluetoothLEAdvertisementWatcher watcher, BluetoothLEAdvertisementReceivedEventArgs eventArgs)
         {
 
+            // 1. Get device name and address
+            // 2. Store device name and address in dictionary
+
+            int numberOfGattServices = eventArgs.Advertisement.ServiceUuids.Count;
+            var data = eventArgs.Advertisement.DataSections[1];
+            Debug.WriteLine(CryptographicBuffer.ConvertBinaryToString(BinaryStringEncoding.Utf8, data.Data));
+            //for (int i = 0; i< data.Count; i++)
+            //{
+            //    string name = CryptographicBuffer.EncodeToHexString(data[i].Data);
+            //    Debug.WriteLine(i + ": " + name);
+            //}
+            
             var address = eventArgs.BluetoothAddress;
-            try
-            {
-                BluetoothLEDevice device = await BluetoothLEDevice.FromBluetoothAddressAsync(address);
-                var cnt = device.GattServices.Count;
-                watcher.Stop();
-                if (device.Name == "HMSoft")
-                {
-                    DeviceInformation deviceIno = device.DeviceInformation;
-                    Debug.WriteLine(device.BluetoothAddress);
-                    device.Dispose();
+            
 
-                    IDevicePairingSettings pairSettings;
-                    Debug.WriteLine(deviceIno.Pairing.ProtectionLevel);
-                    DevicePairingResult dpr = await deviceIno.Pairing.PairAsync(DevicePairingProtectionLevel.None);
-                    //var service = await GattDeviceService.FromIdAsync(eventArgs.Advertisement.ServiceUuids.ToString());
-                    Debug.WriteLine(dpr.Status);
-                    Debug.WriteLine(device.BluetoothAddress);
-                    Debug.WriteLine("Device name: " + device.Name);
-                    Debug.WriteLine("Connection status: " + device.ConnectionStatus);
-                    Debug.WriteLine(device.DeviceInformation.Kind);
-                    Debug.WriteLine(device.GattServices);
-                } else
-                {
-                    //watcher.Start();
-                }
-            } catch (Exception ex)
-            {
-                Debug.WriteLine(ex);
-            }
+            //try
+            //{
+            //    BluetoothLEDevice device = await BluetoothLEDevice.FromBluetoothAddressAsync(address);
+            //    var cnt = device.GattServices.Count;
+            //    watcher.Stop();
+            //    if (device.Name == "HMSoft")
+            //    {
+            //        DeviceInformation deviceIno = device.DeviceInformation;
+            //        Debug.WriteLine(device.BluetoothAddress);
+            //        device.Dispose();
+
+            //        IDevicePairingSettings pairSettings;
+            //        Debug.WriteLine(deviceIno.Pairing.ProtectionLevel);
+            //        DevicePairingResult dpr = await deviceIno.Pairing.PairAsync(DevicePairingProtectionLevel.None);
+            //        //var service = await GattDeviceService.FromIdAsync(eventArgs.Advertisement.ServiceUuids.ToString());
+            //        Debug.WriteLine(dpr.Status);
+            //        Debug.WriteLine(device.BluetoothAddress.ToString("X2"));
+            //        Debug.WriteLine("Device name: " + device.Name);
+            //        Debug.WriteLine("Connection status: " + device.ConnectionStatus);
+            //        Debug.WriteLine(device.DeviceInformation.Kind);
+            //        Debug.WriteLine(device.GattServices);
+            //    } else
+            //    {
+            //        //watcher.Start();
+            //    }
+            //} catch (Exception ex)
+            //{
+            //    Debug.WriteLine(ex);
+            //}
             
         }
 
@@ -221,6 +203,13 @@ namespace bleTest3
 
         }
 
+        #endregion BLEadvertisementWatcher
+
+        #region BLEdevice
+        private void BleDevice_ConnectionStatusChanged(BluetoothLEDevice sender, object args)
+        {
+            Debug.WriteLine("Conn. Changed: " + sender.ConnectionStatus);
+        }
         public async Task connect(ulong bluetoothAddress)
         {
             // Get a BLE device from address.
@@ -236,19 +225,19 @@ namespace bleTest3
             {
                 // Hacker fix.  Each time the app closes the "User Session Token" for the BLE connection
                 // is lost.  To re-enable it for our new session, pairing and unpairing must be done.
-                if(pairedUnpairedThisSession == false)
+                if (pairedUnpairedThisSession == false)
                 {
                     await closeBleDevice();
                     await connectToBLEDevice();
                     pairedUnpairedThisSession = true;
                 }
-                
+
                 for (int i = 0; i < bleDevice.GattServices.Count; i++)
                 {
                     var characteristics = bleDevice.GattServices[i].GetAllCharacteristics();
-                    for(int j = 0; j < characteristics.Count; j++)
+                    for (int j = 0; j < characteristics.Count; j++)
                     {
-                        Debug.WriteLine("Service UUID: " + characteristics[j].Service.Uuid.ToString() + "Gatt #: " +i.ToString() + " Characteristic #: "+j.ToString());
+                        Debug.WriteLine("Service UUID: " + characteristics[j].Service.Uuid.ToString() + "Gatt #: " + i.ToString() + " Characteristic #: " + j.ToString());
                     }
                 }
                 //Debug.WriteLine(bleDevice.GattServices.Count);
@@ -280,7 +269,7 @@ namespace bleTest3
                     //var miliService = await GattDeviceService.FromIdAsync(GatDevices[0].Id);
                     //var pairCharacteristic = miliService.GetAllCharacteristics().FirstOrDefault();
 
-                    
+
                     //var pairStatus = await readWriteCharacteristic.WriteValueAsync(writer.DetachBuffer(), GattWriteOption.WriteWithoutResponse);
                     //Debug.WriteLine(pairStatus);
                 }
@@ -311,6 +300,36 @@ namespace bleTest3
             //Debug.WriteLine(pairingStatus);
         }
 
+        public void writeToBleDevice(string message)
+        {
+            // 1. Convert string to bytes.
+            // 2. Determine if bytes than CC254X buffer (20 bytes).
+            // 3. Store excess bytes in txBuffer
+            // 4. await Send 20 or less bytes.
+            // 5. Loop through await send until txBuffer is empty.
+            // 6. Return true if all bytes are written successfully.
+
+            byte[] txBuffer = GetBytes(message);
+            while (txBuffer.Length > 20)
+            {
+                byte[] messageAsByteArray = txBuffer.Skip(20).ToArray();
+                messageAsByteArray = messageAsByteArray.Take(20).ToArray();
+
+            }
+            if (txBuffer.Length > 0)
+            {
+
+            }
+        }
+
+        public void hmsoftFinishedEnumerating()
+        {
+
+            Callback(this, blueEvent);
+        }
+
+        #endregion BLEdevice
+
         static byte[] GetBytes(string str)
         {
             byte[] bytes = new byte[str.Length];
@@ -328,37 +347,6 @@ namespace bleTest3
             return new string(chars);
         }
 
-        public void writeToBleDevice(string message)
-        {
-            // 1. Convert string to bytes.
-            // 2. Determine if bytes than CC254X buffer (20 bytes).
-            // 3. Store excess bytes in txBuffer
-            // 4. await Send 20 or less bytes.
-            // 5. Loop through await send until txBuffer is empty.
-            // 6. Return true if all bytes are written successfully.
-
-            byte[] txBuffer = GetBytes(message);
-            while (txBuffer.Length > 20)
-            {
-                byte[] messageAsByteArray = txBuffer.Skip(20).ToArray();
-                messageAsByteArray = messageAsByteArray.Take(20).ToArray();
-
-            }
-            if(txBuffer.Length > 0)
-            {
-                
-            }
-        }
-
-        public void hmsoftFinishedEnumerating()
-        {
-            
-            Callback(this, blueEvent);
-        }
-
     } // End Blue
-
-
-    
 
 } // End Namespace
