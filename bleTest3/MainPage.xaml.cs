@@ -15,7 +15,8 @@ using Windows.UI.ViewManagement;
 using bleTest3;
 using Windows.ApplicationModel;
 using Windows.UI.Core;
-
+using Windows.Foundation;
+using lumi;
 
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
@@ -33,6 +34,9 @@ namespace bleTest3
         blue blue = new blue();
         private bool portOpen = false;
         private CoreDispatcher dispatcher;
+
+        DevicePicker devicePicker = new DevicePicker();
+        
 
         public MainPage()
         {
@@ -61,18 +65,27 @@ namespace bleTest3
             serialPorts.populateComboBoxesWithPortSettings(cmbBaud, cmbDataBits, cmbStopBits, cmbParity, cmbHandshaking);
             serialPorts.init(rtbMainDisplay);
 
-
-
             tsb.init(serialPorts, rtbMainDisplay, pbSys);
-            blue.init();
-            
+            blue.init(this.Height, this.Width);
+
+            devicePicker.DeviceSelected += DevicePicker_DeviceSelected;
+
+
             App.Current.Suspending += OnSuspending;
 
         }
-        
-        public async void close()
+
+        private async void DevicePicker_DeviceSelected(DevicePicker sender, DeviceSelectedEventArgs args)
         {
-            await blue.closeBleDevice();
+            Debug.WriteLine("Here's the ID: "+ args.SelectedDevice.Id);
+            var paired = await args.SelectedDevice.Pairing.PairAsync(DevicePairingProtectionLevel.None);
+            Debug.WriteLine(args.SelectedDevice.Id.Substring(15, 10)); 
+            
+        }
+
+        public void close()
+        {
+            blue.closeBleDevice();
         }
 
         public void serialPortCallback(object sender, EventArgs args)
@@ -83,23 +96,51 @@ namespace bleTest3
 
         public void blueCallback(object sender, blue.BlueEvent blueEvent)
         {
+            IAsyncAction ignored;
             switch (blueEvent)
             {
                 case blue.BlueEvent.finishedConnecting:
-                    var ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                    ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                     {
                         rtbMainDisplay.Blocks.Add(getParagraph("Finished connecting to Bluetooth", Colors.CadetBlue));
                         labelConnectionStatus.Text = "Connected to Bluetooth LE";
                         connectionLabelBackGround.Background = getColoredBrush(Colors.CadetBlue);
                     });
                     break;
+                case blue.BlueEvent.searchFinished:
+                    ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                    {
+                        if(blue.bleDevices.Count > 0)
+                        {
+                            int deviceCount = blue.bleDevices.Count;
+                            string[] key = new string[deviceCount];
+
+                            cmbBleDevice.Items.Clear();
+                            
+                            for (int i = 0; i < deviceCount; i++)
+                            {
+                                blue.bleDevices.Keys.CopyTo(key, 0);
+                                cmbBleDevice.Items.Insert(i,key[i]);
+                            }
+                            cmbBleDevice.SelectedIndex = 0;
+                            cmbBleDevice.IsEnabled = true;
+                            btnConnect.IsEnabled = true;
+                        }
+                        else
+                        {
+                            cmbBleDevice.IsEnabled = false;
+                        }
+                        btnBleSearch.IsEnabled = true;
+                        btnConnect.IsEnabled = true;
+                        cmbBleDevice.IsEnabled = true;
+                        cmbDeviceSelector.IsEnabled = true;
+
+
+                    });
+                    break;
             }
         }
         
-        public void bleConnected()
-        {
-
-        }
 
         private void populatePortComboBox()
         {
@@ -183,7 +224,7 @@ namespace bleTest3
             }
         }
 
-        private void btnConnect_Click(object sender, RoutedEventArgs e)
+        private async void btnConnect_Click(object sender, RoutedEventArgs e)
         {
             switch (cmbDeviceSelector.SelectedIndex)
             {
@@ -217,7 +258,8 @@ namespace bleTest3
                     }
                     break;
                 case 1: // Bluetooth LE
-                    blue.connect(132650140378082);
+                    var success = blue.connect(blue.bleDevices[cmbBleDevice.SelectedItem.ToString()]);
+
                     break;
 
             }   
@@ -249,6 +291,58 @@ namespace bleTest3
             rtbMainDisplay.Blocks.Add(getParagraph(text, color));
         }
 
+        private void cmbDeviceSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if(pvtPortSettings != null)
+            {
+                switch (cmbDeviceSelector.SelectedIndex)
+                {
+                    case 0:
+                        pvtPortSettings.Visibility = Visibility.Visible;
+                        btnBleSearch.Visibility = Visibility.Collapsed;
+                        cmbBleDevice.Visibility = Visibility.Collapsed;
+                        break;
+                    case 1:
+                        pvtPortSettings.Visibility = Visibility.Collapsed;
+                        btnBleSearch.Visibility = Visibility.Visible;
+                        cmbBleDevice.Visibility = Visibility.Visible;
+                        break;
+                }
+            }
+            
+        }
+
+        public void rootDeviceSelector(int selection)
+        {
+            switch (selection)
+            {
+                case 0:
+
+                    break;
+
+                case 1:
+                    //DeviceSelectorInfo bluetoothLESelectorUnpaired = DeviceSelectorChoices.BluetoothUnpairedOnly;
+                    //devicePicker.Filter.SupportedDeviceSelectors.Add(bluetoothLESelectorUnpaired.Selector);
+                    DeviceSelectorInfo bluetoothLESelectorPaired = DeviceSelectorChoices.BluetoothLEPairedOnly;
+                    devicePicker.Filter.SupportedDeviceSelectors.Add(bluetoothLESelectorPaired.Selector);
+                    devicePicker.Appearance.Title = "TinySafeBoot Link";
+                    devicePicker.Appearance.ForegroundColor = Colors.White;
+                    Rect devicePickerBox = new Rect(this.Height / 2, this.Width / 2, this.Width / 3, this.Height / 3);
+                    devicePicker.Show(devicePickerBox, Windows.UI.Popups.Placement.Default);
+                    break;
+            }
+        }
+
+        private void btnBleSearch_Click(object sender, RoutedEventArgs e)
+        {
+            btnBleSearch.IsEnabled = false;
+            btnConnect.IsEnabled = false;
+            cmbBleDevice.IsEnabled = false;
+            cmbDeviceSelector.IsEnabled = false;
+            blue.startBLEWatcher(5);
+            DeviceSelectorInfo bluetoothLESelectorPaired = DeviceSelectorChoices.BluetoothLEPairedOnly;
+            
+        }
     }
 
 }

@@ -45,6 +45,8 @@ namespace bleTest3
         private ObservableCollection<SerialDevice> listOfPorts= new ObservableCollection<SerialDevice>();
         private CancellationTokenSource ReadCancellationTokenSource;
 
+        // public ObservableCollection<DeviceAccessInformation> aqsList = new ObservableCollection<DeviceAccessInformation>();
+        public DeviceInformationCollection dis;
         #endregion fields
 
         #region properties
@@ -168,13 +170,15 @@ namespace bleTest3
             try
             {
                 string aqs = SerialDevice.GetDeviceSelector();
-                var dis = await DeviceInformation.FindAllAsync(SerialDevice.GetDeviceSelectorFromUsbVidPid(0x0000, 0xFFFF));
+
+                dis = await DeviceInformation.FindAllAsync(SerialDevice.GetDeviceSelectorFromUsbVidPid(0x0000, 0xFFFF));
 
                 for (int i = 0; i < dis.Count; i++)
                 {
                     listOfDevices.Add(dis[i]);
                     serialDeviceItem = await SerialDevice.FromIdAsync(dis[i].Id);
                 }
+
             }
             catch
             {

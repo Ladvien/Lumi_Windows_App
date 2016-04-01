@@ -46,15 +46,18 @@
                     </TextBlock>
                 </StackPanel>
                 <Button x:Name="btnConnect" Grid.Row="3" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Connect" Click="btnConnect_Click"/>
-                <ComboBox x:Name="cmbDeviceSelector" SelectedIndex="0" Grid.Row="4" HorizontalAlignment="Center" Width="212">
+                <ComboBox x:Name="cmbDeviceSelector" SelectedIndex="0" Grid.Row="4" HorizontalAlignment="Center" Width="212" SelectionChanged="cmbDeviceSelector_SelectionChanged">
                     <ComboBoxItem x:Name="cbiSerialPort">Serial Port</ComboBoxItem>
                     <ComboBoxItem x:Name="cbiBluetooth">Bluetooth</ComboBoxItem>
                 </ComboBox>
-                <Button Grid.Row="5" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Clear" Click="Button_Click"/>
-                <TextBlock Grid.Row="6" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="20" Width="Auto" Height="Auto" Margin="3">
+                <ComboBox x:Name="cmbBleDevice" Grid.Row="5" IsEnabled="False" Visibility="Collapsed" HorizontalAlignment="Center" Width="212" SelectionChanged="cmbDeviceSelector_SelectionChanged">
+                </ComboBox>
+                <Button x:Name="btnBleSearch" Grid.Row="6" Visibility="Collapsed" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Search" Click="btnBleSearch_Click" />
+                <Button Grid.Row="7" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Clear" Click="Button_Click"/>
+                <TextBlock Grid.Row="8" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="20" Width="Auto" Height="Auto" Margin="3">
             		<Run Text="TinySafeBoot"/>
                 </TextBlock>
-                <Button x:Name="btnTsbConnect" Grid.Row="7" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Conect to TSB" Click="Button_Click_1"/>
+                <Button x:Name="btnTsbConnect" Grid.Row="9" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Conect to TSB" Click="Button_Click_1"/>
                 <ProgressBar x:Name="pbSys" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="16"/>
             </Grid>
             <Grid HorizontalAlignment="Left" Margin="250,0,0,0" Width="750" Height="720">
