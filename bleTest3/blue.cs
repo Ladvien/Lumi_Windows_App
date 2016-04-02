@@ -229,8 +229,6 @@ namespace bleTest3
 
             //var = even
 
-
-
             //try
             //{
             //    BluetoothLEDevice device = await BluetoothLEDevice.FromBluetoothAddressAsync(address);

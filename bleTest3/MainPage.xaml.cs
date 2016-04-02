@@ -60,7 +60,7 @@ namespace bleTest3
 
             // Start the port discovery.
             serialPorts.ListAvailablePorts();
-            
+
             // Have the serialPortsExtended object populate the combo boxes.
             serialPorts.populateComboBoxesWithPortSettings(cmbBaud, cmbDataBits, cmbStopBits, cmbParity, cmbHandshaking);
             serialPorts.init(rtbMainDisplay);
@@ -68,11 +68,9 @@ namespace bleTest3
             tsb.init(serialPorts, rtbMainDisplay, pbSys);
             blue.init(this.Height, this.Width);
 
-            devicePicker.DeviceSelected += DevicePicker_DeviceSelected;
+            //devicePicker.DeviceSelected += DevicePicker_DeviceSelected;
 
-
-            App.Current.Suspending += OnSuspending;
-
+            //App.Current.Suspending += OnSuspending;
         }
 
         private async void DevicePicker_DeviceSelected(DevicePicker sender, DeviceSelectedEventArgs args)
@@ -80,7 +78,6 @@ namespace bleTest3
             Debug.WriteLine("Here's the ID: "+ args.SelectedDevice.Id);
             var paired = await args.SelectedDevice.Pairing.PairAsync(DevicePairingProtectionLevel.None);
             Debug.WriteLine(args.SelectedDevice.Id.Substring(15, 10)); 
-            
         }
 
         public void close()
@@ -90,84 +87,20 @@ namespace bleTest3
 
         public void serialPortCallback(object sender, EventArgs args)
         {
-            // Callback from serialPort thread.
-            populatePortComboBox();
-        }
-
-        public void blueCallback(object sender, blue.BlueEvent blueEvent)
-        {
             IAsyncAction ignored;
-            switch (blueEvent)
+
+            // Callback from serialPort thread.
+            if(cmbDeviceSelector.SelectedIndex == 0)
             {
-                case blue.BlueEvent.finishedConnecting:
-                    ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-                    {
-                        rtbMainDisplay.Blocks.Add(getParagraph("Finished connecting to Bluetooth", Colors.CadetBlue));
-                        labelConnectionStatus.Text = "Connected to Bluetooth LE";
-                        connectionLabelBackGround.Background = getColoredBrush(Colors.CadetBlue);
-                    });
-                    break;
-                case blue.BlueEvent.searchFinished:
-                    ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-                    {
-                        if(blue.bleDevices.Count > 0)
-                        {
-                            int deviceCount = blue.bleDevices.Count;
-                            string[] key = new string[deviceCount];
-
-                            cmbBleDevice.Items.Clear();
-                            
-                            for (int i = 0; i < deviceCount; i++)
-                            {
-                                blue.bleDevices.Keys.CopyTo(key, 0);
-                                cmbBleDevice.Items.Insert(i,key[i]);
-                            }
-                            cmbBleDevice.SelectedIndex = 0;
-                            cmbBleDevice.IsEnabled = true;
-                            btnConnect.IsEnabled = true;
-                        }
-                        else
-                        {
-                            cmbBleDevice.IsEnabled = false;
-                        }
-                        btnBleSearch.IsEnabled = true;
-                        btnConnect.IsEnabled = true;
-                        cmbBleDevice.IsEnabled = true;
-                        cmbDeviceSelector.IsEnabled = true;
-
-
-                    });
-                    break;
+                ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                {
+                    populatePortComboBox();
+                });
             }
         }
+
+   
         
-
-        private void populatePortComboBox()
-        {
-            // 1. Clear port items to prevent duplicates.
-            // 2. Add all ports discovered to combo box.
-            // 3. If there is one port in comboboxes enable dependent UI. 
-
-            // Now COM ports are found, populate the cmbBox.
-            cmbPort.Items.Clear();
-            for(int i = 0; i < serialPorts.numberOfPortsInList(); i++)
-            {
-                cmbPort.Items.Add(serialPorts.getPortNameAtIndex(i));
-            }
-            if(cmbPort.Items.Count > 0)
-            {
-                btnConnect.IsEnabled = true;
-                pvtPortSettings.IsEnabled = true;
-                rtbMainDisplay.Blocks.Clear();
-                rtbMainDisplay.Blocks.Add(getParagraph("Ready", Colors.LawnGreen));
-                cmbPort.SelectedIndex = 0;
-            } else
-            {
-                btnConnect.IsEnabled = false;
-                pvtPortSettings.IsEnabled = false;
-            }
-        }
-
         public Paragraph getParagraph(string str, Color color)
         {
             // 1. Get new paragraph.
@@ -201,7 +134,6 @@ namespace bleTest3
             return new SolidColorBrush(color);
         }
 
-
         private void cmbPort_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // 1. Assert one port in combobox.
@@ -224,7 +156,7 @@ namespace bleTest3
             }
         }
 
-        private async void btnConnect_Click(object sender, RoutedEventArgs e)
+        private void btnConnect_Click(object sender, RoutedEventArgs e)
         {
             switch (cmbDeviceSelector.SelectedIndex)
             {
@@ -244,7 +176,6 @@ namespace bleTest3
                         {
                             rtbMainDisplay.Blocks.Add(getParagraph("Unable to open port " + serialPorts.selectedDeviceAttributes.comPort, Colors.Crimson));
                         }
-
                     }
                     else
                     {
@@ -258,10 +189,8 @@ namespace bleTest3
                     }
                     break;
                 case 1: // Bluetooth LE
-                    var success = blue.connect(blue.bleDevices[cmbBleDevice.SelectedItem.ToString()]);
-
+                    var success = blue.connect(blue.bleDevices[cmbFoundDevices.SelectedItem.ToString()]);
                     break;
-
             }   
         }
 
@@ -281,69 +210,167 @@ namespace bleTest3
             
         }
 
-        private async void OnSuspending(object sender, SuspendingEventArgs e)
-        {   
-            //await blue.closeBleDevice();
-        }
-
         public void displayText(string text, Color color)
         {
             rtbMainDisplay.Blocks.Add(getParagraph(text, color));
-        }
-
-        private void cmbDeviceSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if(pvtPortSettings != null)
-            {
-                switch (cmbDeviceSelector.SelectedIndex)
-                {
-                    case 0:
-                        pvtPortSettings.Visibility = Visibility.Visible;
-                        btnBleSearch.Visibility = Visibility.Collapsed;
-                        cmbBleDevice.Visibility = Visibility.Collapsed;
-                        break;
-                    case 1:
-                        pvtPortSettings.Visibility = Visibility.Collapsed;
-                        btnBleSearch.Visibility = Visibility.Visible;
-                        cmbBleDevice.Visibility = Visibility.Visible;
-                        break;
-                }
-            }
-            
-        }
-
-        public void rootDeviceSelector(int selection)
-        {
-            switch (selection)
-            {
-                case 0:
-
-                    break;
-
-                case 1:
-                    //DeviceSelectorInfo bluetoothLESelectorUnpaired = DeviceSelectorChoices.BluetoothUnpairedOnly;
-                    //devicePicker.Filter.SupportedDeviceSelectors.Add(bluetoothLESelectorUnpaired.Selector);
-                    DeviceSelectorInfo bluetoothLESelectorPaired = DeviceSelectorChoices.BluetoothLEPairedOnly;
-                    devicePicker.Filter.SupportedDeviceSelectors.Add(bluetoothLESelectorPaired.Selector);
-                    devicePicker.Appearance.Title = "TinySafeBoot Link";
-                    devicePicker.Appearance.ForegroundColor = Colors.White;
-                    Rect devicePickerBox = new Rect(this.Height / 2, this.Width / 2, this.Width / 3, this.Height / 3);
-                    devicePicker.Show(devicePickerBox, Windows.UI.Popups.Placement.Default);
-                    break;
-            }
         }
 
         private void btnBleSearch_Click(object sender, RoutedEventArgs e)
         {
             btnBleSearch.IsEnabled = false;
             btnConnect.IsEnabled = false;
-            cmbBleDevice.IsEnabled = false;
+            cmbFoundDevices.IsEnabled = false;
             cmbDeviceSelector.IsEnabled = false;
             blue.startBLEWatcher(5);
             DeviceSelectorInfo bluetoothLESelectorPaired = DeviceSelectorChoices.BluetoothLEPairedOnly;
-            
         }
-    }
 
-}
+        private void cmbDeviceSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (pvtPortSettings != null)
+            {
+                switch (cmbDeviceSelector.SelectedIndex)
+                {
+                    case 0:
+                        break;
+                    case 1:
+                        break;
+                }
+            }
+        }
+
+        private void cmbDeviceSelector_SelectionChanged_1(object sender, SelectionChangedEventArgs e)
+        {
+            if (pvtPortSettings != null)
+            {
+                switch (cmbDeviceSelector.SelectedIndex)
+                {
+                    case 0:
+                        cmbFoundDevices.Items.Clear();
+                        pvtPortSettings.Visibility = Visibility.Visible;
+                        btnBleSearch.Visibility = Visibility.Collapsed;
+                        cmbFoundDevices.Visibility = Visibility.Visible;
+                        cmbFoundDevices.IsEnabled = false;
+                        populatePortComboBox();
+                        break;
+                    case 1:
+                        cmbFoundDevices.Items.Clear();
+                        pvtPortSettings.Visibility = Visibility.Collapsed;
+                        btnBleSearch.Visibility = Visibility.Visible;
+                        cmbFoundDevices.Visibility = Visibility.Visible;
+                        cmbFoundDevices.IsEnabled = false;
+                        break;
+                }                
+            }
+        }
+
+        private void populatePortComboBox()
+        {
+            // 1. Clear port items to prevent duplicates.
+            // 2. Add all ports discovered to combo box.
+            // 3. If there is one port in comboboxes enable dependent UI. 
+            IAsyncAction ignored;
+            ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                // Now COM ports are found, populate the cmbBox.
+                if (cmbDeviceSelector.SelectedIndex == 0)
+                {
+                    cmbFoundDevices.Items.Clear();
+
+                    for (int i = 0; i < serialPorts.numberOfPortsInList(); i++)
+                    {
+                        cmbFoundDevices.Items.Insert(i, serialPorts.getPortNameAtIndex(i));
+                    }
+                    if (cmbFoundDevices.Items.Count > 0)
+                    {
+                        btnConnect.IsEnabled = true;
+                        pvtPortSettings.IsEnabled = true;
+                        cmbFoundDevices.IsEnabled = true;
+                        rtbMainDisplay.Blocks.Clear();
+                        rtbMainDisplay.Blocks.Add(getParagraph("Ready", Colors.LawnGreen));
+                        cmbFoundDevices.SelectedIndex = 0;
+                    }
+                    else
+                    {
+                        btnConnect.IsEnabled = false;
+                        pvtPortSettings.IsEnabled = false;
+                    }
+                }
+            });
+        }
+
+        public void blueCallback(object sender, blue.BlueEvent blueEvent)
+        {
+            IAsyncAction ignored;
+            switch (blueEvent)
+            {
+                case blue.BlueEvent.finishedConnecting:
+                    ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                    {
+                        rtbMainDisplay.Blocks.Add(getParagraph("Finished connecting to Bluetooth", Colors.CadetBlue));
+                        labelConnectionStatus.Text = "Connected to Bluetooth LE";
+                        connectionLabelBackGround.Background = getColoredBrush(Colors.CadetBlue);
+                    });
+                    break;
+                case blue.BlueEvent.searchFinished:
+                    ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                    {
+                        if (blue.bleDevices.Count > 0)
+                        {
+                            int deviceCount = blue.bleDevices.Count;
+                            string[] key = new string[deviceCount];
+
+                            cmbFoundDevices.Items.Clear();
+
+                            for (int i = 0; i < deviceCount; i++)
+                            {
+                                blue.bleDevices.Keys.CopyTo(key, 0);
+                                cmbFoundDevices.Items.Insert(i, key[i]);
+                            }
+                            cmbFoundDevices.SelectedIndex = 0;
+                            cmbFoundDevices.IsEnabled = true;
+                            btnConnect.IsEnabled = true;
+                        }
+                        else
+                        {
+                            cmbFoundDevices.IsEnabled = false;
+                        }
+                        btnBleSearch.IsEnabled = true;
+                        btnConnect.IsEnabled = true;
+                        cmbFoundDevices.IsEnabled = true;
+                        cmbDeviceSelector.IsEnabled = true;
+                    });
+                    break;
+            }
+        }
+        #region oldcode
+
+
+        //public void rootDeviceSelector(int selection)
+        //{
+        //    switch (selection)
+        //    {
+        //        case 0:
+        //            break;
+        //        case 1:
+        //            //DeviceSelectorInfo bluetoothLESelectorUnpaired = DeviceSelectorChoices.BluetoothUnpairedOnly;
+        //            //devicePicker.Filter.SupportedDeviceSelectors.Add(bluetoothLESelectorUnpaired.Selector);
+        //            DeviceSelectorInfo bluetoothLESelectorPaired = DeviceSelectorChoices.BluetoothLEPairedOnly;
+        //            devicePicker.Filter.SupportedDeviceSelectors.Add(bluetoothLESelectorPaired.Selector);
+        //            devicePicker.Appearance.Title = "TinySafeBoot Link";
+        //            devicePicker.Appearance.ForegroundColor = Colors.White;
+        //            Rect devicePickerBox = new Rect(this.Height / 2, this.Width / 2, this.Width / 3, this.Height / 3);
+        //            devicePicker.Show(devicePickerBox, Windows.UI.Popups.Placement.Default);
+        //            break;
+        //    }
+        //}
+
+        //private async void OnSuspending(object sender, SuspendingEventArgs e)
+        //{
+        //    //await blue.closeBleDevice();
+        //}
+        #endregion oldcode
+
+    }// End MainPage
+} // End Namespace
 

@@ -127,8 +127,6 @@ namespace bleTest3
         public void init(RichTextBlock paraMainDisplay)
         {
             rtbMainDisplay = paraMainDisplay;
-
-
         }
 
 

@@ -46,11 +46,11 @@
                     </TextBlock>
                 </StackPanel>
                 <Button x:ConnectionId='10' x:Name="btnConnect" Grid.Row="3" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Connect"                         />
-                <ComboBox x:ConnectionId='11' x:Name="cmbDeviceSelector" SelectedIndex="0" Grid.Row="4" HorizontalAlignment="Center" Width="212"                                                      >
+                <ComboBox x:ConnectionId='11' x:Name="cmbDeviceSelector" SelectedIndex="0" Grid.Row="4" HorizontalAlignment="Center" Width="212"                                                         >
                     <ComboBoxItem x:ConnectionId='17' x:Name="cbiSerialPort">Serial Port</ComboBoxItem>
                     <ComboBoxItem x:ConnectionId='18' x:Name="cbiBluetooth">Bluetooth</ComboBoxItem>
                 </ComboBox>
-                <ComboBox x:ConnectionId='12' x:Name="cmbBleDevice" Grid.Row="5" IsEnabled="False" Visibility="Collapsed" HorizontalAlignment="Center" Width="212"                                                      >
+                <ComboBox x:ConnectionId='12' x:Name="cmbFoundDevices" Grid.Row="5" IsEnabled="False" Visibility="Visible" HorizontalAlignment="Center" Width="212"                                                      >
                 </ComboBox>
                 <Button x:ConnectionId='13' x:Name="btnBleSearch" Grid.Row="6" Visibility="Collapsed" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Search"                            />
                 <Button x:ConnectionId='14' Grid.Row="7" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Clear"                     />
