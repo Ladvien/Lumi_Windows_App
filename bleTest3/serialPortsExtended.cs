@@ -41,8 +41,8 @@ namespace bleTest3
         //DataWriter dataWriteObject = null;
         DataReader dataReaderObject = null;
 
-        private ObservableCollection<DeviceInformation> listOfDevices = new ObservableCollection<DeviceInformation>();
-        private ObservableCollection<SerialDevice> listOfPorts= new ObservableCollection<SerialDevice>();
+        private Dictionary<string, DeviceInformation> listOfDevices = new Dictionary<string, DeviceInformation>();
+        private Dictionary<string, SerialDevice> listOfPorts= new Dictionary<string, SerialDevice>();
         private CancellationTokenSource ReadCancellationTokenSource;
 
         // public ObservableCollection<DeviceAccessInformation> aqsList = new ObservableCollection<DeviceAccessInformation>();
@@ -71,10 +71,7 @@ namespace bleTest3
         private SerialDevice _serialDeviceItem;
         public SerialDevice serialDeviceItem
         {
-            set { _serialDeviceItem = value;
-                listOfPorts.Add(value);
-                Callback(this, null);
-            }
+            set { _serialDeviceItem = value; }
             get { return _serialDeviceItem; }
         }
 
@@ -171,12 +168,25 @@ namespace bleTest3
 
                 dis = await DeviceInformation.FindAllAsync(SerialDevice.GetDeviceSelectorFromUsbVidPid(0x0000, 0xFFFF));
 
+                //listOfDevices = new ObservableCollection<DeviceInformation>();
+                //listOfPorts = new ObservableCollection<SerialDevice>();
+
+                SerialDevice newSerialDevice;
+                
                 for (int i = 0; i < dis.Count; i++)
                 {
-                    listOfDevices.Add(dis[i]);
-                    serialDeviceItem = await SerialDevice.FromIdAsync(dis[i].Id);
-                }
+                    
+                    //serialDeviceItem = await SerialDevice.FromIdAsync(dis[i].Id);
+                    newSerialDevice = await SerialDevice.FromIdAsync(dis[i].Id);
+                    if (!listOfDevices.ContainsKey(dis[i].Id))
+                    {
+                        listOfDevices.Add(dis[i].Id, dis[i]);
+                        listOfPorts.Add(newSerialDevice.PortName, newSerialDevice);
+                    }
 
+                    //   listOfPorts.Add(newSerialDevice); }
+                    Callback(this, null);
+                }
             }
             catch
             {
@@ -186,7 +196,12 @@ namespace bleTest3
 
         public string getPortNameAtIndex(int index)
         {
-            string portName = listOfPorts[index].PortName;
+            string portName = "";
+            if (listOfPorts.Count > 0)
+            {
+                string[] portNamesArray = listOfPorts.Keys.ToArray();
+                portName = portNamesArray[index];
+            }
             return portName;
         }
 
@@ -200,11 +215,8 @@ namespace bleTest3
             // 1. Iterate through ports looking for matching name.
             // 2. Return SerialDevice if found.
             // 3. Or return null if not found.
-            for(int i = 0; i < listOfPorts.Count; i++)
-            {
-                if(listOfPorts[i].PortName == portName) { return listOfPorts[i]; }
-            }
-            return null;
+            
+            return listOfPorts[portName]; 
         }
 
         public void populateComboBoxesWithPortSettings(ComboBox baud, ComboBox dataBits, ComboBox stopBits, ComboBox parity, ComboBox handshake)
@@ -455,17 +467,10 @@ namespace bleTest3
             {
                 selectedSerialDevice.Dispose();
             }
-            selectedSerialDevice = null;
+            //selectedSerialDevice = null;
 
             listOfDevices.Clear();
-            try
-            {
-                await ListAvailablePorts();
-            } catch
-            {
 
-            }
-            
         }
 
         public string byteArrayToReadableString(byte[] byteArray)

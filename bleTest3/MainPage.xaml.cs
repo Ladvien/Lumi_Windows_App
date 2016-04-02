@@ -60,6 +60,7 @@ namespace bleTest3
 
             // Start the port discovery.
             serialPorts.ListAvailablePorts();
+            
 
             // Have the serialPortsExtended object populate the combo boxes.
             serialPorts.populateComboBoxesWithPortSettings(cmbBaud, cmbDataBits, cmbStopBits, cmbParity, cmbHandshaking);
@@ -95,6 +96,7 @@ namespace bleTest3
                 ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                 {
                     populatePortComboBox();
+                    assignCOMPort();
                 });
             }
         }
@@ -124,8 +126,9 @@ namespace bleTest3
 
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private async void Button_Click(object sender, RoutedEventArgs e)
         {
+            await serialPorts.ListAvailablePorts();
             clearMainDisplay();
         }
 
@@ -136,24 +139,7 @@ namespace bleTest3
 
         private void cmbPort_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // 1. Assert one port in combobox.
-            // 2. Get the SerialDevice by name.
-            // 3. If SerialDevice is not null, set our serialPorts selectedSerialDevice.
-            if(cmbPort.Items.Count > 0) { 
-                SerialDevice selectedDevice = serialPorts.getSerialDeviceByPortName(cmbPort.SelectedValue.ToString());
-                if (selectedDevice != null)
-                {
-                    serialPorts.selectedSerialDevice = selectedDevice;
-                    serialPorts.setPortAttributesWithComboBoxs(
-                        cmbPort,
-                        cmbBaud,
-                        cmbDataBits,
-                        cmbStopBits,
-                        cmbParity,
-                        cmbHandshaking
-                    );
-                }
-            }
+
         }
 
         private void btnConnect_Click(object sender, RoutedEventArgs e)
@@ -184,12 +170,20 @@ namespace bleTest3
                         labelConnectionStatus.Text = "Disconnected";
                         btnConnect.Content = "Connect";
                         pvtPortSettings.IsEnabled = true;
-                        serialPorts.CloseDevice();
+                        try
+                        {
+                            serialPorts.CloseDevice();
+                        } catch (Exception exArgs)
+                        {
+                            Debug.WriteLine(exArgs.Message);
+                        }
+//                        serialPorts.ListAvailablePorts();
                         portOpen = false;
                     }
                     break;
                 case 1: // Bluetooth LE
-                    var success = blue.connect(blue.bleDevices[cmbFoundDevices.SelectedItem.ToString()]);
+                    if(cmbFoundDevices.SelectedItem != null) { var success = blue.connect(blue.bleDevices[cmbFoundDevices.SelectedItem.ToString()]); }
+                    
                     break;
             }   
         }
@@ -232,6 +226,7 @@ namespace bleTest3
                 switch (cmbDeviceSelector.SelectedIndex)
                 {
                     case 0:
+                        assignCOMPort();
                         break;
                     case 1:
                         break;
@@ -261,6 +256,30 @@ namespace bleTest3
                         cmbFoundDevices.IsEnabled = false;
                         break;
                 }                
+            }
+        }
+
+        public void assignCOMPort()
+        {
+            // 1. Assert one port in combobox.
+            // 2. Get the SerialDevice by name.
+            // 3. If SerialDevice is not null, set our serialPorts selectedSerialDevice.
+            if (cmbFoundDevices.Items.Count > 0)
+            {
+                Debug.WriteLine(cmbFoundDevices.SelectedItem.ToString());
+                SerialDevice selectedDevice = serialPorts.getSerialDeviceByPortName(cmbFoundDevices.SelectedItem.ToString());
+                if (selectedDevice != null)
+                {
+                    serialPorts.selectedSerialDevice = selectedDevice;
+                    serialPorts.setPortAttributesWithComboBoxs(
+                        cmbDeviceSelector,
+                        cmbBaud,
+                        cmbDataBits,
+                        cmbStopBits,
+                        cmbParity,
+                        cmbHandshaking
+                    );
+                }
             }
         }
 
