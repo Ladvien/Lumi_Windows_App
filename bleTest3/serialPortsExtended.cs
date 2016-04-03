@@ -176,18 +176,19 @@ namespace bleTest3
                 
                 for (int i = 0; i < dis.Count; i++)
                 {
-                    newSerialDevice = await SerialDevice.FromIdAsync(dis[i].Id);
+                    
                     if (!listOfDevices.ContainsKey(dis[i].Id))
                     {
+                        newSerialDevice = await SerialDevice.FromIdAsync(dis[i].Id);
                         listOfDevices.Add(dis[i].Id, dis[i]);
                         listOfPorts.Add(newSerialDevice.PortName, newSerialDevice);
                     }
                     Callback(this, null);
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // Where error handling -should- go.
+                Debug.WriteLine("List ports caught: " + ex.Message);
             }
         }
 
@@ -461,9 +462,15 @@ namespace bleTest3
         {
             if (selectedSerialDevice != null)
             {
+                // 1. Remove the selectedSerialDevice from portList.
+                // 2. Disconnect streams.
+                // 3. Dispose of selected COM port.
+
+                listOfPorts.Remove(selectedSerialDevice.PortName);
+                selectedSerialDevice.OutputStream.Dispose();
+                selectedSerialDevice.InputStream.Dispose();
                 selectedSerialDevice.Dispose();
             }
-            //selectedSerialDevice = null;
 
             listOfDevices.Clear();
 

@@ -96,7 +96,7 @@ namespace bleTest3
                 ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                 {
                     populatePortComboBox();
-                    assignCOMPort();
+                    //assignCOMPort();
                 });
             }
         }
@@ -149,6 +149,7 @@ namespace bleTest3
                 case 0: // Serial Port
                     if (!portOpen)
                     {
+                        assignCOMPort();                       
                         if (serialPorts.openPort())
                         {
                             btnTsbConnect.IsEnabled = true;
@@ -166,6 +167,7 @@ namespace bleTest3
                     else
                     {
                         btnTsbConnect.IsEnabled = false;
+                        btnConnect.IsEnabled = false;
                         connectionLabelBackGround.Background = getColoredBrush(Colors.Crimson);
                         labelConnectionStatus.Text = "Disconnected";
                         btnConnect.Content = "Connect";
@@ -177,9 +179,9 @@ namespace bleTest3
                         {
                             Debug.WriteLine(exArgs.Message);
                         }
-                        serialPorts.CloseDevice();
+                        portOpen = false;                        
                         await serialPorts.ListAvailablePorts();
-                        portOpen = false;
+
                     }
                     break;
                 case 1: // Bluetooth LE
@@ -228,7 +230,7 @@ namespace bleTest3
                 switch (cmbDeviceSelector.SelectedIndex)
                 {
                     case 0:
-                        assignCOMPort();
+                        //assignCOMPort();
                         break;
                     case 1:
                         break;
