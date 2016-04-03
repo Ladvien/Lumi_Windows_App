@@ -159,43 +159,43 @@ namespace bleTest3
         public async Task ListAvailablePorts()
         {
             // 1. Discover all device COM device IDs.
-            // 2. Add all devices to a collection
-            // 3. Add each port to the port field. Await asserts
-            //    the discovered port is added(?).
+            // 2. Create a new SerialDevice
+            // 3. Iterate over found COM IDs
+            // 4. Look for SerialDevice based on COM ID.
+            // 5. When found, check if it is already in the dictionary.
+            // 6. If not in dictionary, add COM ID to dictionary and 
+            //    add SerialDevice to dictionary, keyed to portName.
+            // 7. When each device is found, callback to UI with the update.
+
             try
             {
                 string aqs = SerialDevice.GetDeviceSelector();
-
                 dis = await DeviceInformation.FindAllAsync(SerialDevice.GetDeviceSelectorFromUsbVidPid(0x0000, 0xFFFF));
-
-                //listOfDevices = new ObservableCollection<DeviceInformation>();
-                //listOfPorts = new ObservableCollection<SerialDevice>();
 
                 SerialDevice newSerialDevice;
                 
                 for (int i = 0; i < dis.Count; i++)
                 {
-                    
-                    //serialDeviceItem = await SerialDevice.FromIdAsync(dis[i].Id);
                     newSerialDevice = await SerialDevice.FromIdAsync(dis[i].Id);
                     if (!listOfDevices.ContainsKey(dis[i].Id))
                     {
                         listOfDevices.Add(dis[i].Id, dis[i]);
                         listOfPorts.Add(newSerialDevice.PortName, newSerialDevice);
                     }
-
-                    //   listOfPorts.Add(newSerialDevice); }
                     Callback(this, null);
                 }
             }
             catch
             {
-                // Error handling.
+                // Where error handling -should- go.
             }
         }
 
         public string getPortNameAtIndex(int index)
         {
+            // 1. Convert found SerialDevice portNames to string array.
+            // 2. Return portName at index.
+
             string portName = "";
             if (listOfPorts.Count > 0)
             {
@@ -212,10 +212,6 @@ namespace bleTest3
 
         public SerialDevice getSerialDeviceByPortName(string portName)
         {
-            // 1. Iterate through ports looking for matching name.
-            // 2. Return SerialDevice if found.
-            // 3. Or return null if not found.
-            
             return listOfPorts[portName]; 
         }
 
@@ -461,7 +457,7 @@ namespace bleTest3
             }
         }
 
-        public async void CloseDevice()
+        public void CloseDevice()
         {
             if (selectedSerialDevice != null)
             {

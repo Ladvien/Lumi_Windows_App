@@ -142,7 +142,7 @@ namespace bleTest3
 
         }
 
-        private void btnConnect_Click(object sender, RoutedEventArgs e)
+        private async void btnConnect_Click(object sender, RoutedEventArgs e)
         {
             switch (cmbDeviceSelector.SelectedIndex)
             {
@@ -177,7 +177,8 @@ namespace bleTest3
                         {
                             Debug.WriteLine(exArgs.Message);
                         }
-//                        serialPorts.ListAvailablePorts();
+                        serialPorts.CloseDevice();
+                        await serialPorts.ListAvailablePorts();
                         portOpen = false;
                     }
                     break;
@@ -211,6 +212,7 @@ namespace bleTest3
 
         private void btnBleSearch_Click(object sender, RoutedEventArgs e)
         {
+            btnBleSearch.Content = "Searching";
             btnBleSearch.IsEnabled = false;
             btnConnect.IsEnabled = false;
             cmbFoundDevices.IsEnabled = false;
@@ -355,8 +357,7 @@ namespace bleTest3
                             cmbFoundDevices.IsEnabled = false;
                         }
                         btnBleSearch.IsEnabled = true;
-                        btnConnect.IsEnabled = true;
-                        cmbFoundDevices.IsEnabled = true;
+                        btnBleSearch.Content = "Search";
                         cmbDeviceSelector.IsEnabled = true;
                     });
                     break;
