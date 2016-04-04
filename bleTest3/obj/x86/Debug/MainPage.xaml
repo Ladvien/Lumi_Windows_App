@@ -50,7 +50,7 @@
                     <ComboBoxItem x:ConnectionId='22' x:Name="cbiSerialPort">Serial Port</ComboBoxItem>
                     <ComboBoxItem x:ConnectionId='23' x:Name="cbiBluetooth">Bluetooth</ComboBoxItem>
                 </ComboBox>
-                <ComboBox x:ConnectionId='17' x:Name="cmbFoundDevices" Grid.Row="5" IsEnabled="False" Visibility="Visible" HorizontalAlignment="Center" Width="212"                                                      >
+                <ComboBox x:ConnectionId='17' x:Name="cmbFoundDevices" Grid.Row="5" IsEnabled="False" Visibility="Visible" HorizontalAlignment="Center" Width="212"                                                    >
                 </ComboBox>
                 <Button x:ConnectionId='18' x:Name="btnBleSearch" Grid.Row="6" Visibility="Collapsed" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Search"                            />
                 <Button x:ConnectionId='19' Grid.Row="7" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Clear"                     />

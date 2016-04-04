@@ -301,17 +301,16 @@ namespace bleTest3
                 // Attempt to pair the BLE device
                 await connectToBLEDevice();
             }
-            else
+
+            for (int i = 0; i < bleDevice.GattServices.Count; i++)
             {
-                for (int i = 0; i < bleDevice.GattServices.Count; i++)
+                var characteristics = bleDevice.GattServices[i].GetAllCharacteristics();
+                for (int j = 0; j < characteristics.Count; j++)
                 {
-                    var characteristics = bleDevice.GattServices[i].GetAllCharacteristics();
-                    for (int j = 0; j < characteristics.Count; j++)
-                    {
-                        Debug.WriteLine("Service UUID: " + characteristics[j].Service.Uuid.ToString() + "Gatt #: " + i.ToString() + " Characteristic #: " + j.ToString());
-                    }
+                    Debug.WriteLine("Service UUID: " + characteristics[j].Service.Uuid.ToString() + "Gatt #: " + i.ToString() + " Characteristic #: " + j.ToString());
                 }
             }
+
         }
 
         public async void writeToBleDevice(string sendStr)

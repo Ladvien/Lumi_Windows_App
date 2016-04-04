@@ -131,7 +131,7 @@ namespace bleTest3
 
         private void cmbPort_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-
+            cmbFoundDevices.SelectedItem = cmbPort.SelectedItem;
         }
 
         private async void btnConnect_Click(object sender, RoutedEventArgs e)
@@ -149,6 +149,9 @@ namespace bleTest3
                             labelConnectionStatus.Text = "Connected";
                             btnConnect.Content = "Disconnect";
                             pvtPortSettings.IsEnabled = false;
+                            cmbFoundDevices.IsEnabled = false;
+                            cmbDeviceSelector.IsEnabled = false;
+
                             portOpen = true;
                             /////////////////////////////
                             serialPorts.AlwaysListening();
@@ -166,6 +169,8 @@ namespace bleTest3
                         connectionLabelBackGround.Background = getColoredBrush(Colors.Crimson);
                         labelConnectionStatus.Text = "Disconnected";
                         btnConnect.Content = "Connect";
+                        cmbFoundDevices.IsEnabled = true;
+                        cmbDeviceSelector.IsEnabled = true;
                         pvtPortSettings.IsEnabled = true;
                         try
                         {
@@ -218,14 +223,14 @@ namespace bleTest3
             DeviceSelectorInfo bluetoothLESelectorPaired = DeviceSelectorChoices.BluetoothLEPairedOnly;
         }
 
-        private void cmbDeviceSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void cmbFoundDevices_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (pvtPortSettings != null)
             {
                 switch (cmbDeviceSelector.SelectedIndex)
                 {
                     case 0:
-                        //assignCOMPort();
+                        cmbPort.SelectedItem = cmbFoundDevices.SelectedItem;
                         break;
                     case 1:
                         break;
@@ -294,17 +299,17 @@ namespace bleTest3
                 if (cmbDeviceSelector.SelectedIndex == 0)
                 {
                     cmbFoundDevices.Items.Clear();
-
+                    cmbPort.Items.Clear();
                     for (int i = 0; i < serialPorts.numberOfPortsInList(); i++)
                     {
                         cmbFoundDevices.Items.Insert(i, serialPorts.getPortNameAtIndex(i));
+                        cmbPort.Items.Insert(i, serialPorts.getPortNameAtIndex(i));
                     }
                     if (cmbFoundDevices.Items.Count > 0)
                     {
                         btnConnect.IsEnabled = true;
                         pvtPortSettings.IsEnabled = true;
                         cmbFoundDevices.IsEnabled = true;
-                        //clearDisplay();
                         appendLine("Ready", Colors.LawnGreen);
                         cmbFoundDevices.SelectedIndex = 0;
                     }
