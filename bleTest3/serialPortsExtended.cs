@@ -36,7 +36,7 @@ namespace bleTest3
         public delegate void CallBackEventHandler(object sender, EventArgs args);
         public event CallBackEventHandler Callback;
 
-        public RichTextBlock rtbMainDisplay;
+        public Paragraph theOneParagraph;
 
         //DataWriter dataWriteObject = null;
         DataReader dataReaderObject = null;
@@ -121,37 +121,37 @@ namespace bleTest3
         #region methods
 
         #region interface methods
-        public void init(RichTextBlock paraMainDisplay)
+
+        public void init(Paragraph theParagraph)
         {
-            rtbMainDisplay = paraMainDisplay;
+            theOneParagraph = theParagraph;
+        }
+
+        public void appendText(string str, Color color)
+        {
+            Run r = new Run();
+            r.Foreground = getColoredBrush(color);
+            r.Text = str;
+            theOneParagraph.Inlines.Add(r);
+        }
+
+        public void appendLine(string str, Color color)
+        {
+            Run r = new Run();
+            r.Foreground = getColoredBrush(color);
+            r.Text = str + '\n';
+            theOneParagraph.Inlines.Add(r);
+        }
+
+        public void clearDisplay()
+        {
+            theOneParagraph.Inlines.Clear();
         }
 
 
         public SolidColorBrush getColoredBrush(Color color)
         {
             return new SolidColorBrush(color);
-        }
-
-        public Paragraph getParagraph(string str, Color color)
-        {
-            // 1. Get new paragraph.
-            // 2. Paint paragraph text with selected color.
-            // 3. Create a new run
-            // 4. Add stext to run.  
-            // 5. Add run to paragraph
-            // 6. Return paragraph.
-
-            Paragraph p = new Paragraph();
-            p.Foreground = getColoredBrush(color);
-            Run r = new Run();
-            r.Text = str;
-            p.Inlines.Add(r);
-            return p;
-        }
-
-        public void clearMainDisplay()
-        {
-            rtbMainDisplay.Blocks.Clear();
         }
         #endregion interface methods
 
@@ -315,8 +315,8 @@ namespace bleTest3
         {
             if(selectedSerialDevice != null)
             {
-                selectedSerialDevice.WriteTimeout = TimeSpan.FromMilliseconds(1000);
-                selectedSerialDevice.ReadTimeout = TimeSpan.FromMilliseconds(1000);
+                selectedSerialDevice.WriteTimeout = TimeSpan.FromMilliseconds(100);
+                selectedSerialDevice.ReadTimeout = TimeSpan.FromMilliseconds(100);
                 // Create cancellation token object to close I/O operations when closing the device
                 ReadCancellationTokenSource = new CancellationTokenSource();
                 return true;
@@ -347,7 +347,7 @@ namespace bleTest3
             // the data, formatted in a streaming-ready format (ie, IBuffer), once the data is returned, it
             // deletes the buffered data.  Weird.
             uint bytesWritten = await selectedSerialDevice.OutputStream.WriteAsync(dataWriter.DetachBuffer());
-                       
+
             return bytesWritten;
         }
 
@@ -374,11 +374,12 @@ namespace bleTest3
             dataReaderObject.ReadBytes(tempByteArray);
             rxBuffer = tempByteArray;
 
-            //string fancyString = byteArrayToReadableString(rxBuffer);
+            string fancyString = byteArrayToReadableString(rxBuffer);
 
             if (bytesRead > 0)
             {
-              //rtbMainDisplay.Blocks.Add(getParagraph(fancyString, Colors.Red));
+              
+              appendText(fancyString, Colors.Red); 
             }
 
         }
@@ -403,11 +404,11 @@ namespace bleTest3
             {
                 if (ex.GetType().Name == "TaskCanceledException")
                 {
-                    //rtbMainDisplay.Blocks.Add(getParagraph("Timed out waiting for response.", Colors.Crimson));
+                    appendLine("Timed out waiting for response.", Colors.Crimson);
                 }
                 else
                 {
-                    rtbMainDisplay.Blocks.Add(getParagraph(ex.Message, Colors.White));
+                    appendLine(ex.Message, Colors.White);
                 }
             }
             finally
@@ -419,6 +420,11 @@ namespace bleTest3
                     dataReaderObject = null;
                 }
             }
+        }
+
+        public void stopListing()
+        {
+            ReadCancellationTokenSource.Cancel();
         }
 
         public async void AlwaysListening()
@@ -440,11 +446,11 @@ namespace bleTest3
             {
                 if (ex.GetType().Name == "TaskCanceledException")
                 {
-                    rtbMainDisplay.Blocks.Add(getParagraph("Listening interrupted.  No longer listening.", Colors.Crimson));
+                    appendLine("Listening interrupted.  No longer listening.", Colors.Crimson);
                 }
                 else
                 {
-                    rtbMainDisplay.Blocks.Add(getParagraph(ex.Message, Colors.White));
+                    appendLine(ex.Message, Colors.White);
                 }
             }
             finally
@@ -471,9 +477,7 @@ namespace bleTest3
                 selectedSerialDevice.InputStream.Dispose();
                 selectedSerialDevice.Dispose();
             }
-
             listOfDevices.Clear();
-
         }
 
         public string byteArrayToReadableString(byte[] byteArray)
@@ -510,6 +514,6 @@ namespace bleTest3
 
         #endregion port use
 
+        #endregion methods
     }
-    #endregion methods
 }

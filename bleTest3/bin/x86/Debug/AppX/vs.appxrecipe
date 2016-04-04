@@ -22,13 +22,13 @@
     <AppXManifest Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\bin\x86\Debug\Core\AppxManifest.xml">
       <PackagePath>AppxManifest.xml</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
-      <Modified>2016-04-03T13:37:22.245</Modified>
+      <Modified>2016-04-04T03:23:14.033</Modified>
     </AppXManifest>
   </ItemGroup>
   <ItemGroup>
     <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\bin\x86\Debug\lumi.exe">
       <PackagePath>entrypoint\lumi.exe</PackagePath>
-      <Modified>2016-04-03T13:37:20.337</Modified>
+      <Modified>2016-04-04T03:23:11.942</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\User\.nuget\packages\Microsoft.ApplicationInsights\1.0.0\lib\portable-win81+wpa81\Microsoft.ApplicationInsights.dll">
       <PackagePath>Microsoft.ApplicationInsights.dll</PackagePath>
@@ -498,7 +498,7 @@
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\bin\x86\Debug\lumi.xr.xml">
       <PackagePath>lumi.xr.xml</PackagePath>
-      <Modified>2016-04-01T00:35:02.780</Modified>
+      <Modified>2016-04-04T01:16:58.031</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Program Files %28x86%29\Windows Kits\10\UnionMetadata\Windows.winmd">
       <PackagePath>WinMetadata\Windows.winmd</PackagePath>
@@ -506,11 +506,11 @@
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\bin\x86\Debug\resources.pri">
       <PackagePath>resources.pri</PackagePath>
-      <Modified>2016-04-02T12:38:49.021</Modified>
+      <Modified>2016-04-04T02:45:20.838</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\bin\x86\Debug\Core\lumi.exe">
       <PackagePath>lumi.exe</PackagePath>
-      <Modified>2016-04-03T13:37:22.242</Modified>
+      <Modified>2016-04-04T03:23:14.032</Modified>
     </AppxPackagedFile>
   </ItemGroup>
   <ItemGroup>

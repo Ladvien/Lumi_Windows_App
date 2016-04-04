@@ -63,22 +63,35 @@
             <Grid HorizontalAlignment="Left" Margin="250,0,0,0" Width="750" Height="720">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="3*"/>
+                    <RowDefinition Height="35"/>
                     <RowDefinition Height="2*"/>
                 </Grid.RowDefinitions>
-                <ScrollViewer Margin="10,0,-10,0" Background="Black">
-                    <StackPanel Grid.Row="0" Height="auto" Background="Black" Margin="0,10,0,0.333">
+                <ScrollViewer Grid.Row="0" Background="Black">
+                    <StackPanel  Height="auto" Background="Black" HorizontalAlignment="Stretch">
                         <RichTextBlock x:Name="rtbMainDisplay" FontFamily="Courier" Height="auto" Padding="5">
                             <RichTextBlock.Blocks>
-                                <Paragraph>
+                                <Paragraph x:Name="theOneParagraph">
                                     <Paragraph.Inlines>
-                                        <Run Foreground="White" Text="Content Here" />
+                                        <Run x:Name="theOneRun" Foreground="White" Text="Content Here" />
                                     </Paragraph.Inlines>
                                 </Paragraph>
                             </RichTextBlock.Blocks>
                         </RichTextBlock>
                     </StackPanel>
                 </ScrollViewer>
-                <Pivot Grid.Row="1" Margin="0,0.333,0,10">
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="4*"/>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Background="White">
+                            <RichEditBox x:Name="rtbSendTextBlock" Padding="2" Height="35" HorizontalAlignment="Stretch"/>
+                    </StackPanel>
+                    <Button Grid.Column="1" x:Name="btnSendText" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="btnSendText_Click">Send</Button>
+                    <Button Grid.Column="2" x:Name="btnClearSendText" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">Clear</Button>
+                </Grid>
+                <Pivot Grid.Row="2">
                     <PivotItem x:Name="pvtPortSettings" Header="Port Settings" Margin="12,0,12,38">
                         <Grid>
                             <Grid.RowDefinitions>

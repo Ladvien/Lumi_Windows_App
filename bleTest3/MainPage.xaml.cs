@@ -55,16 +55,16 @@ namespace bleTest3
             pvtPortSettings.IsEnabled = false;
 
             // Let the user know to wait while device thread returns.
-            //clearMainDisplay();
-            rtbMainDisplay.Blocks.Add(getParagraph("Please wait while COM ports load...", Colors.White));
+            clearDisplay();
+            appendLine("Please wait while COM ports load...", Colors.White);
 
             // Start the port discovery.
             serialPorts.ListAvailablePorts();
-            
 
+            
             // Have the serialPortsExtended object populate the combo boxes.
             serialPorts.populateComboBoxesWithPortSettings(cmbBaud, cmbDataBits, cmbStopBits, cmbParity, cmbHandshaking);
-            serialPorts.init(rtbMainDisplay);
+            serialPorts.init(theOneParagraph);
 
             tsb.init(serialPorts, rtbMainDisplay, pbSys);
             blue.init(this.Height, this.Width);
@@ -96,40 +96,32 @@ namespace bleTest3
                 ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                 {
                     populatePortComboBox();
-                    //assignCOMPort();
                 });
             }
         }
 
    
         
-        public Paragraph getParagraph(string str, Color color)
+        //public Paragraph getParagraph(string str, Color color)
+        //{
+        //    // 1. Get new paragraph.
+        //    // 2. Paint paragraph text with selected color.
+        //    // 3. Create a new run
+        //    // 4. Add stext to run.  
+        //    // 5. Add run to paragraph
+        //    // 6. Return paragraph.
+
+        //    Paragraph p = new Paragraph();
+        //    p.Foreground = getColoredBrush(color);
+        //    Run r = new Run();
+        //    r.Text = str;
+        //    p.Inlines.Add(r);
+        //    return p;
+        //}
+
+        private void Button_Click(object sender, RoutedEventArgs e)
         {
-            // 1. Get new paragraph.
-            // 2. Paint paragraph text with selected color.
-            // 3. Create a new run
-            // 4. Add stext to run.  
-            // 5. Add run to paragraph
-            // 6. Return paragraph.
-
-            Paragraph p = new Paragraph();
-            p.Foreground = getColoredBrush(color);
-            Run r = new Run();
-            r.Text = str;
-            p.Inlines.Add(r);
-            return p;
-        }
-
-        public void clearMainDisplay()
-        {
-            rtbMainDisplay.Blocks.Clear();
-
-        }
-
-        private async void Button_Click(object sender, RoutedEventArgs e)
-        {
-            await serialPorts.ListAvailablePorts();
-            clearMainDisplay();
+            clearDisplay();
         }
 
         public SolidColorBrush getColoredBrush(Color color)
@@ -158,10 +150,13 @@ namespace bleTest3
                             btnConnect.Content = "Disconnect";
                             pvtPortSettings.IsEnabled = false;
                             portOpen = true;
+                            /////////////////////////////
+                            serialPorts.AlwaysListening();
+                            /////////////////////////////
                         }
                         else
                         {
-                            rtbMainDisplay.Blocks.Add(getParagraph("Unable to open port " + serialPorts.selectedDeviceAttributes.comPort, Colors.Crimson));
+                            appendLine("Unable to open port " + serialPorts.selectedDeviceAttributes.comPort, Colors.Crimson);
                         }
                     }
                     else
@@ -209,7 +204,7 @@ namespace bleTest3
 
         public void displayText(string text, Color color)
         {
-            rtbMainDisplay.Blocks.Add(getParagraph(text, color));
+            appendLine(text, color);
         }
 
         private void btnBleSearch_Click(object sender, RoutedEventArgs e)
@@ -309,8 +304,8 @@ namespace bleTest3
                         btnConnect.IsEnabled = true;
                         pvtPortSettings.IsEnabled = true;
                         cmbFoundDevices.IsEnabled = true;
-                        rtbMainDisplay.Blocks.Clear();
-                        rtbMainDisplay.Blocks.Add(getParagraph("Ready", Colors.LawnGreen));
+                        //clearDisplay();
+                        appendLine("Ready", Colors.LawnGreen);
                         cmbFoundDevices.SelectedIndex = 0;
                     }
                     else
@@ -330,7 +325,7 @@ namespace bleTest3
                 case blue.BlueEvent.finishedConnecting:
                     ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                     {
-                        rtbMainDisplay.Blocks.Add(getParagraph("Finished connecting to Bluetooth", Colors.CadetBlue));
+                        appendLine("Finished connecting to Bluetooth", Colors.CadetBlue);
                         labelConnectionStatus.Text = "Connected to Bluetooth LE";
                         connectionLabelBackGround.Background = getColoredBrush(Colors.CadetBlue);
                     });
@@ -393,6 +388,33 @@ namespace bleTest3
         //}
         #endregion oldcode
 
+        private async void btnSendText_Click(object sender, RoutedEventArgs e)
+        {
+            string sendString = "";
+            rtbSendTextBlock.Document.GetText(Windows.UI.Text.TextGetOptions.NoHidden, out sendString);
+            await serialPorts.write(sendString);            
+        }
+
+        public void appendText(string str, Color color)
+        {
+            Run r = new Run();
+            r.Foreground = getColoredBrush(color);
+            r.Text = str;
+            theOneParagraph.Inlines.Add(r);
+        }
+
+        public void appendLine(string str, Color color)
+        {
+            Run r = new Run();
+            r.Foreground = getColoredBrush(color);
+            r.Text = str + '\n';
+            theOneParagraph.Inlines.Add(r);
+        }
+
+        public void clearDisplay()
+        {
+            theOneParagraph.Inlines.Clear();
+        }
     }// End MainPage
 } // End Namespace
 

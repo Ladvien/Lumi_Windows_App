@@ -40,45 +40,58 @@
                 <TextBlock Grid.Row="1" HorizontalAlignment="Center" TextAlignment="Center" FontSize="20" Margin="3" >
             		<Run Text="Serial Port"/>
                 </TextBlock>
-                <StackPanel x:ConnectionId='9' x:Name="connectionLabelBackGround" Grid.Row="2" Background="Red"  Margin="3" Width="212">
-                    <TextBlock x:ConnectionId='19' x:Name="labelConnectionStatus" HorizontalAlignment="Center" TextAlignment="Center" FontSize="16"  Width="212" Margin="3" >
+                <StackPanel x:ConnectionId='14' x:Name="connectionLabelBackGround" Grid.Row="2" Background="Red"  Margin="3" Width="212">
+                    <TextBlock x:ConnectionId='24' x:Name="labelConnectionStatus" HorizontalAlignment="Center" TextAlignment="Center" FontSize="16"  Width="212" Margin="3" >
                     <Run Text="Disconnected"/>
                     </TextBlock>
                 </StackPanel>
-                <Button x:ConnectionId='10' x:Name="btnConnect" Grid.Row="3" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Connect"                         />
-                <ComboBox x:ConnectionId='11' x:Name="cmbDeviceSelector" SelectedIndex="0" Grid.Row="4" HorizontalAlignment="Center" Width="212"                                                         >
-                    <ComboBoxItem x:ConnectionId='17' x:Name="cbiSerialPort">Serial Port</ComboBoxItem>
-                    <ComboBoxItem x:ConnectionId='18' x:Name="cbiBluetooth">Bluetooth</ComboBoxItem>
+                <Button x:ConnectionId='15' x:Name="btnConnect" Grid.Row="3" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Connect"                         />
+                <ComboBox x:ConnectionId='16' x:Name="cmbDeviceSelector" SelectedIndex="0" Grid.Row="4" HorizontalAlignment="Center" Width="212"                                                         >
+                    <ComboBoxItem x:ConnectionId='22' x:Name="cbiSerialPort">Serial Port</ComboBoxItem>
+                    <ComboBoxItem x:ConnectionId='23' x:Name="cbiBluetooth">Bluetooth</ComboBoxItem>
                 </ComboBox>
-                <ComboBox x:ConnectionId='12' x:Name="cmbFoundDevices" Grid.Row="5" IsEnabled="False" Visibility="Visible" HorizontalAlignment="Center" Width="212"                                                      >
+                <ComboBox x:ConnectionId='17' x:Name="cmbFoundDevices" Grid.Row="5" IsEnabled="False" Visibility="Visible" HorizontalAlignment="Center" Width="212"                                                      >
                 </ComboBox>
-                <Button x:ConnectionId='13' x:Name="btnBleSearch" Grid.Row="6" Visibility="Collapsed" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Search"                            />
-                <Button x:ConnectionId='14' Grid.Row="7" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Clear"                     />
+                <Button x:ConnectionId='18' x:Name="btnBleSearch" Grid.Row="6" Visibility="Collapsed" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Search"                            />
+                <Button x:ConnectionId='19' Grid.Row="7" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Clear"                     />
                 <TextBlock Grid.Row="8" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="20" Width="Auto" Height="Auto" Margin="3">
             		<Run Text="TinySafeBoot"/>
                 </TextBlock>
-                <Button x:ConnectionId='15' x:Name="btnTsbConnect" Grid.Row="9" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Conect to TSB"                       />
-                <ProgressBar x:ConnectionId='16' x:Name="pbSys" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="16"/>
+                <Button x:ConnectionId='20' x:Name="btnTsbConnect" Grid.Row="9" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Conect to TSB"                       />
+                <ProgressBar x:ConnectionId='21' x:Name="pbSys" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="16"/>
             </Grid>
             <Grid HorizontalAlignment="Left" Margin="250,0,0,0" Width="750" Height="720">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="3*"/>
+                    <RowDefinition Height="35"/>
                     <RowDefinition Height="2*"/>
                 </Grid.RowDefinitions>
-                <ScrollViewer Margin="10,0,-10,0" Background="Black">
-                    <StackPanel Grid.Row="0" Height="auto" Background="Black" Margin="0,10,0,0.333">
-                        <RichTextBlock x:ConnectionId='8' x:Name="rtbMainDisplay" FontFamily="Courier" Height="auto" Padding="5">
+                <ScrollViewer Grid.Row="0" Background="Black">
+                    <StackPanel  Height="auto" Background="Black" HorizontalAlignment="Stretch">
+                        <RichTextBlock x:ConnectionId='11' x:Name="rtbMainDisplay" FontFamily="Courier" Height="auto" Padding="5">
                             <RichTextBlock.Blocks>
-                                <Paragraph>
+                                <Paragraph x:ConnectionId='12' x:Name="theOneParagraph">
                                     <Paragraph.Inlines>
-                                        <Run Foreground="White" Text="Content Here" />
+                                        <Run x:ConnectionId='13' x:Name="theOneRun" Foreground="White" Text="Content Here" />
                                     </Paragraph.Inlines>
                                 </Paragraph>
                             </RichTextBlock.Blocks>
                         </RichTextBlock>
                     </StackPanel>
                 </ScrollViewer>
-                <Pivot Grid.Row="1" Margin="0,0.333,0,10">
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="4*"/>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Background="White">
+                            <RichEditBox x:ConnectionId='10' x:Name="rtbSendTextBlock" Padding="2" Height="35" HorizontalAlignment="Stretch"/>
+                    </StackPanel>
+                    <Button x:ConnectionId='8' Grid.Column="1" x:Name="btnSendText" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"                          >Send</Button>
+                    <Button x:ConnectionId='9' Grid.Column="2" x:Name="btnClearSendText" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">Clear</Button>
+                </Grid>
+                <Pivot Grid.Row="2">
                     <PivotItem x:ConnectionId='1' x:Name="pvtPortSettings" Header="Port Settings" Margin="12,0,12,38">
                         <Grid>
                             <Grid.RowDefinitions>
