@@ -28,7 +28,6 @@ namespace bleTest3
     /// </summary>
     public sealed partial class MainPage : Page
     {
-
         serialPortsExtended serialPorts = new serialPortsExtended();
         tsb tsb = new tsb();
         blue blue = new blue();
@@ -36,7 +35,8 @@ namespace bleTest3
         private CoreDispatcher dispatcher;
 
         DevicePicker devicePicker = new DevicePicker();
-        
+
+        serialBuffer serialBufffer = new serialBuffer();
 
         public MainPage()
         {
@@ -64,7 +64,7 @@ namespace bleTest3
             
             // Have the serialPortsExtended object populate the combo boxes.
             serialPorts.populateComboBoxesWithPortSettings(cmbBaud, cmbDataBits, cmbStopBits, cmbParity, cmbHandshaking);
-            serialPorts.init(theOneParagraph);
+            serialPorts.init(theOneParagraph, serialBufffer);
 
             tsb.init(serialPorts, rtbMainDisplay, pbSys);
             blue.init(this.Height, this.Width);
@@ -72,6 +72,13 @@ namespace bleTest3
             //devicePicker.DeviceSelected += DevicePicker_DeviceSelected;
 
             //App.Current.Suspending += OnSuspending;
+
+            serialBufffer.bufferUpdated += new serialBuffer.CallBackEventHandler(bufferUpdated);
+        }
+
+        public void bufferUpdated(object sender, EventArgs args)
+        {
+            Debug.WriteLine("main Callback for bufferUpdated");
         }
 
         private async void DevicePicker_DeviceSelected(DevicePicker sender, DeviceSelectedEventArgs args)

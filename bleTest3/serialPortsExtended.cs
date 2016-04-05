@@ -14,6 +14,7 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Documents;
 using Windows.UI;
 using Windows.Security.Cryptography;
+using lumi;
 
 namespace bleTest3
 {
@@ -35,6 +36,8 @@ namespace bleTest3
         
         public delegate void CallBackEventHandler(object sender, EventArgs args);
         public event CallBackEventHandler Callback;
+
+        public serialBuffer serialBufffer = new serialBuffer();
 
         public Paragraph theOneParagraph;
 
@@ -122,9 +125,16 @@ namespace bleTest3
 
         #region interface methods
 
-        public void init(Paragraph theParagraph)
+        public void init(Paragraph theParagraph, serialBuffer buffer)
         {
+            serialBufffer = buffer;
             theOneParagraph = theParagraph;
+            serialBufffer.bufferUpdated += new serialBuffer.CallBackEventHandler(bufferUpdated);
+        }
+
+        public void bufferUpdated(object sender, EventArgs args)
+        {
+            Debug.WriteLine("serialPorts Callback for bufferUpdated");
         }
 
         public void appendText(string str, Color color)
@@ -378,8 +388,8 @@ namespace bleTest3
 
             if (bytesRead > 0)
             {
-              
-              appendText(fancyString, Colors.Red); 
+                serialBufffer.RxBuffer = tempByteArray;
+                appendText(fancyString, Colors.Red); 
             }
 
         }
@@ -429,6 +439,7 @@ namespace bleTest3
 
         public async void AlwaysListening()
         {
+            
             try
             {
                 if (selectedSerialDevice != null)

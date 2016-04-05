@@ -37,6 +37,9 @@ namespace bleTest3
         #endregion credits
 
         #region properties_and_methods
+
+        serialBuffer serialBuffer = new serialBuffer();
+        
         // Used for UI callback.
         public enum BlueEvent
         {
@@ -102,6 +105,13 @@ namespace bleTest3
 
 
             bleSearchTimer.Tick += BleSearchTimer_Tick;
+
+            serialBuffer.bufferUpdated += new serialBuffer.CallBackEventHandler(bufferUpdated);
+        }
+
+        private void bufferUpdated(object sender, EventArgs args)
+        {
+            Debug.WriteLine("blue Callback for bufferUpdated");
         }
 
         #region devicewatcher

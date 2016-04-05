@@ -8,30 +8,34 @@ using Windows.Storage.Streams;
 
 namespace lumi
 {
-    class serialBuffer
+    public class serialBuffer
     {
 
-        private byte[] _txBuffer;
-        byte[] txBuffer
+        public delegate void CallBackEventHandler(object sender, EventArgs args);
+        public event CallBackEventHandler bufferUpdated;
+
+        private byte[] _RxBuffer;
+        public byte[] RxBuffer
         {
             set
             {
-                IBuffer buffer = CryptographicBuffer.CreateFromByteArray(value);
-                CryptographicBuffer.CopyToByteArray(buffer, out _txBuffer);
+                IBuffer tmpBuffer = CryptographicBuffer.CreateFromByteArray(value);
+                CryptographicBuffer.CopyToByteArray(tmpBuffer, out _RxBuffer);
+                bufferUpdated(this, null);
             }
-            get { return _txBuffer; }
+            private get { return _RxBuffer; }
 
         }
 
-        public byte[] bytesFromTxBuffer(int numberOfBytes)
+        public byte[] ReadFromRxBuffer(int numberOfBytes)
         {
             // 1. Get the characters to return: Range<0, numberOfBytes>
             // 2. Remove the number of bytes from the buffer.
             // 3. Return the wanted bytes.
-            if (txBuffer.Length > 0)
+            if (RxBuffer.Length > 0)
             {
-                byte[] returnBytes = txBuffer.Take(numberOfBytes).ToArray();
-                txBuffer = txBuffer.Skip(numberOfBytes).Take(txBuffer.Length - numberOfBytes).ToArray();
+                byte[] returnBytes = RxBuffer.Take(numberOfBytes).ToArray();
+                RxBuffer = RxBuffer.Skip(numberOfBytes).Take(RxBuffer.Length - numberOfBytes).ToArray();
                 return returnBytes;
             }
             else
@@ -41,27 +45,28 @@ namespace lumi
             }
         }
 
-        private byte[] _rxBuffer;
-        byte[] rxBuffer
+        private byte[] _txBuffer;
+        public byte[] txBuffer
         {
             set
             {
-                IBuffer buffer = CryptographicBuffer.CreateFromByteArray(value);
-                CryptographicBuffer.CopyToByteArray(buffer, out _rxBuffer);
+                IBuffer tmpBuffer = CryptographicBuffer.CreateFromByteArray(value);
+                CryptographicBuffer.CopyToByteArray(tmpBuffer, out _txBuffer);
+                bufferUpdated(this, null);
             }
-            get { return _rxBuffer; }
+            private get { return _txBuffer; }
 
         }
 
-        public byte[] BytesFromRXBuffer(int numberOfBytes)
+        public byte[] ReadFromTxBuffer(int numberOfBytes)
         {
             // 1. Get the characters to return: Range<0, numberOfBytes>
             // 2. Remove the number of bytes from the buffer.
             // 3. Return the wanted bytes.
-            if (rxBuffer.Length > 0)
+            if (txBuffer.Length > 0)
             {
-                byte[] returnBytes = rxBuffer.Take(numberOfBytes).ToArray();
-                rxBuffer = rxBuffer.Skip(numberOfBytes).Take(rxBuffer.Length - numberOfBytes).ToArray();
+                byte[] returnBytes = txBuffer.Take(numberOfBytes).ToArray();
+                txBuffer = txBuffer.Skip(numberOfBytes).Take(txBuffer.Length - numberOfBytes).ToArray();
                 return returnBytes;
             }
             else
