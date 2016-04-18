@@ -66,19 +66,31 @@ namespace bleTest3
             serialPorts.populateComboBoxesWithPortSettings(cmbBaud, cmbDataBits, cmbStopBits, cmbParity, cmbHandshaking);
             serialPorts.init(theOneParagraph, serialBufffer);
 
-            tsb.init(serialPorts, rtbMainDisplay, pbSys);
+            tsb.init(serialPorts, rtbMainDisplay, pbSys, serialBufffer);
             blue.init(this.Height, this.Width);
 
             //devicePicker.DeviceSelected += DevicePicker_DeviceSelected;
 
             //App.Current.Suspending += OnSuspending;
 
-            serialBufffer.bufferUpdated += new serialBuffer.CallBackEventHandler(bufferUpdated);
+            serialBufffer.init();
+            serialBufffer.RXbufferUpdated += new serialBuffer.CallBackEventHandler(RXbufferUpdated);
+            serialBufffer.TXbufferUpdated += new serialBuffer.CallBackEventHandler(TXbufferUpdated);
         }
 
-        public void bufferUpdated(object sender, EventArgs args)
+        public void RXbufferUpdated(object sender, EventArgs args)
         {
-            Debug.WriteLine("main Callback for bufferUpdated");
+            if(tsb.commandInProgress == tsb.commands.hello)
+            {
+                byte[] data = serialBufffer.readAllBytesFromRXBuffer();
+                //appendText(serialBufffer.ReadFromRxBuffer)
+            }
+            Debug.WriteLine("main Callback for RX bufferUpdated");
+        }
+
+        public void TXbufferUpdated(object sender, EventArgs args)
+        {
+            Debug.WriteLine("main Callback for TX bufferUpdated");
         }
 
         private async void DevicePicker_DeviceSelected(DevicePicker sender, DeviceSelectedEventArgs args)
@@ -201,14 +213,13 @@ namespace bleTest3
 
         private async void Button_Click_1(object sender, RoutedEventArgs e)
         {
+            btnConnect.IsEnabled = false;
             try
             {
-                //serialPorts.newWriter();
-                //uint bytesWritten = await serialPorts.write("@@@");
-                await tsb.helloProcessing();
+                tsb.hello();
             } catch (Exception ex)
             {
-                //await serialPorts.disposeStream();
+                await serialPorts.disposeStream();
                 Debug.WriteLine(ex.Message);
             }
             
@@ -426,6 +437,26 @@ namespace bleTest3
         public void clearDisplay()
         {
             theOneParagraph.Inlines.Clear();
+        }
+
+
+        private async void btnTest_Click(object sender, RoutedEventArgs e)
+        {
+            //await serialPorts.write("AT");
+            //serialBufffer.startUpdateTimer(1);
+
+
+            //disableConsole();
+
+            //IAsyncAction ignored;
+            //await dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
+            //{
+            //    serialBufffer.ReadFromRxBuffer(2);
+            //});
+
+
+            //byte[] readBytes = serialBufffer.ReadFromRxBuffer(2);
+            //Debug.WriteLine(readBytes);
         }
     }// End MainPage
 } // End Namespace

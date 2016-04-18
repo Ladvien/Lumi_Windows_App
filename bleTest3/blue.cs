@@ -106,14 +106,19 @@ namespace bleTest3
 
             bleSearchTimer.Tick += BleSearchTimer_Tick;
 
-            serialBuffer.bufferUpdated += new serialBuffer.CallBackEventHandler(bufferUpdated);
+            serialBuffer.RXbufferUpdated += new serialBuffer.CallBackEventHandler(RXbufferUpdated);
+            serialBuffer.TXbufferUpdated += new serialBuffer.CallBackEventHandler(TXbufferUpdated);
         }
 
-        private void bufferUpdated(object sender, EventArgs args)
+        private void RXbufferUpdated(object sender, EventArgs args)
         {
-            Debug.WriteLine("blue Callback for bufferUpdated");
+            Debug.WriteLine("blue Callback for RX bufferUpdated");
         }
 
+        private void TXbufferUpdated(object sender, EventArgs args)
+        {
+            Debug.WriteLine("blue Callback for TX bufferUpdated");
+        }
         #region devicewatcher
 
         private void DeviceWatcher_Updated(DeviceWatcher sender, DeviceInformationUpdate args)

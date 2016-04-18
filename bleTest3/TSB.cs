@@ -14,6 +14,7 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Documents;
 using Windows.UI;
 using bleTest3;
+using lumi;
 
 namespace bleTest3
 {
@@ -179,7 +180,7 @@ namespace bleTest3
         int numberOfPages = 0;
 
         DEVICE_SIGNATURE deviceSignatureValue = new DEVICE_SIGNATURE();
-        commands commandInProgress = new commands();
+        public commands commandInProgress = new commands();
         displayFlash displayFlashType = displayFlash.asIntelHexFile;
 
         serialPortsExtended serialPorts;
@@ -188,14 +189,31 @@ namespace bleTest3
 
         #endregion properties
 
+        public delegate void CallBackEventHandler(object sender, EventArgs args);
+        public event CallBackEventHandler Callback;
 
+        public serialBuffer serialBuffer = new serialBuffer();
 
-
-        public void init(serialPortsExtended serialPortMain, RichTextBlock mainDisplayMain, ProgressBar mainProgressBar)
+        public void init(serialPortsExtended serialPortMain, RichTextBlock mainDisplayMain, ProgressBar mainProgressBar, serialBuffer _serialBuffer)
         {
             serialPorts = serialPortMain;
             mainDisplay = mainDisplayMain;
             progressBar = mainProgressBar;
+            serialBuffer = _serialBuffer;
+
+            serialBuffer.RXbufferUpdated += new serialBuffer.CallBackEventHandler(RXbufferUpdated);
+            serialBuffer.TXbufferUpdated += new serialBuffer.CallBackEventHandler(TXbufferUpdated);
+        }
+
+        private void TXbufferUpdated(object sender, EventArgs args)
+        {
+            
+        }
+
+        private void RXbufferUpdated(object sender, EventArgs args)
+        {
+
+            Debug.WriteLine("Got some dater");
         }
 
         public void scrollToBottomOfTerminal()
@@ -225,8 +243,15 @@ namespace bleTest3
             commandInProgress = commandNumber;
         }
 
+        public async void hello()
+        {
+            commandInProgress = commands.hello;
+            await serialPorts.write(commandsAsStrings[(int)commands.hello]);
+        }
+
         public async Task<bool> helloProcessing()
         {
+            
             // 1. Try handshake ("@@@") three times; or continue if successful.
             // 2. Check if reply seems valid(ish).
             // 3. Chop up the reply into useful device data.

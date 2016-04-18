@@ -13,6 +13,7 @@
             <ColumnDefinition Width="23*"/>
         </Grid.ColumnDefinitions>
         <Grid HorizontalAlignment="Left" Width="1020" Height="Auto" VerticalAlignment="Top" Grid.ColumnSpan="2">
+            <StackPanel x:Name="consolePanel">
             <Grid HorizontalAlignment="Left" Height="720" Margin="5,5,0,0" VerticalAlignment="Top" Width="232">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="40"/>
@@ -58,8 +59,10 @@
             		<Run Text="TinySafeBoot"/>
                 </TextBlock>
                 <Button x:Name="btnTsbConnect" Grid.Row="9" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Conect to TSB" Click="Button_Click_1"/>
+                <Button x:Name="btnTest" Grid.Row="10" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Test" Click="btnTest_Click"/>
                 <ProgressBar x:Name="pbSys" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="16"/>
             </Grid>
+            </StackPanel>
             <Grid HorizontalAlignment="Left" Margin="250,0,0,0" Width="750" Height="720">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="3*"/>

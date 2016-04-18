@@ -37,7 +37,7 @@ namespace bleTest3
         public delegate void CallBackEventHandler(object sender, EventArgs args);
         public event CallBackEventHandler Callback;
 
-        public serialBuffer serialBufffer = new serialBuffer();
+        public serialBuffer serialBuffer = new serialBuffer();
 
         public Paragraph theOneParagraph;
 
@@ -127,14 +127,20 @@ namespace bleTest3
 
         public void init(Paragraph theParagraph, serialBuffer buffer)
         {
-            serialBufffer = buffer;
+            serialBuffer = buffer;
             theOneParagraph = theParagraph;
-            serialBufffer.bufferUpdated += new serialBuffer.CallBackEventHandler(bufferUpdated);
+            serialBuffer.RXbufferUpdated += new serialBuffer.CallBackEventHandler(RXbufferUpdated);
+            serialBuffer.TXbufferUpdated += new serialBuffer.CallBackEventHandler(TXbufferUpdated);
         }
 
-        public void bufferUpdated(object sender, EventArgs args)
+        public void RXbufferUpdated(object sender, EventArgs args)
         {
-            Debug.WriteLine("serialPorts Callback for bufferUpdated");
+            Debug.WriteLine("serialPorts Callback for TX bufferUpdated");
+        }
+
+        public void TXbufferUpdated(object sender, EventArgs args)
+        {
+            int numberOfBytes = serialBuffer.bytesInTxBuffer();
         }
 
         public void appendText(string str, Color color)
@@ -388,8 +394,8 @@ namespace bleTest3
 
             if (bytesRead > 0)
             {
-                serialBufffer.RxBuffer = tempByteArray;
-                appendText(fancyString, Colors.Red); 
+                serialBuffer.RxBuffer = tempByteArray;
+                //appendText(fancyString, Colors.Red); 
             }
 
         }
