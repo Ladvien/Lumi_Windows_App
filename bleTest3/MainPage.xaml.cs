@@ -73,7 +73,6 @@ namespace bleTest3
 
             //App.Current.Suspending += OnSuspending;
 
-            serialBufffer.init();
             serialBufffer.RXbufferUpdated += new serialBuffer.CallBackEventHandler(RXbufferUpdated);
             serialBufffer.TXbufferUpdated += new serialBuffer.CallBackEventHandler(TXbufferUpdated);
         }
@@ -219,7 +218,7 @@ namespace bleTest3
                 tsb.hello();
             } catch (Exception ex)
             {
-                await serialPorts.disposeStream();
+                //await serialPorts.disposeStream();
                 Debug.WriteLine(ex.Message);
             }
             

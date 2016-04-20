@@ -15,6 +15,7 @@ using Windows.UI.Xaml.Documents;
 using Windows.UI;
 using bleTest3;
 using lumi;
+using Windows.UI.Xaml;
 
 namespace bleTest3
 {
@@ -194,6 +195,9 @@ namespace bleTest3
 
         public serialBuffer serialBuffer = new serialBuffer();
 
+        public DispatcherTimer writeTimer = new DispatcherTimer();
+
+
         public void init(serialPortsExtended serialPortMain, RichTextBlock mainDisplayMain, ProgressBar mainProgressBar, serialBuffer _serialBuffer)
         {
             serialPorts = serialPortMain;
@@ -201,8 +205,24 @@ namespace bleTest3
             progressBar = mainProgressBar;
             serialBuffer = _serialBuffer;
 
+            // Write timeout timer.
+            writeTimer.Tick += writeTimer_Tick;
+
             serialBuffer.RXbufferUpdated += new serialBuffer.CallBackEventHandler(RXbufferUpdated);
             serialBuffer.TXbufferUpdated += new serialBuffer.CallBackEventHandler(TXbufferUpdated);
+        }
+
+        public void startWriteTimeoutTimer(int seconds)
+        {
+            writeTimer.Interval = new TimeSpan(0, 0, 0, seconds);
+            writeTimer.Start();
+        }
+
+        private void writeTimer_Tick(object sender, object e)
+        {
+            commandInProgress = commands.error;
+            RXbufferUpdated(this, null);
+            writeTimer.Stop();
         }
 
         private void TXbufferUpdated(object sender, EventArgs args)
@@ -213,7 +233,19 @@ namespace bleTest3
         private void RXbufferUpdated(object sender, EventArgs args)
         {
 
-            Debug.WriteLine("Got some dater");
+            if(commandInProgress != commands.error)
+            {
+                if(writeTimer != null){writeTimer.Stop();}
+                Debug.WriteLine("Got some dater");
+                byte[] bufferData = serialBuffer.readAllBytesFromRXBuffer();
+                for (int i = 0; i < bufferData.Length; i++)
+                {
+                    Debug.Write((char)bufferData[i]);
+                }
+            } else
+            {
+                Debug.WriteLine("Write timeout.");
+            }           
         }
 
         public void scrollToBottomOfTerminal()
@@ -246,6 +278,7 @@ namespace bleTest3
         public async void hello()
         {
             commandInProgress = commands.hello;
+            startWriteTimeoutTimer(1);
             await serialPorts.write(commandsAsStrings[(int)commands.hello]);
         }
 

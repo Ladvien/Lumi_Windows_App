@@ -17,34 +17,15 @@ namespace lumi
         public event CallBackEventHandler RXbufferUpdated;
         public event CallBackEventHandler TXbufferUpdated;
 
-        public DispatcherTimer bufferUpdateTimer = new DispatcherTimer();
-
-        public void init()
-        {
-            bufferUpdateTimer.Tick += BufferUpdateTimer_Tick;
-        }
-
         private byte[] _RxBuffer;
         public byte[] RxBuffer
         {
             set
             {
-                int initialBufferLength = 0;
-                if (_RxBuffer == null)
-                {
-                    _RxBuffer = new byte[value.Length];
-                } else
-                {
-                    initialBufferLength = _RxBuffer.Length;
-                }
-                
                 IBuffer tmpBuffer = CryptographicBuffer.CreateFromByteArray(value);
                 CryptographicBuffer.CopyToByteArray(tmpBuffer, out _RxBuffer);
-                if (_RxBuffer.Length > initialBufferLength)
-                {
-                    // Only send update if buffer was added to.
-                    RXbufferUpdated(this, null);
-                }          
+                // Only send update if buffer was added to.
+                RXbufferUpdated(this, null);          
             }
             private get { return _RxBuffer; }
 
@@ -52,13 +33,11 @@ namespace lumi
 
         public byte[] ReadFromRxBuffer(int numberOfBytes)
         {
-            // 1. Start timeout timer.
-            // 2. 
             // 1. Get the characters to return: Range<0, numberOfBytes>
             // 2. Remove the number of bytes from the buffer.
             // 3. Return the wanted bytes.
 
-            while (RxBuffer.Length <= numberOfBytes) //&&  bufferUpdateTimer.IsEnabled == true)
+            while (RxBuffer.Length <= numberOfBytes)
             {
                 try
                 {
@@ -68,16 +47,16 @@ namespace lumi
                         {
                             byte[] returnBytes = RxBuffer.Take(numberOfBytes).ToArray();
                             RxBuffer = RxBuffer.Skip(numberOfBytes).Take(RxBuffer.Length - numberOfBytes).ToArray();
-                            Debug.WriteLine("UMM: " + RxBuffer[0] + RxBuffer[1]);
                             return returnBytes;
                         } else
                         {
                             byte[] returnBytes = RxBuffer.Take(numberOfBytes).ToArray();
-                            RxBuffer = null;
-                            Debug.WriteLine("UMM: " + RxBuffer[0] + RxBuffer[1]);
                             return returnBytes;
                         }
                         
+                    } else
+                    {
+                        return new byte[0];
                     }
                 } catch ( Exception ex)
                 {
@@ -131,15 +110,5 @@ namespace lumi
             }
         }
 
-        public void startUpdateTimer(int seconds)
-        {
-            bufferUpdateTimer.Interval = new TimeSpan(0, 0, 0, seconds);
-            bufferUpdateTimer.Start();
-        }
-
-        private void BufferUpdateTimer_Tick(object sender, object e)
-        {
-            bufferUpdateTimer.Stop();
-        }
     }
 }
