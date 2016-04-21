@@ -74,6 +74,11 @@ namespace lumi
             return returnByteArray;
         }
 
+        public int bytesInRxBuffer()
+        {
+            return RxBuffer.Length;
+        }
+
         private byte[] _txBuffer;
         public byte[] txBuffer
         {

@@ -66,7 +66,7 @@ namespace bleTest3
             serialPorts.populateComboBoxesWithPortSettings(cmbBaud, cmbDataBits, cmbStopBits, cmbParity, cmbHandshaking);
             serialPorts.init(theOneParagraph, serialBufffer);
 
-            tsb.init(serialPorts, rtbMainDisplay, pbSys, serialBufffer);
+            tsb.init(serialPorts, theOneParagraph, pbSys, serialBufffer);
             blue.init(this.Height, this.Width);
 
             //devicePicker.DeviceSelected += DevicePicker_DeviceSelected;

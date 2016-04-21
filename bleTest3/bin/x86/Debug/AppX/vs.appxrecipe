@@ -10,7 +10,7 @@
     <PackageArchitecture>x86</PackageArchitecture>
     <PackageIdentityName>d43802e8-a09d-4956-9b73-8c71366b48ea</PackageIdentityName>
     <IntermediateOutputPath>C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\obj\x86\Debug\</IntermediateOutputPath>
-    <RegisteredManifestChecksum>FF1CD9DC78E5C7F3A922B957EB5064189E7F408C2C8A87BFE41284F2086B1B34</RegisteredManifestChecksum>
+    <RegisteredManifestChecksum>1A21CF56F118736FAEC3EAD30F42DFA8EE7694A1EF765FCDA0B3B73504C31939</RegisteredManifestChecksum>
     <RegisteredPackageMoniker>d43802e8-a09d-4956-9b73-8c71366b48ea_1.0.0.0_x86__yytbqfwkx097j</RegisteredPackageMoniker>
     <RegisteredUserModeAppID>d43802e8-a09d-4956-9b73-8c71366b48ea_yytbqfwkx097j!App</RegisteredUserModeAppID>
     <RegisteredPackageID>d43802e8-a09d-4956-9b73-8c71366b48ea</RegisteredPackageID>
@@ -22,13 +22,13 @@
     <AppXManifest Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\bin\x86\Debug\Core\AppxManifest.xml">
       <PackagePath>AppxManifest.xml</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
-      <Modified>2016-04-19T23:12:45.222</Modified>
+      <Modified>2016-04-21T00:52:34.981</Modified>
     </AppXManifest>
   </ItemGroup>
   <ItemGroup>
     <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\bin\x86\Debug\lumi.exe">
       <PackagePath>entrypoint\lumi.exe</PackagePath>
-      <Modified>2016-04-19T23:12:42.559</Modified>
+      <Modified>2016-04-21T00:52:33.288</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\User\.nuget\packages\Microsoft.ApplicationInsights\1.0.0\lib\portable-win81+wpa81\Microsoft.ApplicationInsights.dll">
       <PackagePath>Microsoft.ApplicationInsights.dll</PackagePath>
@@ -458,9 +458,160 @@
       <PackagePath>ApplicationInsights.config</PackagePath>
       <Modified>2016-03-18T22:37:24.336</Modified>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Properties\Default.rd.xml">
-      <PackagePath>Properties\Default.rd.xml</PackagePath>
-      <Modified>2016-03-18T22:36:45.481</Modified>
+    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\SplashScreen.scale-100.png">
+      <PackagePath>Assets\SplashScreen.scale-100.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2016-04-21T00:04:50.208</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\SplashScreen.scale-125.png">
+      <PackagePath>Assets\SplashScreen.scale-125.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2016-04-21T00:04:50.203</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\SplashScreen.scale-150.png">
+      <PackagePath>Assets\SplashScreen.scale-150.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2016-04-21T00:04:50.181</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\SplashScreen.scale-400.png">
+      <PackagePath>Assets\SplashScreen.scale-400.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2016-04-21T00:04:50.120</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\Square150x150Logo.scale-100.png">
+      <PackagePath>Assets\Square150x150Logo.scale-100.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2016-04-21T00:04:49.587</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\Square150x150Logo.scale-125.png">
+      <PackagePath>Assets\Square150x150Logo.scale-125.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2016-04-21T00:04:49.568</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\Square150x150Logo.scale-150.png">
+      <PackagePath>Assets\Square150x150Logo.scale-150.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2016-04-21T00:04:49.559</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\Square150x150Logo.scale-400.png">
+      <PackagePath>Assets\Square150x150Logo.scale-400.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2016-04-21T00:04:49.528</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\Square310x310Logo.scale-100.png">
+      <PackagePath>Assets\Square310x310Logo.scale-100.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2016-04-21T00:04:49.735</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\Square310x310Logo.scale-125.png">
+      <PackagePath>Assets\Square310x310Logo.scale-125.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2016-04-21T00:04:49.718</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\Square310x310Logo.scale-150.png">
+      <PackagePath>Assets\Square310x310Logo.scale-150.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2016-04-21T00:04:49.698</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\Square310x310Logo.scale-200.png">
+      <PackagePath>Assets\Square310x310Logo.scale-200.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2016-04-21T00:04:49.675</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\Square310x310Logo.scale-400.png">
+      <PackagePath>Assets\Square310x310Logo.scale-400.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2016-04-21T00:04:49.651</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\Square44x44Logo.scale-100.png">
+      <PackagePath>Assets\Square44x44Logo.scale-100.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2016-04-21T00:04:49.800</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\Square44x44Logo.scale-125.png">
+      <PackagePath>Assets\Square44x44Logo.scale-125.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2016-04-21T00:04:49.788</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\Square44x44Logo.scale-150.png">
+      <PackagePath>Assets\Square44x44Logo.scale-150.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2016-04-21T00:04:49.776</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\Square44x44Logo.scale-400.png">
+      <PackagePath>Assets\Square44x44Logo.scale-400.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2016-04-21T00:04:49.750</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\Square71x71Logo.scale-100.png">
+      <PackagePath>Assets\Square71x71Logo.scale-100.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2016-04-21T00:04:49.502</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\Square71x71Logo.scale-125.png">
+      <PackagePath>Assets\Square71x71Logo.scale-125.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2016-04-21T00:04:49.488</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\Square71x71Logo.scale-150.png">
+      <PackagePath>Assets\Square71x71Logo.scale-150.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2016-04-21T00:04:49.468</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\Square71x71Logo.scale-200.png">
+      <PackagePath>Assets\Square71x71Logo.scale-200.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2016-04-21T00:04:49.457</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\Square71x71Logo.scale-400.png">
+      <PackagePath>Assets\Square71x71Logo.scale-400.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2016-04-21T00:04:49.428</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\StoreLogo.scale-100.png">
+      <PackagePath>Assets\StoreLogo.scale-100.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2016-04-21T00:04:49.908</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\StoreLogo.scale-125.png">
+      <PackagePath>Assets\StoreLogo.scale-125.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2016-04-21T00:04:49.903</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\StoreLogo.scale-150.png">
+      <PackagePath>Assets\StoreLogo.scale-150.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2016-04-21T00:04:49.878</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\StoreLogo.scale-200.png">
+      <PackagePath>Assets\StoreLogo.scale-200.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2016-04-21T00:04:49.878</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\StoreLogo.scale-400.png">
+      <PackagePath>Assets\StoreLogo.scale-400.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2016-04-21T00:04:49.858</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\Wide310x150Logo.scale-100.png">
+      <PackagePath>Assets\Wide310x150Logo.scale-100.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2016-04-21T00:03:50.708</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\Wide310x150Logo.scale-125.png">
+      <PackagePath>Assets\Wide310x150Logo.scale-125.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2016-04-21T00:04:50.001</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\Wide310x150Logo.scale-150.png">
+      <PackagePath>Assets\Wide310x150Logo.scale-150.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2016-04-21T00:04:49.986</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\Wide310x150Logo.scale-400.png">
+      <PackagePath>Assets\Wide310x150Logo.scale-400.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2016-04-21T00:04:49.949</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\LockScreenLogo.scale-200.png">
       <PackagePath>Assets\LockScreenLogo.scale-200.png</PackagePath>
@@ -469,17 +620,17 @@
     <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\SplashScreen.scale-200.png">
       <PackagePath>Assets\SplashScreen.scale-200.png</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
-      <Modified>2015-10-11T01:57:40.000</Modified>
+      <Modified>2016-04-21T00:04:50.155</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\Square150x150Logo.scale-200.png">
       <PackagePath>Assets\Square150x150Logo.scale-200.png</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
-      <Modified>2015-10-11T01:57:40.000</Modified>
+      <Modified>2016-04-21T00:04:49.545</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\Square44x44Logo.scale-200.png">
       <PackagePath>Assets\Square44x44Logo.scale-200.png</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
-      <Modified>2015-10-11T01:57:40.000</Modified>
+      <Modified>2016-04-21T00:04:49.758</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\Square44x44Logo.targetsize-24_altform-unplated.png">
       <PackagePath>Assets\Square44x44Logo.targetsize-24_altform-unplated.png</PackagePath>
@@ -494,7 +645,11 @@
     <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Assets\Wide310x150Logo.scale-200.png">
       <PackagePath>Assets\Wide310x150Logo.scale-200.png</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
-      <Modified>2015-10-11T01:57:40.000</Modified>
+      <Modified>2016-04-21T00:04:49.968</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\Properties\Default.rd.xml">
+      <PackagePath>Properties\Default.rd.xml</PackagePath>
+      <Modified>2016-03-18T22:36:45.481</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\bin\x86\Debug\lumi.xr.xml">
       <PackagePath>lumi.xr.xml</PackagePath>
@@ -502,68 +657,68 @@
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Program Files %28x86%29\Windows Kits\10\UnionMetadata\Windows.winmd">
       <PackagePath>WinMetadata\Windows.winmd</PackagePath>
-      <Modified>2016-03-18T21:57:48.000</Modified>
+      <Modified>2016-04-20T12:49:31.328</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\bin\x86\Debug\resources.pri">
       <PackagePath>resources.pri</PackagePath>
-      <Modified>2016-04-13T11:32:53.803</Modified>
+      <Modified>2016-04-21T00:19:05.695</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\User\Documents\Visual Studio 2015\Projects\bleTest3\bleTest3\bin\x86\Debug\Core\lumi.exe">
       <PackagePath>lumi.exe</PackagePath>
-      <Modified>2016-04-19T23:12:45.221</Modified>
+      <Modified>2016-04-21T00:52:34.978</Modified>
     </AppxPackagedFile>
   </ItemGroup>
   <ItemGroup>
     <ResolvedSDKReference Include="C:\Program Files %28x86%29\Microsoft SDKs\Windows Kits\10\ExtensionSDKs\Microsoft.NET.CoreRuntime\1.0\">
       <Name>Microsoft.NET.CoreRuntime.1.0</Name>
-      <Version>1.0.23430.0</Version>
+      <Version>1.0.23819.0</Version>
       <Architecture>ARM</Architecture>
-      <FrameworkIdentity>Name = Microsoft.NET.CoreRuntime.1.0, MinVersion = 1.0.23430.0, Publisher = %27CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US%27</FrameworkIdentity>
+      <FrameworkIdentity>Name = Microsoft.NET.CoreRuntime.1.0, MinVersion = 1.0.23819.0, Publisher = %27CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US%27</FrameworkIdentity>
       <AppxLocation>C:\Program Files %28x86%29\Microsoft SDKs\Windows Kits\10\ExtensionSDKs\Microsoft.NET.CoreRuntime\1.0\.\AppX\ARM\Microsoft.NET.CoreRuntime.1.0.appx</AppxLocation>
       <MoreInfo>
       </MoreInfo>
     </ResolvedSDKReference>
     <ResolvedSDKReference Include="C:\Program Files %28x86%29\Microsoft SDKs\Windows Kits\10\ExtensionSDKs\Microsoft.NET.CoreRuntime\1.0\">
       <Name>Microsoft.NET.CoreRuntime.1.0</Name>
-      <Version>1.0.23430.0</Version>
+      <Version>1.0.23819.0</Version>
       <Architecture>x64</Architecture>
-      <FrameworkIdentity>Name = Microsoft.NET.CoreRuntime.1.0, MinVersion = 1.0.23430.0, Publisher = %27CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US%27</FrameworkIdentity>
+      <FrameworkIdentity>Name = Microsoft.NET.CoreRuntime.1.0, MinVersion = 1.0.23819.0, Publisher = %27CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US%27</FrameworkIdentity>
       <AppxLocation>C:\Program Files %28x86%29\Microsoft SDKs\Windows Kits\10\ExtensionSDKs\Microsoft.NET.CoreRuntime\1.0\.\AppX\x64\Microsoft.NET.CoreRuntime.1.0.appx</AppxLocation>
       <MoreInfo>
       </MoreInfo>
     </ResolvedSDKReference>
     <ResolvedSDKReference Include="C:\Program Files %28x86%29\Microsoft SDKs\Windows Kits\10\ExtensionSDKs\Microsoft.NET.CoreRuntime\1.0\">
       <Name>Microsoft.NET.CoreRuntime.1.0</Name>
-      <Version>1.0.23430.0</Version>
+      <Version>1.0.23819.0</Version>
       <Architecture>x86</Architecture>
-      <FrameworkIdentity>Name = Microsoft.NET.CoreRuntime.1.0, MinVersion = 1.0.23430.0, Publisher = %27CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US%27</FrameworkIdentity>
+      <FrameworkIdentity>Name = Microsoft.NET.CoreRuntime.1.0, MinVersion = 1.0.23819.0, Publisher = %27CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US%27</FrameworkIdentity>
       <AppxLocation>C:\Program Files %28x86%29\Microsoft SDKs\Windows Kits\10\ExtensionSDKs\Microsoft.NET.CoreRuntime\1.0\.\AppX\x86\Microsoft.NET.CoreRuntime.1.0.appx</AppxLocation>
       <MoreInfo>
       </MoreInfo>
     </ResolvedSDKReference>
     <ResolvedSDKReference Include="C:\Program Files %28x86%29\Microsoft SDKs\Windows Kits\10\ExtensionSDKs\Microsoft.VCLibs\14.0\">
       <Name>Microsoft.VCLibs.140.00.Debug</Name>
-      <Version>14.0.22929.0</Version>
+      <Version>14.0.23918.0</Version>
       <Architecture>ARM</Architecture>
-      <FrameworkIdentity>Name = Microsoft.VCLibs.140.00.Debug, MinVersion = 14.0.22929.0, Publisher = %27CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US%27</FrameworkIdentity>
+      <FrameworkIdentity>Name = Microsoft.VCLibs.140.00.Debug, MinVersion = 14.0.23918.0, Publisher = %27CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US%27</FrameworkIdentity>
       <AppxLocation>C:\Program Files %28x86%29\Microsoft SDKs\Windows Kits\10\ExtensionSDKs\Microsoft.VCLibs\14.0\.\AppX\Debug\ARM\Microsoft.VCLibs.ARM.Debug.14.00.appx</AppxLocation>
       <MoreInfo>
       </MoreInfo>
     </ResolvedSDKReference>
     <ResolvedSDKReference Include="C:\Program Files %28x86%29\Microsoft SDKs\Windows Kits\10\ExtensionSDKs\Microsoft.VCLibs\14.0\">
       <Name>Microsoft.VCLibs.140.00.Debug</Name>
-      <Version>14.0.22929.0</Version>
+      <Version>14.0.23918.0</Version>
       <Architecture>x64</Architecture>
-      <FrameworkIdentity>Name = Microsoft.VCLibs.140.00.Debug, MinVersion = 14.0.22929.0, Publisher = %27CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US%27</FrameworkIdentity>
+      <FrameworkIdentity>Name = Microsoft.VCLibs.140.00.Debug, MinVersion = 14.0.23918.0, Publisher = %27CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US%27</FrameworkIdentity>
       <AppxLocation>C:\Program Files %28x86%29\Microsoft SDKs\Windows Kits\10\ExtensionSDKs\Microsoft.VCLibs\14.0\.\AppX\Debug\x64\Microsoft.VCLibs.x64.Debug.14.00.appx</AppxLocation>
       <MoreInfo>
       </MoreInfo>
     </ResolvedSDKReference>
     <ResolvedSDKReference Include="C:\Program Files %28x86%29\Microsoft SDKs\Windows Kits\10\ExtensionSDKs\Microsoft.VCLibs\14.0\">
       <Name>Microsoft.VCLibs.140.00.Debug</Name>
-      <Version>14.0.22929.0</Version>
+      <Version>14.0.23918.0</Version>
       <Architecture>x86</Architecture>
-      <FrameworkIdentity>Name = Microsoft.VCLibs.140.00.Debug, MinVersion = 14.0.22929.0, Publisher = %27CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US%27</FrameworkIdentity>
+      <FrameworkIdentity>Name = Microsoft.VCLibs.140.00.Debug, MinVersion = 14.0.23918.0, Publisher = %27CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US%27</FrameworkIdentity>
       <AppxLocation>C:\Program Files %28x86%29\Microsoft SDKs\Windows Kits\10\ExtensionSDKs\Microsoft.VCLibs\14.0\.\AppX\Debug\x86\Microsoft.VCLibs.x86.Debug.14.00.appx</AppxLocation>
       <MoreInfo>
       </MoreInfo>

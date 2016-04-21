@@ -185,23 +185,22 @@ namespace bleTest3
         displayFlash displayFlashType = displayFlash.asIntelHexFile;
 
         serialPortsExtended serialPorts;
-        RichTextBlock mainDisplay;
+        Paragraph theOneParagraph;
         ProgressBar progressBar;
 
         #endregion properties
 
         public delegate void CallBackEventHandler(object sender, EventArgs args);
         public event CallBackEventHandler Callback;
-
+        // 
         public serialBuffer serialBuffer = new serialBuffer();
-
+        // When a write command is sent, then timeout timer is started.
         public DispatcherTimer writeTimer = new DispatcherTimer();
 
-
-        public void init(serialPortsExtended serialPortMain, RichTextBlock mainDisplayMain, ProgressBar mainProgressBar, serialBuffer _serialBuffer)
+        public void init(serialPortsExtended serialPortMain, Paragraph mainDisplayMain, ProgressBar mainProgressBar, serialBuffer _serialBuffer)
         {
             serialPorts = serialPortMain;
-            mainDisplay = mainDisplayMain;
+            theOneParagraph = mainDisplayMain;
             progressBar = mainProgressBar;
             serialBuffer = _serialBuffer;
 
@@ -233,19 +232,24 @@ namespace bleTest3
         private void RXbufferUpdated(object sender, EventArgs args)
         {
 
-            if(commandInProgress != commands.error)
+
+            switch (commandInProgress)
             {
-                if(writeTimer != null){writeTimer.Stop();}
-                Debug.WriteLine("Got some dater");
-                byte[] bufferData = serialBuffer.readAllBytesFromRXBuffer();
-                for (int i = 0; i < bufferData.Length; i++)
-                {
-                    Debug.Write((char)bufferData[i]);
-                }
-            } else
-            {
-                Debug.WriteLine("Write timeout.");
-            }           
+                case commands.error:
+                    appendText("Uh-oh. Bad stuff happened.\n", Colors.Crimson);
+                    break;
+                case commands.hello:
+                    bool outcome = helloProcessing();
+                    if (outcome)
+                    {
+                        writeTimer.Stop();
+                        // Whatever says we are successful.
+                    } else { appendText("Failed to connect to TinySafeBoot", Colors.Crimson); } 
+                    break;
+                default:
+                    Debug.WriteLine("Defaulted in RXbuffer switch\n");
+                    break;
+            }
         }
 
         public void scrollToBottomOfTerminal()
@@ -282,7 +286,7 @@ namespace bleTest3
             await serialPorts.write(commandsAsStrings[(int)commands.hello]);
         }
 
-        public async Task<bool> helloProcessing()
+        public bool helloProcessing()
         {
             
             // 1. Try handshake ("@@@") three times; or continue if successful.
@@ -291,48 +295,38 @@ namespace bleTest3
             // 4. Save the device data for later.
             // 5. If not reply, let the user know it was a fail.
 
-            int[] firmwareDatePieces = { 0x00, 0x00 };
-            int firmwareStatus = 0x00;
-            int[] signatureBytes = { 0x00, 0x00, 0x00 };
-            int pagesizeInWords = 0x00;
-            int[] freeFlash = { 0x00, 0x00 };
-            int[] eepromSize = { 0x00, 0x00 };
+            if(serialBuffer.bytesInRxBuffer() > 16)
+            {
+                byte[] data = serialBuffer.readAllBytesFromRXBuffer();
 
-            uint bytesWritten = await serialPorts.write("@@@");
+                int[] firmwareDatePieces = { 0x00, 0x00 };
+                int firmwareStatus = 0x00;
+                int[] signatureBytes = { 0x00, 0x00, 0x00 };
+                int pagesizeInWords = 0x00;
+                int[] freeFlash = { 0x00, 0x00 };
+                int[] eepromSize = { 0x00, 0x00 };
 
-            try
-            {
-                await serialPorts.Listen(1500);
-            } catch (Exception ex)
-            {
-                mainDisplay.Blocks.Add(getParagraph(ex.Message, Colors.Red));
-            }
-            
-            int numberOfBytes = serialPorts.numberBufferedBytes();
-            byte[] rxBuffer = serialPorts.getBytes(numberOfBytes);
-            if (numberOfBytes > 16)
-            {
                 string tsbString = "";
-                tsbString += (char)rxBuffer[0];
-                tsbString += (char)rxBuffer[1];
-                tsbString += (char)rxBuffer[2];
+                tsbString += (char)data[0];
+                tsbString += (char)data[1];
+                tsbString += (char)data[2];
 
                 // ATtiny have all lower case, ATMega have upper case.  Not sure if it's expected.
-                if (tsbString.Contains("tsb") || tsbString.Contains("TSB") && rxBuffer.Length == 17)
+                if (tsbString.Contains("tsb") || tsbString.Contains("TSB") && data.Length == 17)
                 {
-                    if (rxBuffer.Length > 16)
+                    if (data.Length > 16)
                     {
-                        firmwareDatePieces[0] = rxBuffer[3];
-                        firmwareDatePieces[1] = rxBuffer[4];
-                        firmwareStatus = rxBuffer[5];
-                        signatureBytes[0] = rxBuffer[6];
-                        signatureBytes[1] = rxBuffer[7];
-                        signatureBytes[2] = rxBuffer[8];
-                        pagesizeInWords = rxBuffer[9];
-                        freeFlash[0] = rxBuffer[10];
-                        freeFlash[1] = rxBuffer[11];
-                        eepromSize[0] = rxBuffer[12];
-                        eepromSize[1] = rxBuffer[13];
+                        firmwareDatePieces[0] = data[3];
+                        firmwareDatePieces[1] = data[4];
+                        firmwareStatus = data[5];
+                        signatureBytes[0] = data[6];
+                        signatureBytes[1] = data[7];
+                        signatureBytes[2] = data[8];
+                        pagesizeInWords = data[9];
+                        freeFlash[0] = data[10];
+                        freeFlash[1] = data[11];
+                        eepromSize[0] = data[12];
+                        eepromSize[1] = data[13];
                     }
 
                     // Date of firmware.
@@ -363,16 +357,15 @@ namespace bleTest3
                     fullEepromSize = ((eepromSize[1] << 8) | eepromSize[0]) + 1;
                     string eeprom = fullEepromSize.ToString();
 
-                    Paragraph tsbHanshakeInfo = getParagraph(
+                    string tsbHanshakeInfo = 
                               deviceSignatureValue.ToString()
                          + "\nFirmware Date:\t" + firmwareDateString
                          + "\nStatus:\t\t" + firmwareStatus.ToString("X2")
                          + "\nSignature:\t" + deviceSignature
                          + "\nPage Size\t" + pageSizeString
                          + "\nFlash Free:\t" + flashLeft
-                         + "\nEEPROM size:\t" + eeprom + "\n",
-                         Colors.Azure);
-                    mainDisplay.Blocks.Add(tsbHanshakeInfo);
+                         + "\nEEPROM size:\t" + eeprom + "\n";
+                    appendText(tsbHanshakeInfo, Colors.White);
                     commandInProgress = commands.none;
                     //setTsbConnectionSafely(true);
                     return true;
@@ -380,8 +373,8 @@ namespace bleTest3
             }
             else
             {
-                Paragraph error = getParagraph("Could not handshake with TSB. Please reset and try again.\n", Colors.Crimson);
-                mainDisplay.Blocks.Add(error);
+                string error = "Could not handshake with TSB. Please reset and try again.\n";
+                appendText(error, Colors.Crimson);
                 return false;
             }
             return false;
@@ -391,28 +384,18 @@ namespace bleTest3
         {
             return new SolidColorBrush(color);
         }
-
-        public Paragraph getParagraph(string str, Color color)
+        
+        public void appendText(string str, Color color)
         {
-            // 1. Get new paragraph.
-            // 2. Paint paragraph text with selected color.
-            // 3. Create a new run
-            // 4. Add stext to run.  
-            // 5. Add run to paragraph
-            // 6. Return paragraph.
-
-            Paragraph p = new Paragraph();
-            p.Foreground = getColoredBrush(color);
-            p.FontFamily = new FontFamily("Courier");
             Run r = new Run();
+            r.Foreground = getColoredBrush(color);
             r.Text = str;
-            p.Inlines.Add(r);
-            return p;
+            theOneParagraph.Inlines.Add(r);
         }
 
         public void clearMainDisplay()
         {
-            mainDisplay.Blocks.Clear();
+            theOneParagraph = new Paragraph();
         }
 
         //    public void readFlash()
