@@ -138,9 +138,10 @@ namespace bleTest3
             Debug.WriteLine("serialPorts Callback for TX bufferUpdated");
         }
 
-        public void TXbufferUpdated(object sender, EventArgs args)
+        public async void TXbufferUpdated(object sender, EventArgs args)
         {
             int numberOfBytes = serialBuffer.bytesInTxBuffer();
+            await writeBytes(serialBuffer.ReadFromTxBuffer(numberOfBytes));
         }
 
         public void appendText(string str, Color color)
@@ -362,6 +363,33 @@ namespace bleTest3
             // simply a buffered string attached to an abstract object.  Now, DetachBuffer basically returns
             // the data, formatted in a streaming-ready format (ie, IBuffer), once the data is returned, it
             // deletes the buffered data.  Weird.
+            uint bytesWritten = await selectedSerialDevice.OutputStream.WriteAsync(dataWriter.DetachBuffer());
+
+            return bytesWritten;
+        }
+
+        public async Task<uint> writeBytes(byte[] data)
+        {
+            // 1. Assert dataWriteObject is using selectedSerialDevice.
+            // 2. Create the WriteString operation.
+            // 3. Create the async Write task.
+            // 4. Execute the write operation; await how many bytes are written.
+            // 5. Return the number of bytes written.
+
+            //DataWriter dataWriteObject = new DataWriter(selectedSerialDevice.OutputStream);
+            //Task<uint> storeAsyncTask;
+            //dataWriteObject.WriteString(data);
+            //storeAsyncTask = dataWriteObject.StoreAsync().AsTask();
+
+
+            DataWriter dataWriter = new DataWriter();       // Creates a new writing stream.
+            dataWriter.WriteBytes(data);                   // Prepares the string into a byte[] buffered in
+                                                            // the dataWriter object, which is ready to write
+                                                            // back out as a string. Weird.
+                                                            // Here's where it get's tricky.  WriteAsync takes a IBuffer object, which as I understand it, is
+                                                            // simply a buffered string attached to an abstract object.  Now, DetachBuffer basically returns
+                                                            // the data, formatted in a streaming-ready format (ie, IBuffer), once the data is returned, it
+                                                            // deletes the buffered data.  Weird.
             uint bytesWritten = await selectedSerialDevice.OutputStream.WriteAsync(dataWriter.DetachBuffer());
 
             return bytesWritten;

@@ -20,6 +20,8 @@ namespace lumi
         private byte[] _RxBuffer;
         public byte[] RxBuffer
         {
+            // 1. Get an IBuffer object from the passed in byte array
+            // 2. Copy value to the end of the _RxBuffer object.
             set
             {
                 IBuffer tmpBuffer = CryptographicBuffer.CreateFromByteArray(value);
@@ -60,7 +62,7 @@ namespace lumi
                     }
                 } catch ( Exception ex)
                 {
-                    //Debug.WriteLine(ex.Message);
+                    Debug.WriteLine(ex.Message);
                 }
                 
             }
@@ -70,6 +72,8 @@ namespace lumi
 
         public byte[] readAllBytesFromRXBuffer()
         {
+            // 1. Get all the bytes from the RxBuffer
+            // 2. Return bytes.
             byte[] returnByteArray = ReadFromRxBuffer(RxBuffer.Length);
             return returnByteArray;
         }
@@ -82,6 +86,9 @@ namespace lumi
         private byte[] _txBuffer;
         public byte[] txBuffer
         {
+            // 1. Get an IBuffer object from the passed in byte array
+            // 2. Copy value to the end of the _txBuffer object.
+            // 3. Call TXBufferUpdated.
             set
             {
                 IBuffer tmpBuffer = CryptographicBuffer.CreateFromByteArray(value);
@@ -90,6 +97,20 @@ namespace lumi
             }
             private get { return _txBuffer; }
 
+        }
+
+        private byte[] internalTxBuffer
+        {
+            // 1. Get an IBuffer object from the passed in byte array
+            // 2. Copy value to the end of the _txBuffer object.
+            // 3. DO NOT call TXBufferUpdated.  If txBuffer is called internally,
+            //    a rescursive error pops.  TxBuffer calls TXBufferedUpdated while updating itself.
+            set
+            {
+                IBuffer tmpBuffer = CryptographicBuffer.CreateFromByteArray(value);
+                CryptographicBuffer.CopyToByteArray(tmpBuffer, out _txBuffer);
+            }
+            get { return _txBuffer; }
         }
 
         public int bytesInTxBuffer()
@@ -102,10 +123,10 @@ namespace lumi
             // 1. Get the characters to return: Range<0, numberOfBytes>
             // 2. Remove the number of bytes from the buffer.
             // 3. Return the wanted bytes.
-            if (txBuffer.Length > 0)
+            if (internalTxBuffer.Length > 0)
             {
-                byte[] returnBytes = txBuffer.Take(numberOfBytes).ToArray();
-                txBuffer = txBuffer.Skip(numberOfBytes).Take(txBuffer.Length - numberOfBytes).ToArray();
+                byte[] returnBytes = internalTxBuffer.Take(numberOfBytes).ToArray();
+                internalTxBuffer = internalTxBuffer.Skip(numberOfBytes).Take(internalTxBuffer.Length - numberOfBytes).ToArray();
                 return returnBytes;
             }
             else

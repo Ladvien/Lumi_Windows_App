@@ -29,10 +29,12 @@ namespace bleTest3
     public sealed partial class MainPage : Page
     {
         serialPortsExtended serialPorts = new serialPortsExtended();
-        tsb tsb = new tsb();
+        TSB tsb = new TSB();
         blue blue = new blue();
         private bool portOpen = false;
         private CoreDispatcher dispatcher;
+
+        
 
         DevicePicker devicePicker = new DevicePicker();
 
@@ -41,13 +43,15 @@ namespace bleTest3
         public MainPage()
         {
             this.InitializeComponent();
-            dispatcher = Windows.UI.Core.CoreWindow.GetForCurrentThread().Dispatcher;
+            dispatcher = CoreWindow.GetForCurrentThread().Dispatcher;
             ApplicationView appView = ApplicationView.GetForCurrentView();
             appView.Title = "Lumi";
 
             // Add the callback handlers for serialPortsExtended isntance
             serialPorts.Callback += new serialPortsExtended.CallBackEventHandler(serialPortCallback);
             blue.Callback += new blue.CallBackEventHandler(blueCallback);
+
+
 
             // Until other thread reports COM port discovered
             btnConnect.IsEnabled = false;
@@ -67,6 +71,8 @@ namespace bleTest3
             serialPorts.init(theOneParagraph, serialBufffer);
 
             tsb.init(serialPorts, theOneParagraph, pbSys, serialBufffer);
+            // Delegate callback for TSB updates.
+            tsb.TsbUpdatedCommand += new TSB.TsbUpdateCommand(tsbcommandUpdate);
             blue.init(this.Height, this.Width);
 
             //devicePicker.DeviceSelected += DevicePicker_DeviceSelected;
@@ -77,9 +83,23 @@ namespace bleTest3
             serialBufffer.TXbufferUpdated += new serialBuffer.CallBackEventHandler(TXbufferUpdated);
         }
 
+        private void tsbcommandUpdate(TSB.statuses tsbConnectionStatus)
+        {
+            Debug.WriteLine("Insert command updates here");
+            Debug.Write(tsbConnectionStatus);
+            switch (tsbConnectionStatus)
+            {
+                case TSB.statuses.connected:
+                    btnTsbConnect.Content = "Disconnect";
+                    connectionLabelBackGround.Background = getColoredBrush(Colors.LawnGreen);
+                    labelConnectionStatus.Text = "Connected to TSB";
+                    break;
+            }
+        }
+
         public void RXbufferUpdated(object sender, EventArgs args)
         {
-            if(tsb.commandInProgress == tsb.commands.hello)
+            if(tsb.commandInProgress == TSB.commands.hello)
             {
                 byte[] data = serialBufffer.readAllBytesFromRXBuffer();
                 //appendText(serialBufffer.ReadFromRxBuffer)
@@ -163,7 +183,7 @@ namespace bleTest3
                         if (serialPorts.openPort())
                         {
                             btnTsbConnect.IsEnabled = true;
-                            connectionLabelBackGround.Background = getColoredBrush(Colors.LawnGreen);
+                            connectionLabelBackGround.Background = getColoredBrush(Colors.Yellow);
                             labelConnectionStatus.Text = "Connected";
                             btnConnect.Content = "Disconnect";
                             pvtPortSettings.IsEnabled = false;
