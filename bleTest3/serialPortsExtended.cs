@@ -37,7 +37,7 @@ namespace bleTest3
         public delegate void CallBackEventHandler(object sender, EventArgs args);
         public event CallBackEventHandler Callback;
 
-        public serialBuffer serialBuffer = new serialBuffer();
+        public SerialBuffer serialBuffer = new SerialBuffer();
 
         public Paragraph theOneParagraph;
 
@@ -125,12 +125,12 @@ namespace bleTest3
 
         #region interface methods
 
-        public void init(Paragraph theParagraph, serialBuffer buffer)
+        public void init(Paragraph theParagraph, SerialBuffer buffer)
         {
             serialBuffer = buffer;
             theOneParagraph = theParagraph;
-            serialBuffer.RXbufferUpdated += new serialBuffer.CallBackEventHandler(RXbufferUpdated);
-            serialBuffer.TXbufferUpdated += new serialBuffer.CallBackEventHandler(TXbufferUpdated);
+            serialBuffer.RXbufferUpdated += new SerialBuffer.CallBackEventHandler(RXbufferUpdated);
+            serialBuffer.TXbufferUpdated += new SerialBuffer.CallBackEventHandler(TXbufferUpdated);
         }
 
         public void RXbufferUpdated(object sender, EventArgs args)

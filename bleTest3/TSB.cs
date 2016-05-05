@@ -173,6 +173,9 @@ namespace bleTest3
         public delegate void TsbUpdateCommand(statuses tsbConnectionStatus);
         public event TsbUpdateCommand TsbUpdatedCommand;
 
+        public SerialBuffer readFlashBuffer = new SerialBuffer();
+        public SerialBuffer readFlashBufferTmp = new SerialBuffer();
+
         const int commandAttempts = 3;
 
         private string rxBuffer = "";
@@ -195,6 +198,11 @@ namespace bleTest3
         // Number of pages
         int numberOfPages = 0;
 
+
+        // Properties used for ReadFlash()
+        string localStringBuffer = "";
+        int pageIndex = 0;
+
         DEVICE_SIGNATURE deviceSignatureValue = new DEVICE_SIGNATURE();
         public commands commandInProgress = new commands();
         displayFlash displayFlashType = displayFlash.asIntelHexFile;
@@ -208,11 +216,11 @@ namespace bleTest3
         public delegate void CallBackEventHandler(object sender, EventArgs args);
         public event CallBackEventHandler Callback;
         // 
-        public serialBuffer serialBuffer = new serialBuffer();
+        public SerialBuffer serialBuffer = new SerialBuffer();
         // When a write command is sent, then timeout timer is started.
         public DispatcherTimer writeTimer = new DispatcherTimer();
 
-        public void init(serialPortsExtended serialPortMain, Paragraph mainDisplayMain, ProgressBar mainProgressBar, serialBuffer _serialBuffer)
+        public void init(serialPortsExtended serialPortMain, Paragraph mainDisplayMain, ProgressBar mainProgressBar, SerialBuffer _serialBuffer)
         {
             serialPorts = serialPortMain;
             theOneParagraph = mainDisplayMain;
@@ -222,8 +230,14 @@ namespace bleTest3
             // Write timeout timer.
             writeTimer.Tick += writeTimer_Tick;
 
-            serialBuffer.RXbufferUpdated += new serialBuffer.CallBackEventHandler(RXbufferUpdated);
-            serialBuffer.TXbufferUpdated += new serialBuffer.CallBackEventHandler(TXbufferUpdated);
+            serialBuffer.RXbufferUpdated += new SerialBuffer.CallBackEventHandler(RXbufferUpdated);
+            serialBuffer.TXbufferUpdated += new SerialBuffer.CallBackEventHandler(TXbufferUpdated);
+            readFlashBuffer.bufferUpdated += new SerialBuffer.CallBackEventHandler(ReadFlashBuffer_bufferUpdated);
+        }
+
+        private void ReadFlashBuffer_bufferUpdated(object sender, EventArgs args)
+        {
+            
         }
 
         public void startWriteTimeoutTimer(int seconds)
@@ -264,6 +278,9 @@ namespace bleTest3
                     {
                         appendText("Failed to connect to TinySafeBoot", Colors.Crimson);
                     } 
+                    break;
+                case commands.readFlash:
+                    processFlashRead();
                     break;
                 default:
                     Debug.WriteLine("Defaulted in RXbuffer switch\n");
@@ -428,48 +445,63 @@ namespace bleTest3
             }
             return commandAsByteArray;
         }
-
-        public void readFlash()
+        
+        public async void readFlash()
         {
-            // 1. Write read Flash command.
-            // 2. Get first page by sending confirmation ("!").
+            // 1. Set readFlash as the commandInProgress
+            // 2. Write read Flash command.
+            commandInProgress = commands.readFlash;
+            await serialPorts.write(commandsAsStrings[(int)commands.readFlash]);
+            await serialPorts.write(commandsAsStrings[(int)commands.confirm]);
+        }
+
+        public async void processFlashRead()
+        {
+            // 1. Check to see if a whole page is collected
+            // 2. If a whole page is found, store it and request another.
+            // 3. If all pages are collected, process read.
             // 3. Continue to get data until buffer is full.
+
             // 4. Write monoline string to file.
             // 5. Check the dogear of the page (bottom  corner bytes)
             //    if last two bytes are FF FF, then break, as end of Flash.
             // 5. Print out formatted string to display.
 
-            string localStringBuffer = "";
-            int pageIndex = 0;
+            // Declared globally.
+            //string localStringBuffer = "";
+            //int pageIndex = 0;
+            //byte[] byteArray = serialBuffer.readAllBytesFromRXBuffer();            
 
-            // Start this thing
-            serialPorts.WriteData(commandsAsStrings[(int)commands.readFlash]);
-            System.Threading.Thread.Sleep(50);
-
-            // Get all bytes in a page.
-            while (pageIndex < numberOfPages)
+            byte[] rxByteArray = serialBuffer.readAllBytesFromRXBuffer();
+            if (dogEarCheck(rxByteArray)){
+                readFlashBuffer.PrivateBuffer = rxByteArray;
+                string str = getStringFromBytes(readFlashBuffer.readAllBytesFromBuffer());
+                Debug.WriteLine(str);
+                return;
+            }
+            else if (rxByteArray.Length >= pageSize)
             {
-                localStringBuffer += getPage();
-                Console.WriteLine("Chars: {0}  pageIndex: {1}  numberOfPages: {2}", localStringBuffer.Length, pageIndex, numberOfPages);
-                pageIndex++;
-                if (localStringBuffer[localStringBuffer.Length - 1] == 0xFF &&
-                    localStringBuffer[localStringBuffer.Length - 1] == 0xFF)
-                {
-                    //localStringBuffer += getPage();
-                    break;
-                }
+                readFlashBuffer.PrivateBuffer = rxByteArray;
+                string str = getStringFromBytes(readFlashBuffer.readAllBytesFromBuffer());
+                Debug.WriteLine(str);
+                await serialPorts.write(commandsAsStrings[(int)commands.confirm]);
+
             }
 
-            int[] flashReadByteArray = getIntArrayFromString(localStringBuffer);
-            // parseAndPrintRawRead(flashReadByteArray);
 
         }
 
-        public string getPage()
+        private bool dogEarCheck(byte[] byteArray)
         {
-            serialPorts.WriteData(commandsAsStrings[(int)commands.confirm]);
-            System.Threading.Thread.Sleep(150);
-            return serialPorts.ReadExistingAsString();
+            // Check to see what the if the page is dogeared.
+            if(byteArray[byteArray.Length - 1] == 0xFF && byteArray[byteArray.Length - 2] == 0xFF)
+            {
+                return true;
+            } else
+            {
+                return false;
+            }
+
         }
 
         //public int[] getIntArrayFromString(string data)
@@ -685,17 +717,28 @@ namespace bleTest3
         //    return true;
         //}
 
-        //public string getStringFromIntBytes(int[] bytes)
-        //{
+        public string getStringFromBytes(byte[] bytes)
+        {
+            string str = "";
 
-        //    string str = "";
-        //    for (int i = 0; i < bytes.Length; i++)
-        //    {
-        //        str += Convert.ToChar(bytes[i]);
-        //    }
+            for(int i = 0; i < bytes.Length; i++)
+            {
+                str += bytes[i].ToString("X2");
+            }
+            return str;
+        }
 
-        //    return str;
-        //}
+        public string getStringFromIntBytes(int[] bytes)
+        {
+
+            string str = "";
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                str += Convert.ToChar(bytes[i]);
+            }
+
+            return str;
+        }
 
         //public void setTsbConnectionSafely(bool tsbConnection)
         //{
@@ -932,7 +975,7 @@ namespace bleTest3
     //    }
 
 
-}// End Intel Hex File Class
+//}// End Intel Hex File Class
 
 
 }

@@ -38,7 +38,7 @@ namespace bleTest3
 
         #region properties_and_methods
 
-        serialBuffer serialBuffer = new serialBuffer();
+        SerialBuffer serialBuffer = new SerialBuffer();
         
         // Used for UI callback.
         public enum BlueEvent
@@ -79,7 +79,7 @@ namespace bleTest3
         private int deviceCounter;
         #endregion properties_and_methods
 
-        public async void init(double appHeight, double appWidth)
+        public void init(double appHeight, double appWidth)
         {
             // Create and initialize a new watcher instance.
             bleAdvertWatcher = new BluetoothLEAdvertisementWatcher();
@@ -96,18 +96,19 @@ namespace bleTest3
             deviceWatcher.Updated += DeviceWatcher_Updated;
             deviceWatcher.Start();
 
+            
             bleAdvertWatcher.Received += OnAdvertisementReceived;
             bleAdvertWatcher.Stopped += OnAdvertisementWatcherStopped;
 
-            bleAdvertWatcher.ScanningMode = BluetoothLEScanningMode.Active;
+            //bleAdvertWatcher.ScanningMode = BluetoothLEScanningMode.Active;
 
             bleAdvertWatcher.Start();
 
 
             bleSearchTimer.Tick += BleSearchTimer_Tick;
 
-            serialBuffer.RXbufferUpdated += new serialBuffer.CallBackEventHandler(RXbufferUpdated);
-            serialBuffer.TXbufferUpdated += new serialBuffer.CallBackEventHandler(TXbufferUpdated);
+            serialBuffer.RXbufferUpdated += new SerialBuffer.CallBackEventHandler(RXbufferUpdated);
+            serialBuffer.TXbufferUpdated += new SerialBuffer.CallBackEventHandler(TXbufferUpdated);
         }
 
         private void RXbufferUpdated(object sender, EventArgs args)

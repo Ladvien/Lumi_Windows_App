@@ -10,12 +10,13 @@ using Windows.UI.Xaml;
 
 namespace lumi
 {
-    public class serialBuffer
+    public class SerialBuffer
     {
 
         public delegate void CallBackEventHandler(object sender, EventArgs args);
         public event CallBackEventHandler RXbufferUpdated;
         public event CallBackEventHandler TXbufferUpdated;
+        public event CallBackEventHandler bufferUpdated;
 
         private byte[] _RxBuffer;
         public byte[] RxBuffer
@@ -135,6 +136,81 @@ namespace lumi
                 return empty;
             }
         }
+        
+        private byte[] _PrivateBuffer;
+        public byte[] PrivateBuffer
+        {
+            // 1. Get an IBuffer object from the passed in byte array
+            // 2. Copy value to the end of the _PrivateBuffer object.
+            set
+            {
+                IBuffer tmpBuffer = CryptographicBuffer.CreateFromByteArray(value);
+                CryptographicBuffer.CopyToByteArray(tmpBuffer, out _PrivateBuffer);
+            }
+            private get { return _PrivateBuffer; }
 
+        }
+
+        public byte[] ReadFromBuffer(int numberOfBytes)
+        {
+            // 1. Get the characters to return: Range<0, numberOfBytes>
+            // 2. Remove the number of bytes from the buffer.
+            // 3. Return the wanted bytes.
+
+            while (PrivateBuffer.Length <= numberOfBytes)
+            {
+                try
+                {
+                    if (PrivateBuffer.Length > 0)
+                    {
+                        if (PrivateBuffer.Length > numberOfBytes)
+                        {
+                            byte[] returnBytes = PrivateBuffer.Take(numberOfBytes).ToArray();
+                            PrivateBuffer = PrivateBuffer.Skip(numberOfBytes).Take(PrivateBuffer.Length - numberOfBytes).ToArray();
+                            return returnBytes;
+                        }
+                        else
+                        {
+                            byte[] returnBytes = PrivateBuffer.Take(numberOfBytes).ToArray();
+                            return returnBytes;
+                        }
+
+                    }
+                    else
+                    {
+                        return new byte[0];
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.Message);
+                }
+
+            }
+            byte[] empty = { 0x00 };
+            return empty;
+        }
+
+        public byte[] readAllBytesFromBuffer()
+        {
+            // 1. Get all the bytes from the Buffer
+            // 2. Return bytes.
+            byte[] returnByteArray = ReadFromBuffer(PrivateBuffer.Length);
+            return returnByteArray;
+        }
+
+        public int bytesInBuffer()
+        {
+            if(PrivateBuffer != null)
+            {
+                return PrivateBuffer.Length;
+            } else
+            {
+                return 0;
+            }
+            
+        }
     }
+
+    
 }

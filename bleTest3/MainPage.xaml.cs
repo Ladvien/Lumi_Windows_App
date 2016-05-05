@@ -38,7 +38,7 @@ namespace bleTest3
 
         DevicePicker devicePicker = new DevicePicker();
 
-        serialBuffer serialBufffer = new serialBuffer();
+        SerialBuffer serialBufffer = new SerialBuffer();
 
         public MainPage()
         {
@@ -79,8 +79,8 @@ namespace bleTest3
 
             //App.Current.Suspending += OnSuspending;
 
-            serialBufffer.RXbufferUpdated += new serialBuffer.CallBackEventHandler(RXbufferUpdated);
-            serialBufffer.TXbufferUpdated += new serialBuffer.CallBackEventHandler(TXbufferUpdated);
+            serialBufffer.RXbufferUpdated += new SerialBuffer.CallBackEventHandler(RXbufferUpdated);
+            serialBufffer.TXbufferUpdated += new SerialBuffer.CallBackEventHandler(TXbufferUpdated);
         }
 
         private void tsbcommandUpdate(TSB.statuses tsbConnectionStatus)
@@ -461,21 +461,7 @@ namespace bleTest3
 
         private async void btnTest_Click(object sender, RoutedEventArgs e)
         {
-            //await serialPorts.write("AT");
-            //serialBufffer.startUpdateTimer(1);
-
-
-            //disableConsole();
-
-            //IAsyncAction ignored;
-            //await dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
-            //{
-            //    serialBufffer.ReadFromRxBuffer(2);
-            //});
-
-
-            //byte[] readBytes = serialBufffer.ReadFromRxBuffer(2);
-            //Debug.WriteLine(readBytes);
+            tsb.readFlash();
         }
     }// End MainPage
 } // End Namespace
