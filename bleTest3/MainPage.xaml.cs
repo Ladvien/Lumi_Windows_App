@@ -473,6 +473,11 @@ namespace bleTest3
         {
 
         }
+
+        private void displayFlashType_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            tsb.setFlashDisplay((TSB.displayFlash)cmbFlashDisplay.SelectedIndex);
+        }
     }// End MainPage
 } // End Namespace
 

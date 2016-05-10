@@ -175,6 +175,12 @@
                                 <ColumnDefinition Width="2*"/>
                             </Grid.ColumnDefinitions>
                             <Button Grid.Row="0" Grid.Column="0" FontSize="20" HorizontalAlignment="Stretch" VerticalAlignment="Center" Click="Button_ReadFlash">Read Flash</Button>
+                            <ComboBox x:Name="cmbFlashDisplay" SelectedIndex="0" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch" SelectionChanged="displayFlashType_SelectionChanged">
+                                <ComboBoxItem>None</ComboBoxItem>
+                                <ComboBoxItem>Data</ComboBoxItem>
+                                <ComboBoxItem>Address and Data</ComboBoxItem>
+                                <ComboBoxItem>Color Intel HEX</ComboBoxItem>
+                            </ComboBox>
                             <Button Grid.Row="1" Grid.Column="0" FontSize="20" HorizontalAlignment="Stretch" VerticalAlignment="Center">Write Flash</Button>
                             <Button Grid.Row="2" Grid.Column="0" FontSize="20" HorizontalAlignment="Stretch" VerticalAlignment="Center">Get Security Info</Button>
                             <Button Grid.Row="3" Grid.Column="0" FontSize="20" HorizontalAlignment="Stretch" VerticalAlignment="Center"></Button>

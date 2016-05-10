@@ -147,10 +147,10 @@ namespace bleTest3
 
         public enum displayFlash
         {
-            asIntelHexFile = 0,
+            none = 0,
             dataOnly = 1,
             addressAndData = 2,
-            none = 3
+            asIntelHexFile = 3
         }
 
         public enum statuses : int
@@ -316,6 +316,11 @@ namespace bleTest3
         public void updateActionInProgress(commands commandNumber)
         {
             commandInProgress = commandNumber;
+        }
+
+        public void setFlashDisplay(displayFlash displayFlashTypeArgument)
+        {
+            displayFlashType = displayFlashTypeArgument;
         }
 
         public async void hello()
@@ -611,6 +616,16 @@ namespace bleTest3
 
             switch (displayFlashType)
             {
+                case displayFlash.none:
+                    // No display.
+                    break;
+                case displayFlash.dataOnly:
+                    appendText(data + "\n", Colors.LawnGreen);
+                    break;
+                case displayFlash.addressAndData:
+                    appendText(address + ": ", Colors.Yellow);
+                    appendText(data + "\n", Colors.LawnGreen);
+                    break;
                 case displayFlash.asIntelHexFile:
                     appendText(":", Colors.Yellow);                  // Start code
                     appendText(byteCount, Colors.Green);             // Byte count
@@ -619,11 +634,7 @@ namespace bleTest3
                     appendText(data, Colors.CadetBlue);              // Data
                     appendText(checkSumString + "\n", Colors.Gray);  // Checksum
                     break;
-                case displayFlash.none:
-                    // No display.
-                    break;
-                case displayFlash.addressAndData:
-                    appendText(address + ": ", Colors.Yellow);
+                default:
                     appendText(data + "\n", Colors.LawnGreen);
                     break;
             }

@@ -104,7 +104,6 @@ namespace bleTest3
 
             bleAdvertWatcher.Start();
 
-
             bleSearchTimer.Tick += BleSearchTimer_Tick;
 
             serialBuffer.RXbufferUpdated += new SerialBuffer.CallBackEventHandler(RXbufferUpdated);
