@@ -100,7 +100,7 @@ namespace bleTest3
             bleAdvertWatcher.Received += OnAdvertisementReceived;
             bleAdvertWatcher.Stopped += OnAdvertisementWatcherStopped;
 
-            //bleAdvertWatcher.ScanningMode = BluetoothLEScanningMode.Active;
+            bleAdvertWatcher.ScanningMode = BluetoothLEScanningMode.Active;
 
             bleAdvertWatcher.Start();
 

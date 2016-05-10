@@ -73,7 +73,7 @@
                     <StackPanel  Height="auto" Background="Black" HorizontalAlignment="Stretch">
                         <RichTextBlock x:Name="rtbMainDisplay" FontFamily="Courier" Height="auto" Padding="5">
                             <RichTextBlock.Blocks>
-                                <Paragraph x:Name="theOneParagraph">
+                                <Paragraph x:Name="theOneParagraph" FontFamily="Courier New">
                                     <Paragraph.Inlines>
                                         <Run x:Name="theOneRun" Foreground="White" Text="Content Here" />
                                     </Paragraph.Inlines>
@@ -94,8 +94,8 @@
                     <Button Grid.Column="1" x:Name="btnSendText" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="btnSendText_Click">Send</Button>
                     <Button Grid.Column="2" x:Name="btnClearSendText" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">Clear</Button>
                 </Grid>
-                <Pivot Grid.Row="2">
-                    <PivotItem x:Name="pvtPortSettings" Header="Port Settings" Margin="12,0,12,38">
+                <Pivot Grid.Row="2" Height="274">
+                    <PivotItem x:Name="pvtPortSettings" Header="Port Settings" IsEnabled="false">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition MinHeight="30" Height="1*"/>
@@ -139,31 +139,47 @@
                     <PivotItem Header="Data Settings">
                         <Grid>
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="40"/>
-                                <RowDefinition Height="40"/>
-                                <RowDefinition Height="40"/>
-                                <RowDefinition Height="1*"/>
+                                <RowDefinition MinHeight="30" Height="1*"/>
+                                <RowDefinition MinHeight="30" Height="1*"/>
+                                <RowDefinition MinHeight="30" Height="1*"/>
+                                <RowDefinition MinHeight="30" Height="1*"/>
+                                <RowDefinition MinHeight="30" Height="1*"/>
+                                <RowDefinition MinHeight="30" Height="1*"/>
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="1*"/>
                                 <ColumnDefinition Width="1*"/>
                                 <ColumnDefinition Width="2*"/>
                             </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Row="0" Grid.Column="0" FontSize="20" HorizontalAlignment="Left" VerticalAlignment="Center">Port</TextBlock>
+                            <TextBlock Grid.Row="1" Grid.Column="0" FontSize="20" HorizontalAlignment="Left" VerticalAlignment="Center">Baud</TextBlock>
+                            <TextBlock Grid.Row="2" Grid.Column="0" FontSize="20" HorizontalAlignment="Left" VerticalAlignment="Center">Data Bits</TextBlock>
+                            <TextBlock Grid.Row="3" Grid.Column="0" FontSize="20" HorizontalAlignment="Left" VerticalAlignment="Center">Stop Bits</TextBlock>
+                            <TextBlock Grid.Row="4" Grid.Column="0" FontSize="20" HorizontalAlignment="Left" VerticalAlignment="Center">Parity</TextBlock>
+                            <TextBlock Grid.Row="5" Grid.Column="0" FontSize="20" HorizontalAlignment="Left" VerticalAlignment="Center">Handshaking</TextBlock>
                         </Grid>
                     </PivotItem>
-                    <PivotItem Header="TinySafeBoot">
+                    <PivotItem x:Name="tabTSB" Header="TinySafeBoot">
                         <Grid>
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="40"/>
-                                <RowDefinition Height="40"/>
-                                <RowDefinition Height="40"/>
-                                <RowDefinition Height="1*"/>
+                                <RowDefinition MinHeight="30" Height="1*"/>
+                                <RowDefinition MinHeight="30" Height="1*"/>
+                                <RowDefinition MinHeight="30" Height="1*"/>
+                                <RowDefinition MinHeight="30" Height="1*"/>
+                                <RowDefinition MinHeight="30" Height="1*"/>
+                                <RowDefinition MinHeight="30" Height="1*"/>
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="1*"/>
                                 <ColumnDefinition Width="1*"/>
                                 <ColumnDefinition Width="2*"/>
                             </Grid.ColumnDefinitions>
+                            <Button Grid.Row="0" Grid.Column="0" FontSize="20" HorizontalAlignment="Stretch" VerticalAlignment="Center" Click="Button_ReadFlash">Read Flash</Button>
+                            <Button Grid.Row="1" Grid.Column="0" FontSize="20" HorizontalAlignment="Stretch" VerticalAlignment="Center">Write Flash</Button>
+                            <Button Grid.Row="2" Grid.Column="0" FontSize="20" HorizontalAlignment="Stretch" VerticalAlignment="Center">Get Security Info</Button>
+                            <Button Grid.Row="3" Grid.Column="0" FontSize="20" HorizontalAlignment="Stretch" VerticalAlignment="Center"></Button>
+                            <Button Grid.Row="4" Grid.Column="0" FontSize="20" HorizontalAlignment="Stretch" VerticalAlignment="Center"></Button>
+                            <Button Grid.Row="5" Grid.Column="0" FontSize="20" HorizontalAlignment="Stretch" VerticalAlignment="Center"></Button>
                         </Grid>
                     </PivotItem>
                 </Pivot>

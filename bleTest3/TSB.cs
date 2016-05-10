@@ -16,6 +16,7 @@ using Windows.UI;
 using bleTest3;
 using lumi;
 using Windows.UI.Xaml;
+using System.Collections;
 
 namespace bleTest3
 {
@@ -169,7 +170,6 @@ namespace bleTest3
         #endregion enumerations
 
         #region properties
-
         public delegate void TsbUpdateCommand(statuses tsbConnectionStatus);
         public event TsbUpdateCommand TsbUpdatedCommand;
 
@@ -200,7 +200,7 @@ namespace bleTest3
 
 
         // Properties used for ReadFlash()
-        string localStringBuffer = "";
+        List<byte> rxByteArray;
         int pageIndex = 0;
 
         DEVICE_SIGNATURE deviceSignatureValue = new DEVICE_SIGNATURE();
@@ -222,6 +222,8 @@ namespace bleTest3
 
         public void init(serialPortsExtended serialPortMain, Paragraph mainDisplayMain, ProgressBar mainProgressBar, SerialBuffer _serialBuffer)
         {
+            rxByteArray = new List<byte>();
+
             serialPorts = serialPortMain;
             theOneParagraph = mainDisplayMain;
             progressBar = mainProgressBar;
@@ -266,6 +268,7 @@ namespace bleTest3
             {
                 case commands.error:
                     appendText("Uh-oh. Bad stuff happened.\n", Colors.Crimson);
+                    TsbUpdatedCommand(statuses.error);
                     break;
                 case commands.hello:
                     bool outcome = helloProcessing();
@@ -425,6 +428,7 @@ namespace bleTest3
         public void appendText(string str, Color color)
         {
             Run r = new Run();
+            //r.FontFamily = new FontFamily("Courier New");
             r.Foreground = getColoredBrush(color);
             r.Text = str;
             theOneParagraph.Inlines.Add(r);
@@ -472,18 +476,29 @@ namespace bleTest3
             //int pageIndex = 0;
             //byte[] byteArray = serialBuffer.readAllBytesFromRXBuffer();            
 
-            byte[] rxByteArray = serialBuffer.readAllBytesFromRXBuffer();
-            if (dogEarCheck(rxByteArray)){
-                readFlashBuffer.PrivateBuffer = rxByteArray;
-                string str = getStringFromBytes(readFlashBuffer.readAllBytesFromBuffer());
-                Debug.WriteLine(str);
+
+
+            byte[] tmpRxByteArray = serialBuffer.readAllBytesFromRXBuffer();
+
+            var currentProgressBarValue = 100*((float)rxByteArray.Count / (float)flashSize);
+            progressBar.Value = map(currentProgressBarValue, 0, 100, 0, 50);
+            //byte[] 
+
+            rxByteArray.AddRange(tmpRxByteArray);
+            if (dogEarCheck(tmpRxByteArray.ToArray())){
+                //string str = getStringFromBytes(readFlashBuffer.readAllBytesFromBuffer());
+                // readFlashString += str;
+                Debug.Write("");
+                progressBar.Value = 50;
+                parseAndPrintRawRead(rxByteArray);
+                progressBar.Value = 100;
                 return;
             }
-            else if (rxByteArray.Length >= pageSize)
+            else if (tmpRxByteArray.Length >= pageSize)
             {
-                readFlashBuffer.PrivateBuffer = rxByteArray;
-                string str = getStringFromBytes(readFlashBuffer.readAllBytesFromBuffer());
-                Debug.WriteLine(str);
+                //string str = getStringFromBytes(readFlashBuffer.readAllBytesFromBuffer());
+                //readFlashString += str;
+                //Debug.WriteLine(str);
                 await serialPorts.write(commandsAsStrings[(int)commands.confirm]);
 
             }
@@ -493,6 +508,7 @@ namespace bleTest3
 
         private bool dogEarCheck(byte[] byteArray)
         {
+            if(byteArray == null) { return false;}
             // Check to see what the if the page is dogeared.
             if(byteArray[byteArray.Length - 1] == 0xFF && byteArray[byteArray.Length - 2] == 0xFF)
             {
@@ -519,122 +535,130 @@ namespace bleTest3
         //    return dataIntArray;
         //}
 
-        //public void parseAndPrintRawRead(int[] rawFlashRead)
-        //{
-        //    // 0. Greeting
-        //    // 1. Get number of pages reads.
-        //    // 2. Define page array, lineBuffer, lineSize, location.
-        //    //    and get doc path and stream.
-        //    // 3. Loop through each page...
-        //    // 4. Loop through page depth (pageDepth * lineSize = page)
-        //    // 5. Loop through line
-        //    // 6. Write assemble a HEX string a byte at a time.
-        //    // 7. Write the assembled HEX string to display and file.
-        //    // 8. Clear line buffer.
-        //    // 9. Repeat 1-8 until end of int array.
+        public void parseAndPrintRawRead(List<byte> rawFlashRead)
+        {
+            // 0. Greeting
+            // 1. Get number of pages reads.
+            // 2. Define page array, lineBuffer, lineSize, location.
+            //    and get doc path and stream.
+            // 3. Loop through each page...
+            // 4. Loop through page depth (pageDepth * lineSize = page)
+            // 5. Loop through line
+            // 6. Write assemble a HEX string a byte at a time.
+            // 7. Write the assembled HEX string to display and file.
+            // 8. Clear line buffer.
+            // 9. Repeat 1-8 until end of int array.
 
-        //    string mydocpath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        //    System.IO.StreamWriter outputFile = new System.IO.StreamWriter(mydocpath + @"\Flash_Read_Output.hex");
+            //string mydocpath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            //System.IO.StreamWriter outputFile = new System.IO.StreamWriter(mydocpath + @"\Flash_Read_Output.hex");
 
-        //    int numberOfPagesRead = (rawFlashRead.Length / pageSize);
-        //    int pageDepth = (pageSize / 16);
-        //    const int pageWidth = 16;
-        //    string lineBuffer = "";
+            int numberOfPagesRead = (rawFlashRead.Count / pageSize);
+            int pageDepth = (pageSize / 16);
+            const int pageWidth = 16;
+            string lineBuffer = "";
 
-        //    mainDisplay.AppendText("\nFlash readout for " + deviceSignatureValue + "\n\n", System.Drawing.Color.White);
-
-        //    for (int i = 0; i < numberOfPagesRead; i++)
-        //    {
-        //        if (displayFlashType != displayFlash.none)
-        //        { mainDisplay.AppendText("\n\t Page #:" + i + "\n", System.Drawing.Color.Yellow); }
-        //        for (int j = 0; j < pageDepth; j++)
-        //        {
-        //            int location = ((i * pageSize) + (j * pageWidth));
-        //            for (int k = 0; k < pageWidth; k++)
-        //            {
-        //                lineBuffer += rawFlashRead[location + k].ToString("X2");
-        //            }
-        //            outputFile.WriteLine(getIntelFileHexString(location.ToString("X4"), lineBuffer.ToString()), true);
-        //            lineBuffer = "";
-        //        }
-        //    }
-
-        //    scrollToBottomOfTerminal();
-        //    outputFile.Close();
-        //}
-
-        //public string getIntelFileHexString(string address, string data)
-        //{
-        //    // 1. Get start code.
-        //    // 2. Get and set byte count string.
-        //    // 3. Set address string.
-        //    // 4. Get record type.
-        //    // 5. Set data
-        //    // 6. Get and set checksum.
-        //    // 7. Add newline at end.
-        //    // 8. Return completed Intel HEX file line as string.
-
-        //    string startCode = ":";
-        //    string byteCount = (data.Length / 2).ToString("X2");
-        //    // Address passed in.
-        //    string recordType = "00"; // 00 = Data, 01 = EOF, 02 = Ext. Segment. Addr., 03 = Start Lin. Addr, 04 = Ext. Linear Addr., 05 = Start Linear Addr.
-        //                              // Checksum passed in
-
-        //    string intelHexFileLine = startCode + byteCount + address + recordType + data;
-        //    int checkSum = getCheckSumFromLine(intelHexFileLine);
-        //    string checkSumString = checkSum.ToString("X2");
-        //    intelHexFileLine += checkSumString;
-
-        //    switch (displayFlashType)
-        //    {
-        //        case displayFlash.asIntelHexFile:
-        //            mainDisplay.AppendText(":", Color.Yellow);                  // Start code
-        //            mainDisplay.AppendText(byteCount, Color.Green);             // Byte count
-        //            mainDisplay.AppendText(address, Color.Purple);              // Address
-        //            mainDisplay.AppendText(recordType, Color.Pink);             // Record type.
-        //            mainDisplay.AppendText(data, Color.CadetBlue);              // Data
-        //            mainDisplay.AppendText(checkSumString + "\n", Color.Gray);  // Checksum
-        //            break;
-        //        case displayFlash.none:
-        //            // No display.
-        //            break;
-        //        case displayFlash.addressAndData:
-        //            mainDisplay.AppendText(address + ": ", Color.Yellow);
-        //            mainDisplay.AppendText(data + "\n", Color.LawnGreen);
-        //            break;
-        //    }
-
-        //    return intelHexFileLine;
-        //}
-
-        //public int getCheckSumFromLine(string line)
-        //{
-        //    // 1. Remove start character.
-        //    // 2. Split the line into array of char pairs (e.g., "FFAC" -> { "FF", "AC" })
-        //    // 3. Convert HEX string pairs to Int32, then cast as byte.
-        //    // 4. Sum all bytes for the line.
-        //    // 5. Take the two's complement.
-        //    // 6. Return checksum.
-
-        //    byte checkSum = 0;
-        //    int halfLength = (line.Length / 2);
-        //    int[] returnBuffer = new int[halfLength];
-        //    string[] splitByTwoData = new string[halfLength];
-
-        //    line = line.Replace(":", "");
-        //    for (int i = 0; i < halfLength; i++)
-        //    {
-        //        splitByTwoData[i] = line.Substring((i * 2), 2);
-        //    }
-        //    for (int i = 0; i < halfLength; i++)
-        //    {
-        //        checkSum += (byte)Convert.ToInt32(splitByTwoData[i], 16);
-        //    }
-        //    checkSum = (byte)(~checkSum + 1);
+            byte[] byteArray = rawFlashRead.ToArray();
 
 
-        //    return checkSum;
-        //}
+
+
+            appendText("\nFlash readout for " + deviceSignatureValue + "\n\n", Colors.White);
+
+
+            for (int i = 0; i < numberOfPagesRead; i++)
+            {
+                if (displayFlashType != displayFlash.none)
+                { appendText("\n\t Page #:" + i + "\n", Colors.Yellow); }
+                for (int j = 0; j < pageDepth; j++)
+                {
+                    int location = ((i * pageSize) + (j * pageWidth));
+                    for (int k = 0; k < pageWidth; k++)
+                    {
+                        lineBuffer += byteArray[location + k].ToString("X2");
+                    }
+                    getIntelFileHexString(location.ToString("X4"), lineBuffer.ToString());
+                    lineBuffer = "";
+                }
+                var currentProgressBarValue = 100 * ((float)i / (float)numberOfPages);
+                progressBar.Value = map(currentProgressBarValue, 0, 100, 50, 100);
+            }
+
+            scrollToBottomOfTerminal();
+            //outputFile.Close();
+        }
+
+        public string getIntelFileHexString(string address, string data)
+        {
+            // 1. Get start code.
+            // 2. Get and set byte count string.
+            // 3. Set address string.
+            // 4. Get record type.
+            // 5. Set data
+            // 6. Get and set checksum.
+            // 7. Add newline at end.
+            // 8. Return completed Intel HEX file line as string.
+
+            string startCode = ":";
+            string byteCount = (data.Length / 2).ToString("X2");
+            // Address passed in.
+            string recordType = "00"; // 00 = Data, 01 = EOF, 02 = Ext. Segment. Addr., 03 = Start Lin. Addr, 04 = Ext. Linear Addr., 05 = Start Linear Addr.
+                                      // Checksum passed in
+
+            string intelHexFileLine = startCode + byteCount + address + recordType + data;
+            int checkSum = getCheckSumFromLine(intelHexFileLine);
+            string checkSumString = checkSum.ToString("X2");
+            intelHexFileLine += checkSumString;
+
+            switch (displayFlashType)
+            {
+                case displayFlash.asIntelHexFile:
+                    appendText(":", Colors.Yellow);                  // Start code
+                    appendText(byteCount, Colors.Green);             // Byte count
+                    appendText(address, Colors.Purple);              // Address
+                    appendText(recordType, Colors.Pink);             // Record type.
+                    appendText(data, Colors.CadetBlue);              // Data
+                    appendText(checkSumString + "\n", Colors.Gray);  // Checksum
+                    break;
+                case displayFlash.none:
+                    // No display.
+                    break;
+                case displayFlash.addressAndData:
+                    appendText(address + ": ", Colors.Yellow);
+                    appendText(data + "\n", Colors.LawnGreen);
+                    break;
+            }
+
+            return intelHexFileLine;
+        }
+
+        public int getCheckSumFromLine(string line)
+        {
+            // 1. Remove start character.
+            // 2. Split the line into array of char pairs (e.g., "FFAC" -> { "FF", "AC" })
+            // 3. Convert HEX string pairs to Int32, then cast as byte.
+            // 4. Sum all bytes for the line.
+            // 5. Take the two's complement.
+            // 6. Return checksum.
+
+            byte checkSum = 0;
+            int halfLength = (line.Length / 2);
+            int[] returnBuffer = new int[halfLength];
+            string[] splitByTwoData = new string[halfLength];
+
+            line = line.Replace(":", "");
+            for (int i = 0; i < halfLength; i++)
+            {
+                splitByTwoData[i] = line.Substring((i * 2), 2);
+            }
+            for (int i = 0; i < halfLength; i++)
+            {
+                checkSum += (byte)Convert.ToInt32(splitByTwoData[i], 16);
+            }
+            checkSum = (byte)(~checkSum + 1);
+
+
+            return checkSum;
+        }
 
         //public void uploadFileToChip()
         //{
@@ -667,7 +691,7 @@ namespace bleTest3
         //    // 7. Wait and check for CF ('!').
         //    // 8. Return true if process successful.
 
-        //    mainDisplay.AppendText("\n\n\nWrite in progress: \nPlease do not disconnect device or exit the application.\n", Color.Yellow);
+        //    appendText("\n\n\nWrite in progress: \nPlease do not disconnect device or exit the application.\n", Color.Yellow);
         //    scrollToBottomOfTerminal();
 
 
@@ -692,11 +716,11 @@ namespace bleTest3
         //            readyForData = serialPorts.ReadExistingAsString();
         //            if (readyForData.Contains("!"))
         //            {
-        //                mainDisplay.AppendText("ERROR writing Page #" + i + "\n", Color.Red);
+        //                appendText("ERROR writing Page #" + i + "\n", Color.Red);
         //                return false;
         //            }
-        //            mainDisplay.AppendText("Page #" + i + " ", Color.Yellow);
-        //            mainDisplay.AppendText("OK.\n", Color.LawnGreen);
+        //            appendText("Page #" + i + " ", Color.Yellow);
+        //            appendText("OK.\n", Color.LawnGreen);
         //            scrollToBottomOfTerminal();
         //        }
         //        serialPorts.WriteData(commandsAsStrings[(int)commands.request]);
@@ -705,9 +729,9 @@ namespace bleTest3
         //        if (readyForData.Contains("!"))
         //        {
         //            scrollToBottomOfTerminal();
-        //            mainDisplay.AppendText("\nThe file ", Color.LawnGreen);
-        //            mainDisplay.AppendText(fileName, Color.Yellow);
-        //            mainDisplay.AppendText(" was written succesfully!", Color.LawnGreen);
+        //            appendText("\nThe file ", Color.LawnGreen);
+        //            appendText(fileName, Color.Yellow);
+        //            appendText(" was written succesfully!", Color.LawnGreen);
         //            scrollToBottomOfTerminal();
         //            return true;
         //        }
@@ -738,6 +762,11 @@ namespace bleTest3
             }
 
             return str;
+        }
+
+        double map(double x, double in_min, double in_max, double out_min, double out_max)
+        {
+            return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
         }
 
         //public void setTsbConnectionSafely(bool tsbConnection)

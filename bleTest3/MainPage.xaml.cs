@@ -57,6 +57,7 @@ namespace bleTest3
             btnConnect.IsEnabled = false;
             btnTsbConnect.IsEnabled = false;
             pvtPortSettings.IsEnabled = false;
+            tabTSB.IsEnabled = false;
 
             // Let the user know to wait while device thread returns.
             clearDisplay();
@@ -77,8 +78,6 @@ namespace bleTest3
 
             //devicePicker.DeviceSelected += DevicePicker_DeviceSelected;
 
-            //App.Current.Suspending += OnSuspending;
-
             serialBufffer.RXbufferUpdated += new SerialBuffer.CallBackEventHandler(RXbufferUpdated);
             serialBufffer.TXbufferUpdated += new SerialBuffer.CallBackEventHandler(TXbufferUpdated);
         }
@@ -93,6 +92,13 @@ namespace bleTest3
                     btnTsbConnect.Content = "Disconnect";
                     connectionLabelBackGround.Background = getColoredBrush(Colors.LawnGreen);
                     labelConnectionStatus.Text = "Connected to TSB";
+                    tabTSB.IsEnabled = true;
+                    break;
+                case TSB.statuses.error:
+                    tabTSB.IsEnabled = false;
+                    btnTsbConnect.Content = "Connect";
+                    connectionLabelBackGround.Background = getColoredBrush(Colors.Crimson);
+                    labelConnectionStatus.Text = "Error";
                     break;
             }
         }
@@ -458,10 +464,14 @@ namespace bleTest3
             theOneParagraph.Inlines.Clear();
         }
 
+        private void Button_ReadFlash(object sender, RoutedEventArgs e)
+        {
+            tsb.readFlash();
+        }
 
         private async void btnTest_Click(object sender, RoutedEventArgs e)
         {
-            tsb.readFlash();
+
         }
     }// End MainPage
 } // End Namespace
