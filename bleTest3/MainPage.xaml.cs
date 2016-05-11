@@ -17,6 +17,8 @@ using Windows.ApplicationModel;
 using Windows.UI.Core;
 using Windows.Foundation;
 using lumi;
+using Windows.Storage.Pickers;
+using Windows.Storage;
 
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
@@ -71,7 +73,7 @@ namespace bleTest3
             serialPorts.populateComboBoxesWithPortSettings(cmbBaud, cmbDataBits, cmbStopBits, cmbParity, cmbHandshaking);
             serialPorts.init(theOneParagraph, serialBufffer);
 
-            tsb.init(serialPorts, theOneParagraph, pbSys, serialBufffer);
+            tsb.init(serialPorts, theOneParagraph, pbSys, serialBufffer, txbOpenFilePath);
             // Delegate callback for TSB updates.
             tsb.TsbUpdatedCommand += new TSB.TsbUpdateCommand(tsbcommandUpdate);
             blue.init(this.Height, this.Width);
@@ -241,9 +243,9 @@ namespace bleTest3
         private async void Button_Click_1(object sender, RoutedEventArgs e)
         {
             btnConnect.IsEnabled = false;
+            await reset();
             try
             {
-                await serialPorts.dtrToggle();
                 tsb.hello();
             } catch (Exception ex)
             {
@@ -476,14 +478,34 @@ namespace bleTest3
         {
             byte[] byteArray = new byte[10];
             tsb.writeHexFile(byteArray);
+            reset();
+            
+        }
 
-            serialPorts.dtrToggle();
+        public async Task reset()
+        {
+            switch (cmbDeviceSelector.SelectedIndex)
+            {
+                case 0:
+                    await serialPorts.dtrToggle();
+                    break;
+                case 1:
+                    // Write PIOB low and high.
+                    break;
+            }
         }
 
         private void displayFlashType_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             tsb.setFlashDisplay((TSB.displayFlash)cmbFlashDisplay.SelectedIndex);
         }
+
+        private async void OpenFile_ButtonClick(object sender, RoutedEventArgs e)
+        {
+            await tsb.selectFileToRead();
+        }
+
+
     }// End MainPage
 } // End Namespace
 

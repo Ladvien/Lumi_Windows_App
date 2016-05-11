@@ -1,4 +1,4 @@
-﻿    <Page
+﻿<Page
     x:Class="bleTest3.MainPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -14,54 +14,54 @@
         </Grid.ColumnDefinitions>
         <Grid HorizontalAlignment="Left" Width="1020" Height="Auto" VerticalAlignment="Top" Grid.ColumnSpan="2">
             <StackPanel x:Name="consolePanel">
-            <Grid HorizontalAlignment="Left" Height="720" Margin="5,5,0,0" VerticalAlignment="Top" Width="232">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="40"/>
-                </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="24" FontWeight="Bold" Width="Auto" Height="Auto" Margin="3">
+                <Grid HorizontalAlignment="Left" Height="720" Margin="5,5,0,0" VerticalAlignment="Top" Width="232">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40"/>
+                        <RowDefinition Height="40"/>
+                        <RowDefinition Height="40"/>
+                        <RowDefinition Height="40"/>
+                        <RowDefinition Height="40"/>
+                        <RowDefinition Height="40"/>
+                        <RowDefinition Height="40"/>
+                        <RowDefinition Height="40"/>
+                        <RowDefinition Height="40"/>
+                        <RowDefinition Height="40"/>
+                        <RowDefinition Height="40"/>
+                        <RowDefinition Height="40"/>
+                        <RowDefinition Height="40"/>
+                        <RowDefinition Height="40"/>
+                        <RowDefinition Height="40"/>
+                        <RowDefinition Height="40"/>
+                        <RowDefinition Height="40"/>
+                        <RowDefinition Height="40"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="24" FontWeight="Bold" Width="Auto" Height="Auto" Margin="3">
             		<Run Text="Lumi"/>
-                </TextBlock>
-                <TextBlock Grid.Row="1" HorizontalAlignment="Center" TextAlignment="Center" FontSize="20" Margin="3" >
-            		<Run Text="Serial Port"/>
-                </TextBlock>
-                <StackPanel x:Name="connectionLabelBackGround" Grid.Row="2" Background="Red"  Margin="3" Width="212">
-                    <TextBlock x:Name="labelConnectionStatus" HorizontalAlignment="Center" TextAlignment="Center" FontSize="16"  Width="212" Margin="3" >
-                    <Run Text="Disconnected"/>
                     </TextBlock>
-                </StackPanel>
-                <Button x:Name="btnConnect" Grid.Row="3" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Connect" Click="btnConnect_Click"/>
-                <ComboBox x:Name="cmbDeviceSelector" SelectedIndex="0" Grid.Row="4" HorizontalAlignment="Center" Width="212" SelectionChanged="cmbDeviceSelector_SelectionChanged_1" >
-                    <ComboBoxItem x:Name="cbiSerialPort">Serial Port</ComboBoxItem>
-                    <ComboBoxItem x:Name="cbiBluetooth">Bluetooth</ComboBoxItem>
-                </ComboBox>
-                <ComboBox x:Name="cmbFoundDevices" Grid.Row="5" IsEnabled="False" Visibility="Visible" HorizontalAlignment="Center" Width="212" SelectionChanged="cmbFoundDevices_SelectionChanged">
-                </ComboBox>
-                <Button x:Name="btnBleSearch" Grid.Row="6" Visibility="Collapsed" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Search" Click="btnBleSearch_Click" />
-                <Button Grid.Row="7" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Clear" Click="Button_Click"/>
-                <TextBlock Grid.Row="8" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="20" Width="Auto" Height="Auto" Margin="3">
+                    <TextBlock Grid.Row="1" HorizontalAlignment="Center" TextAlignment="Center" FontSize="20" Margin="3" >
+            		<Run Text="Serial Port"/>
+                    </TextBlock>
+                    <StackPanel x:Name="connectionLabelBackGround" Grid.Row="2" Background="Red"  Margin="3" Width="212">
+                        <TextBlock x:Name="labelConnectionStatus" HorizontalAlignment="Center" TextAlignment="Center" FontSize="16"  Width="212" Margin="3" >
+                    <Run Text="Disconnected"/>
+                        </TextBlock>
+                    </StackPanel>
+                    <Button x:Name="btnConnect" Grid.Row="3" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Connect" Click="btnConnect_Click"/>
+                    <ComboBox x:Name="cmbDeviceSelector" SelectedIndex="0" Grid.Row="4" HorizontalAlignment="Center" Width="212" SelectionChanged="cmbDeviceSelector_SelectionChanged_1" >
+                        <ComboBoxItem x:Name="cbiSerialPort">Serial Port</ComboBoxItem>
+                        <ComboBoxItem x:Name="cbiBluetooth">Bluetooth</ComboBoxItem>
+                    </ComboBox>
+                    <ComboBox x:Name="cmbFoundDevices" Grid.Row="5" IsEnabled="False" Visibility="Visible" HorizontalAlignment="Center" Width="212" SelectionChanged="cmbFoundDevices_SelectionChanged">
+                    </ComboBox>
+                    <Button x:Name="btnBleSearch" Grid.Row="6" Visibility="Collapsed" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Search" Click="btnBleSearch_Click" />
+                    <Button Grid.Row="7" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Clear" Click="Button_Click"/>
+                    <TextBlock Grid.Row="8" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="20" Width="Auto" Height="Auto" Margin="3">
             		<Run Text="TinySafeBoot"/>
-                </TextBlock>
-                <Button x:Name="btnTsbConnect" Grid.Row="9" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Conect to TSB" Click="Button_Click_1"/>
-                <Button x:Name="btnTest" Grid.Row="10" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Test" Click="btnTest_Click"/>
-                <ProgressBar x:Name="pbSys" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="16"/>
-            </Grid>
+                    </TextBlock>
+                    <Button x:Name="btnTsbConnect" Grid.Row="9" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Conect to TSB" Click="Button_Click_1"/>
+                    <Button x:Name="btnTest" Grid.Row="10" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Test" Click="btnTest_Click"/>
+                    <ProgressBar x:Name="pbSys" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="16"/>
+                </Grid>
             </StackPanel>
             <Grid HorizontalAlignment="Left" Margin="250,0,0,0" Width="750" Height="720">
                 <Grid.RowDefinitions>
@@ -89,7 +89,7 @@
                         <ColumnDefinition Width="1*"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Background="White">
-                            <RichEditBox x:Name="rtbSendTextBlock" Padding="2" Height="35" HorizontalAlignment="Stretch"/>
+                        <RichEditBox x:Name="rtbSendTextBlock" Padding="2" Height="35" HorizontalAlignment="Stretch"/>
                     </StackPanel>
                     <Button Grid.Column="1" x:Name="btnSendText" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="btnSendText_Click">Send</Button>
                     <Button Grid.Column="2" x:Name="btnClearSendText" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">Clear</Button>
@@ -170,9 +170,10 @@
                                 <RowDefinition MinHeight="30" Height="1*"/>
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="1*"/>
-                                <ColumnDefinition Width="1*"/>
                                 <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition Width="1*"/>
                             </Grid.ColumnDefinitions>
                             <Button Grid.Row="0" Grid.Column="0" FontSize="20" HorizontalAlignment="Stretch" VerticalAlignment="Center" Click="Button_ReadFlash">Read Flash</Button>
                             <ComboBox x:Name="cmbFlashDisplay" SelectedIndex="0" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch" SelectionChanged="displayFlashType_SelectionChanged">
@@ -181,11 +182,13 @@
                                 <ComboBoxItem>Address and Data</ComboBoxItem>
                                 <ComboBoxItem>Color Intel HEX</ComboBoxItem>
                             </ComboBox>
+                            <Button Grid.Row="1" Grid.Column="1" FontSize="20" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Click="OpenFile_ButtonClick">Open File</Button>
                             <Button Grid.Row="1" Grid.Column="0" FontSize="20" HorizontalAlignment="Stretch" VerticalAlignment="Center">Write Flash</Button>
                             <Button Grid.Row="2" Grid.Column="0" FontSize="20" HorizontalAlignment="Stretch" VerticalAlignment="Center">Get Security Info</Button>
                             <Button Grid.Row="3" Grid.Column="0" FontSize="20" HorizontalAlignment="Stretch" VerticalAlignment="Center"></Button>
                             <Button Grid.Row="4" Grid.Column="0" FontSize="20" HorizontalAlignment="Stretch" VerticalAlignment="Center"></Button>
                             <Button Grid.Row="5" Grid.Column="0" FontSize="20" HorizontalAlignment="Stretch" VerticalAlignment="Center"></Button>
+                            <TextBlock x:Name="txbOpenFilePath" Grid.Row="1" Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TextAlignment="Left" Padding="2">None</TextBlock>
                         </Grid>
                     </PivotItem>
                 </Pivot>

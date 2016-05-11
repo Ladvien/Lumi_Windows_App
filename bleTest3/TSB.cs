@@ -19,6 +19,7 @@ using Windows.UI.Xaml;
 using System.Collections;
 using Windows.Storage;
 using System.IO;
+using Windows.Storage.Pickers;
 
 namespace bleTest3
 {
@@ -186,6 +187,8 @@ namespace bleTest3
         //string filePath = "ms-appx:///thedata.txt";
         string fileName = "";
 
+        StorageFile hexFileToWrite;
+
         // Firmware date.
         public string firmwareDateString;
         long firmwareDate;
@@ -213,6 +216,7 @@ namespace bleTest3
         serialPortsExtended serialPorts;
         Paragraph theOneParagraph;
         ProgressBar progressBar;
+        TextBlock txbOpenFilePath;
 
         #endregion properties
 
@@ -223,7 +227,7 @@ namespace bleTest3
         // When a write command is sent, then timeout timer is started.
         public DispatcherTimer writeTimer = new DispatcherTimer();
 
-        public void init(serialPortsExtended serialPortMain, Paragraph mainDisplayMain, ProgressBar mainProgressBar, SerialBuffer _serialBuffer)
+        public void init(serialPortsExtended serialPortMain, Paragraph mainDisplayMain, ProgressBar mainProgressBar, SerialBuffer _serialBuffer, TextBlock _openFilePath)
         {
             rxByteArray = new List<byte>();
 
@@ -231,6 +235,7 @@ namespace bleTest3
             theOneParagraph = mainDisplayMain;
             progressBar = mainProgressBar;
             serialBuffer = _serialBuffer;
+            txbOpenFilePath = _openFilePath;
 
             // Write timeout timer.
             writeTimer.Tick += writeTimer_Tick;
@@ -775,6 +780,26 @@ namespace bleTest3
         double map(double x, double in_min, double in_max, double out_min, double out_max)
         {
             return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+        }
+
+        public async Task selectFileToRead()
+        {
+            FileOpenPicker openPicker = new FileOpenPicker();
+            openPicker.ViewMode = PickerViewMode.Thumbnail;
+            openPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+            openPicker.FileTypeFilter.Add(".hex");
+            hexFileToWrite = await openPicker.PickSingleFileAsync();
+            txbOpenFilePath.TextTrimming = TextTrimming.CharacterEllipsis;
+            txbOpenFilePath.Text = hexFileToWrite.Path;
+            if (hexFileToWrite != null)
+            {
+                appendText("File selected to upload: ", Colors.Yellow);
+                appendText(hexFileToWrite.Name + "\n", Colors.LawnGreen);
+            }
+            else
+            {
+                appendText("Open HEX File Operation cancelled.", Colors.Crimson);
+            }
         }
 
         //public void setTsbConnectionSafely(bool tsbConnection)
