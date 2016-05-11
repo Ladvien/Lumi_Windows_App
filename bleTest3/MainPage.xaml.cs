@@ -89,7 +89,8 @@ namespace bleTest3
             switch (tsbConnectionStatus)
             {
                 case TSB.statuses.connected:
-                    btnTsbConnect.Content = "Disconnect";
+                    //btnTsbConnect.Content = "Disconnect";
+                    btnTsbConnect.IsEnabled = false;
                     connectionLabelBackGround.Background = getColoredBrush(Colors.LawnGreen);
                     labelConnectionStatus.Text = "Connected to TSB";
                     tabTSB.IsEnabled = true;
@@ -97,6 +98,7 @@ namespace bleTest3
                 case TSB.statuses.error:
                     tabTSB.IsEnabled = false;
                     btnTsbConnect.Content = "Connect";
+                    btnTsbConnect.IsEnabled = true;
                     connectionLabelBackGround.Background = getColoredBrush(Colors.Crimson);
                     labelConnectionStatus.Text = "Error";
                     break;
@@ -241,6 +243,7 @@ namespace bleTest3
             btnConnect.IsEnabled = false;
             try
             {
+                await serialPorts.dtrToggle();
                 tsb.hello();
             } catch (Exception ex)
             {
@@ -471,7 +474,10 @@ namespace bleTest3
 
         private async void btnTest_Click(object sender, RoutedEventArgs e)
         {
+            byte[] byteArray = new byte[10];
+            tsb.writeHexFile(byteArray);
 
+            serialPorts.dtrToggle();
         }
 
         private void displayFlashType_SelectionChanged(object sender, SelectionChangedEventArgs e)

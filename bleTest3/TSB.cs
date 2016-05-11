@@ -17,6 +17,8 @@ using bleTest3;
 using lumi;
 using Windows.UI.Xaml;
 using System.Collections;
+using Windows.Storage;
+using System.IO;
 
 namespace bleTest3
 {
@@ -180,7 +182,8 @@ namespace bleTest3
 
         private string rxBuffer = "";
 
-        string filePath = "";
+        string filePath = @"C:\Users\cthom\Documents\myFileTest.txt";
+        //string filePath = "ms-appx:///thedata.txt";
         string fileName = "";
 
         // Firmware date.
@@ -466,34 +469,19 @@ namespace bleTest3
 
         public async void processFlashRead()
         {
-            // 1. Check to see if a whole page is collected
-            // 2. If a whole page is found, store it and request another.
+            // 1. Update progressBar based on pages read.
+            // 2. Add new serialBuffer data (recently received) to rxByteArray List.
+            // 3. Check the dogear of the page (bottom  corner bytes)
+            // 3. If last two bytes are FF FF, then break, as end of Flash.
             // 3. If all pages are collected, process read.
-            // 3. Continue to get data until buffer is full.
-
-            // 4. Write monoline string to file.
-            // 5. Check the dogear of the page (bottom  corner bytes)
-            //    if last two bytes are FF FF, then break, as end of Flash.
-            // 5. Print out formatted string to display.
-
-            // Declared globally.
-            //string localStringBuffer = "";
-            //int pageIndex = 0;
-            //byte[] byteArray = serialBuffer.readAllBytesFromRXBuffer();            
-
-
+            // 4. Continue to get data until buffer is full.
+            // 5. If not the end, request another page.
 
             byte[] tmpRxByteArray = serialBuffer.readAllBytesFromRXBuffer();
-
             var currentProgressBarValue = 100*((float)rxByteArray.Count / (float)flashSize);
             progressBar.Value = map(currentProgressBarValue, 0, 100, 0, 50);
-            //byte[] 
-
             rxByteArray.AddRange(tmpRxByteArray);
             if (dogEarCheck(tmpRxByteArray.ToArray())){
-                //string str = getStringFromBytes(readFlashBuffer.readAllBytesFromBuffer());
-                // readFlashString += str;
-                Debug.Write("");
                 progressBar.Value = 50;
                 parseAndPrintRawRead(rxByteArray);
                 progressBar.Value = 100;
@@ -501,27 +489,20 @@ namespace bleTest3
             }
             else if (tmpRxByteArray.Length >= pageSize)
             {
-                //string str = getStringFromBytes(readFlashBuffer.readAllBytesFromBuffer());
-                //readFlashString += str;
-                //Debug.WriteLine(str);
                 await serialPorts.write(commandsAsStrings[(int)commands.confirm]);
-
             }
-
-
         }
 
         private bool dogEarCheck(byte[] byteArray)
         {
+            // 1. If null, return false.
+            // 2. Check the last two bytes in a page to see if they are blank (0xFF).
             if(byteArray == null) { return false;}
             // Check to see what the if the page is dogeared.
             if(byteArray[byteArray.Length - 1] == 0xFF && byteArray[byteArray.Length - 2] == 0xFF)
-            {
-                return true;
-            } else
-            {
-                return false;
-            }
+            {return true;}
+            else
+            {return false;}
 
         }
 
@@ -564,11 +545,7 @@ namespace bleTest3
 
             byte[] byteArray = rawFlashRead.ToArray();
 
-
-
-
             appendText("\nFlash readout for " + deviceSignatureValue + "\n\n", Colors.White);
-
 
             for (int i = 0; i < numberOfPagesRead; i++)
             {
@@ -638,8 +615,29 @@ namespace bleTest3
                     appendText(data + "\n", Colors.LawnGreen);
                     break;
             }
-
             return intelHexFileLine;
+        }
+
+        public async void writeHexFile(byte[] line)
+        {
+            string test = "AB33";
+
+            StorageFile file = await Windows.Storage.ApplicationData.Current.LocalFolder.CreateFileAsync("myData.txt", CreationCollisionOption.ReplaceExisting);
+            Debug.WriteLine(file.Path.ToString());
+            await FileIO.AppendTextAsync(file, test);
+
+        }
+
+        private string getStringFromByteList(List<byte> byteList)
+        {
+            string str = "";
+            byte[] byteArray = byteList.ToArray();
+            for(int i = 0; i < byteArray.Length; i++)
+            {
+                str += byteArray[i].ToString("X4");
+            }
+
+            return str;
         }
 
         public int getCheckSumFromLine(string line)
@@ -666,7 +664,6 @@ namespace bleTest3
                 checkSum += (byte)Convert.ToInt32(splitByTwoData[i], 16);
             }
             checkSum = (byte)(~checkSum + 1);
-
 
             return checkSum;
         }

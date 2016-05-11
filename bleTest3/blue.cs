@@ -39,7 +39,11 @@ namespace bleTest3
         #region properties_and_methods
 
         SerialBuffer serialBuffer = new SerialBuffer();
-        
+
+        DataReader dataReaderObject = null;
+
+        List<byte> rxBuffer;
+
         // Used for UI callback.
         public enum BlueEvent
         {
@@ -81,6 +85,7 @@ namespace bleTest3
 
         public void init(double appHeight, double appWidth)
         {
+            rxBuffer = new List<byte>();
             // Create and initialize a new watcher instance.
             bleAdvertWatcher = new BluetoothLEAdvertisementWatcher();
             
@@ -403,6 +408,41 @@ namespace bleTest3
             {
 
             }
+        }
+
+
+
+        private async Task ReadAsync(CancellationToken cancellationToken)
+        {
+            Task<UInt32> loadAsyncTask;
+
+            uint ReadBufferLength = 1024;
+
+            //dataReaderObject.UnicodeEncoding = Windows.Storage.Streams.UnicodeEncoding.Utf16BE;
+
+            // If task cancellation was requested, comply
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // Set InputStreamOptions to complete the asynchronous read operation when one or more bytes is available
+            dataReaderObject.InputStreamOptions = InputStreamOptions.Partial;
+
+            // Create a task object to wait for data on the serialPort.InputStream
+            loadAsyncTask = dataReaderObject.LoadAsync(ReadBufferLength).AsTask(cancellationToken);
+
+            // Launch the task and wait
+            UInt32 bytesRead = await loadAsyncTask;
+            byte[] tempByteArray = new byte[bytesRead];
+            dataReaderObject.ReadBytes(tempByteArray);
+            rxBuffer.AddRange(tempByteArray);
+
+            string fancyString = byteArrayToReadableString(rxBuffer.ToArray());
+
+            if (bytesRead > 0)
+            {
+                serialBuffer.RxBuffer = tempByteArray;
+                //appendText(fancyString, Colors.Red); 
+            }
+
         }
 
         public void closeBleDevice()

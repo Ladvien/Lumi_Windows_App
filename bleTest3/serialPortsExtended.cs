@@ -509,6 +509,14 @@ namespace bleTest3
             }
         }
 
+        public async Task dtrToggle()
+        {
+            selectedSerialDevice.IsDataTerminalReadyEnabled = false;
+            await Task.Delay(TimeSpan.FromMilliseconds(50));
+            selectedSerialDevice.IsDataTerminalReadyEnabled = true;
+            await Task.Delay(TimeSpan.FromMilliseconds(50));
+        }
+
         public void CloseDevice()
         {
             if (selectedSerialDevice != null)
