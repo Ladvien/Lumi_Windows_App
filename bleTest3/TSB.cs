@@ -180,6 +180,7 @@ namespace bleTest3
         public SerialBuffer readFlashBufferTmp = new SerialBuffer();
 
         public IntelHexFile intelHexFileHandler = new IntelHexFile();
+        public List<byte> intelHexFileToUpload;
 
         const int commandAttempts = 3;
 
@@ -232,7 +233,7 @@ namespace bleTest3
         public void init(serialPortsExtended serialPortMain, Paragraph mainDisplayMain, ProgressBar mainProgressBar, SerialBuffer _serialBuffer, TextBlock _openFilePath)
         {
             rxByteArray = new List<byte>();
-
+            intelHexFileToUpload = new List<byte>();
             serialPorts = serialPortMain;
             theOneParagraph = mainDisplayMain;
             progressBar = mainProgressBar;
@@ -660,27 +661,32 @@ namespace bleTest3
             return checkSum;
         }
 
-        //public void uploadFileToChip()
-        //{
-        //    // 1. Open Intel HEX file.
-        //    // 2. Read file into byte array.
-        //    // 3. Print out the data.
-        //    // 4. Write data to flash.
+        public async void uploadFileToChip()
+        {
+            // 1. Open Intel HEX file.
+            // 2. Read file into byte array.
+            // 3. Print out the data.
+            // 4. Write data to flash.
 
-        //    intelHexFile intelHexFileHandler = new intelHexFile();
-        //    byte[] bytesFromFile = intelHexFileHandler.intelHexFileToArray(filePath, pageSize);
+            //byte[] bytesFromFile = intelHexFileHandler.intelHexFileToArray(filePath, pageSize);
 
-        //    int[] intsFromFile = new int[bytesFromFile.Length];
-        //    for (int i = 0; i < bytesFromFile.Length; i++)
-        //    {
-        //        intsFromFile[i] = bytesFromFile[i];
-        //    }
-        //    parseAndPrintRawRead(intsFromFile);
-        //    writeDataToFlash(intsFromFile);
+            //int[] intsFromFile = new int[intelHexFileToUpload.Length];
+            //for (int i = 0; i < intelHexFileToUpload.Length; i++)
+            //{
+            //    intelHexFileToUpload[i] = intelHexFileToUpload[i];
+            //}
+            byte[] fileToUpload = await readHexFile();
+            if(fileToUpload != null)
+            {
+                intelHexFileToUpload.AddRange(fileToUpload);
+                parseAndPrintRawRead(intelHexFileToUpload);
+                //writeDataToFlash(intsFromFile);
+            }
 
-        //}
 
-        //public bool writeDataToFlash(int[] dataToWrite)
+        }
+
+        //public bool writeDataToFlash(List<byte> dataToWrite)
         //{
         //    // 1. Send Flash write character.
         //    // 2. Get response and check for RQ ('?').
@@ -797,7 +803,7 @@ namespace bleTest3
 
         }
 
-        public async void readHexFile()
+        public async Task<byte[]> readHexFile()
         {
             if (hexFileToRead == null)
             {
@@ -805,24 +811,16 @@ namespace bleTest3
             }
             else
             {
-                
                 // Code borrowed from SO: 
                 // http://stackoverflow.com/questions/34583303/how-to-read-a-text-file-in-windows-universal-app
                 using (var inputStream = await hexFileToRead.OpenReadAsync())
                 using (var classicStream = inputStream.AsStreamForRead())
                 {
                     byte[] intelHexFileAsByteArray = intelHexFileHandler.intelHexFileToArray(classicStream, pageSize);
-                    string intelHexFileString = "";
-                    for(int i = 0; i < intelHexFileAsByteArray.Length; i++)
-                    {
-                        intelHexFileString += intelHexFileAsByteArray[i].ToString("X2");
-                    }
-                    //while (streamReader.Peek() >= 0)
-                    //{
-                    //    Debug.WriteLine(string.Format("the line is {0}", streamReader.ReadLine()));
-                    //}
+                    return intelHexFileAsByteArray;
                 }
             }
+            return null;
         }
 
     } // End TSB Class
