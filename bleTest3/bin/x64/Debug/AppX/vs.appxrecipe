@@ -22,13 +22,13 @@
     <AppXManifest Include="C:\Users\cthom\Lumi_Windows_App\bleTest3\bin\x64\Debug\Core\AppxManifest.xml">
       <PackagePath>AppxManifest.xml</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
-      <Modified>2016-05-12T00:13:58.050</Modified>
+      <Modified>2016-05-12T03:29:55.285</Modified>
     </AppXManifest>
   </ItemGroup>
   <ItemGroup>
     <AppxPackagedFile Include="C:\Users\cthom\Lumi_Windows_App\bleTest3\bin\x64\Debug\lumi.exe">
       <PackagePath>entrypoint\lumi.exe</PackagePath>
-      <Modified>2016-05-12T00:13:57.426</Modified>
+      <Modified>2016-05-12T03:29:54.891</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\cthom\.nuget\packages\Microsoft.ApplicationInsights\1.0.0\lib\portable-win81+wpa81\Microsoft.ApplicationInsights.dll">
       <PackagePath>Microsoft.ApplicationInsights.dll</PackagePath>
@@ -653,7 +653,7 @@
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\cthom\Lumi_Windows_App\bleTest3\bin\x64\Debug\lumi.xr.xml">
       <PackagePath>lumi.xr.xml</PackagePath>
-      <Modified>2016-05-11T12:52:03.421</Modified>
+      <Modified>2016-05-12T02:13:59.683</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Program Files %28x86%29\Windows Kits\10\UnionMetadata\Windows.winmd">
       <PackagePath>WinMetadata\Windows.winmd</PackagePath>
@@ -661,11 +661,11 @@
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\cthom\Lumi_Windows_App\bleTest3\bin\x64\Debug\resources.pri">
       <PackagePath>resources.pri</PackagePath>
-      <Modified>2016-05-11T12:52:04.360</Modified>
+      <Modified>2016-05-12T02:14:00.397</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\cthom\Lumi_Windows_App\bleTest3\bin\x64\Debug\Core\lumi.exe">
       <PackagePath>lumi.exe</PackagePath>
-      <Modified>2016-05-12T00:13:58.043</Modified>
+      <Modified>2016-05-12T03:29:55.282</Modified>
     </AppxPackagedFile>
   </ItemGroup>
   <ItemGroup>

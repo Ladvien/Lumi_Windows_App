@@ -179,6 +179,8 @@ namespace bleTest3
         public SerialBuffer readFlashBuffer = new SerialBuffer();
         public SerialBuffer readFlashBufferTmp = new SerialBuffer();
 
+        public IntelHexFile intelHexFileHandler = new IntelHexFile();
+
         const int commandAttempts = 3;
 
         private string rxBuffer = "";
@@ -511,21 +513,6 @@ namespace bleTest3
 
         }
 
-        //public int[] getIntArrayFromString(string data)
-        //{
-        //    // 1. Loop through each character in string 
-        //    // 2. Assign each char to place in int array.
-        //    // 3. Return int array.
-
-        //    int[] dataIntArray = new int[data.Length];
-        //    for (int i = 0; i < data.Length; i++)
-        //    {
-        //        dataIntArray[i] = data[i];
-        //    }
-
-        //    return dataIntArray;
-        //}
-
         public void parseAndPrintRawRead(List<byte> rawFlashRead)
         {
             // 0. Greeting
@@ -630,28 +617,6 @@ namespace bleTest3
             StorageFile file = await Windows.Storage.ApplicationData.Current.LocalFolder.CreateFileAsync("myData.txt", CreationCollisionOption.ReplaceExisting);
             Debug.WriteLine(file.Path.ToString());
             await FileIO.AppendTextAsync(file, test);
-
-        }
-        
-        public async void readHexFile()
-        {
-            if(hexFileToRead == null)
-            {
-                appendText("No HEX File selected.\n", Colors.Crimson);
-            } else
-            {
-                // Code borrowed from SO: 
-                // http://stackoverflow.com/questions/34583303/how-to-read-a-text-file-in-windows-universal-app
-                using (var inputStream = await hexFileToRead.OpenReadAsync())
-                using (var classicStream = inputStream.AsStreamForRead())
-                using (var streamReader = new StreamReader(classicStream))
-                {
-                    while (streamReader.Peek() >= 0)
-                    {
-                        Debug.WriteLine(string.Format("the line is {0}", streamReader.ReadLine()));
-                    }
-                }
-            }
 
         }
 
@@ -810,256 +775,268 @@ namespace bleTest3
             openPicker.ViewMode = PickerViewMode.Thumbnail;
             openPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
             openPicker.FileTypeFilter.Add(".hex");
-            hexFileToRead = await openPicker.PickSingleFileAsync();
-            txbOpenFilePath.TextTrimming = TextTrimming.CharacterEllipsis;
-            txbOpenFilePath.Text = hexFileToRead.Path;
-            if (hexFileToRead != null)
+
+            try
             {
-                appendText("File selected to upload: ", Colors.Yellow);
-                appendText(hexFileToRead.Name + "\n", Colors.LawnGreen);
+                hexFileToRead = await openPicker.PickSingleFileAsync();
+                txbOpenFilePath.TextTrimming = TextTrimming.CharacterEllipsis;
+                txbOpenFilePath.Text = hexFileToRead.Path;
+                if (hexFileToRead.Path != "")
+                {
+                    appendText("File selected to upload: ", Colors.Yellow);
+                    appendText(hexFileToRead.Name + "\n", Colors.LawnGreen);
+                }
+                else
+                {
+                    appendText("Open HEX File Operation cancelled.", Colors.Crimson);
+                }
+            } catch (NullReferenceException)
+            {
+                appendText("No file selected.\n", Colors.Crimson);
+            }
+
+        }
+
+        public async void readHexFile()
+        {
+            if (hexFileToRead == null)
+            {
+                appendText("No HEX File selected.\n", Colors.Crimson);
             }
             else
             {
-                appendText("Open HEX File Operation cancelled.", Colors.Crimson);
+                
+                // Code borrowed from SO: 
+                // http://stackoverflow.com/questions/34583303/how-to-read-a-text-file-in-windows-universal-app
+                using (var inputStream = await hexFileToRead.OpenReadAsync())
+                using (var classicStream = inputStream.AsStreamForRead())
+                {
+                    byte[] intelHexFileAsByteArray = intelHexFileHandler.intelHexFileToArray(classicStream, pageSize);
+                    string intelHexFileString = "";
+                    for(int i = 0; i < intelHexFileAsByteArray.Length; i++)
+                    {
+                        intelHexFileString += intelHexFileAsByteArray[i].ToString("X2");
+                    }
+                    //while (streamReader.Peek() >= 0)
+                    //{
+                    //    Debug.WriteLine(string.Format("the line is {0}", streamReader.ReadLine()));
+                    //}
+                }
             }
         }
 
-        //public void setTsbConnectionSafely(bool tsbConnection)
-        //{
-        //    if (mainDisplay.InvokeRequired)
-        //    {
-        //        TsbConnectedEventHandler.Invoke(tsbConnection);
-        //        return;
-        //    }
-        //    TsbConnectedEventHandler.Invoke(tsbConnection);
-        //}
-
-        //private DEVICE_SIGNATURE getDeviceInfo(UInt32 rawDeviceSignature)
-        //{
-        //    DEVICE_SIGNATURE identifiedDevice = new DEVICE_SIGNATURE();
-
-        //    return identifiedDevice;
-        //}
-
     } // End TSB Class
 
-    //class intelHexFile
-    //{
-    //    public byte[] intelHexFileToArray(string fileName, int pageSize)
-    //    {
-    //        // 1. Open file for file info.
-    //        // 2. Get number of lines in file.
-    //        // 3. Get number of bytes in file.
-    //        // 3. Close and reopen the file for reading.
-    //        // 4. Get the number of bytes needed so all pages to write are full.
-    //        // 5. Get a byte array sized for number of needed pages (pageSize * neededPages).
-    //        // 6. Open file for reading.
-    //        // 7. Loop through lines in file, filling line buffer.
-    //        // 8. If a line of data was found...
-    //        // 9. Get the beginning address of the line.
-    //        // 10. Loop through char in line buffer.
-    //        // 11. If number of full lines is less than total bytes, then fill grab data from line.
-    //        // 12. Otherwise, pad line in the byte array with 0xFF until end of line and get position.
-    //        // 13. Find the difference between position and end of full page.
-    //        // 14. If page is not filled, fill with 0xFF.
-    //        // 15. Return the byte array filled with extracted data.
+    class IntelHexFile
+    {
 
-    //        if (File.Exists(fileName))
-    //        {
-    //            // Peek.
-    //            StreamReader fileToGetNumberOfLines = new StreamReader(fileName);
-    //            Tuple<int, int> numberOfBytesAndLines = linesInFile(fileToGetNumberOfLines);
-    //            int numberOfBytesInFile = numberOfBytesAndLines.Item1;
-    //            int numberOfLinesInFile = numberOfBytesAndLines.Item2;
-    //            fileToGetNumberOfLines.Close();
+        public byte[] intelHexFileToArray(Stream fileName, int pageSize)
+        {
+            // 1. Open file for file info.
+            // 2. Get number of lines in file.
+            // 3. Get number of bytes in file.
+            // 3. Close and reopen the file for reading.
+            // 4. Get the number of bytes needed so all pages to write are full.
+            // 5. Get a byte array sized for number of needed pages (pageSize * neededPages).
+            // 6. Open file for reading.
+            // 7. Loop through lines in file, filling line buffer.
+            // 8. If a line of data was found...
+            // 9. Get the beginning address of the line.
+            // 10. Loop through char in line buffer.
+            // 11. If number of full lines is less than total bytes, then fill grab data from line.
+            // 12. Otherwise, pad line in the byte array with 0xFF until end of line and get position.
+            // 13. Find the difference between position and end of full page.
+            // 14. If page is not filled, fill with 0xFF.
+            // 15. Return the byte array filled with extracted data.
 
-    //            // Buffer.
-    //            int neededPages = getNeededPagePadding(numberOfBytesInFile, pageSize);
-    //            byte[] dataFromFile = new byte[neededPages * pageSize];
+            // Peek.
+            Stream fullReadStream = fileName;
+            StreamReader fileToGetNumberOfLines = new StreamReader(fileName);
+            Tuple<int, int> numberOfBytesAndLines = linesInFile(fileToGetNumberOfLines);
+            int numberOfBytesInFile = numberOfBytesAndLines.Item1;
+            int numberOfLinesInFile = numberOfBytesAndLines.Item2;
+            fileToGetNumberOfLines.BaseStream.Seek(0, SeekOrigin.Begin);
 
-    //            // Read.
-    //            StreamReader fileStream = new StreamReader(fileName);
-    //            byte[] bytesThisLine = new byte[16];
-    //            Tuple<byte[], Int16> lineOfDataAndAddress = new Tuple<byte[], Int16>(null, 0);
-    //            int indexOfLastDataLine = 0;
+            // Buffer.
+            int neededPages = getNeededPagePadding(numberOfBytesInFile, pageSize);
+            byte[] dataFromFile = new byte[neededPages * pageSize];
 
-
-
-    //            // Iterate
-    //            for (int lineIndex = 0; lineIndex < numberOfLinesInFile; lineIndex++)
-    //            {
-    //                lineOfDataAndAddress = readLineFromHexFile(fileStream);
-    //                if (lineOfDataAndAddress.Item1 != null)
-    //                {
-    //                    Int16 startAddressOfLine = lineOfDataAndAddress.Item2;
-    //                    for (int byteIndex = 0; byteIndex < 16; byteIndex++)
-    //                    {
-    //                        if ((byteIndex + lineIndex * 16) < numberOfBytesInFile)
-    //                        { dataFromFile[byteIndex + startAddressOfLine] = lineOfDataAndAddress.Item1[byteIndex]; }
-    //                        else {
-    //                            dataFromFile[byteIndex + startAddressOfLine] = 0xFF;
-    //                            indexOfLastDataLine = (byteIndex + startAddressOfLine);
-    //                        }
-    //                    }
-    //                }
-    //            }
-
-    //            // Pad page.
-    //            int blankBytesToFill = (neededPages * pageSize) - indexOfLastDataLine;
-    //            for (int i = 0; i < blankBytesToFill; i++)
-    //            {
-    //                dataFromFile[i + indexOfLastDataLine] = 0xFF;
-    //            }
-    //            return dataFromFile;
-    //        }
-    //        else
-    //        {
-    //            Console.WriteLine("Error");
-    //            return null;
-    //        }
-
-    //        return null;
-    //    }
-
-    //    public Tuple<byte[], Int16> readLineFromHexFile(StreamReader fileStream)
-    //    {
-    //        // 1. Get a line from file.
-    //        // 2. Remove the start character
-    //        // 3. Get byte count and convert to byte, then to int.
-    //        // 4. Get both address bytes, convert to Int16.
-    //        // 5. Get data type, return null if not data.
-    //        // 6. Loop through the data extracting a line of bytes.
-    //        //    UNIMP: Checksum
-    //        // 7. Return line of bytes and Int16 address a tuple.
-
-    //        int parseLineIndex = 0;
-
-    //        //To hold file hex values.
-    //        int dataByteCount = 0;
-    //        byte data_address1 = 0x00;
-    //        byte data_address2 = 0x00;
-    //        UInt16 fullDataAddress = 0x00;
-    //        Int16 fullAddressAsInt = 0;
-    //        byte data_record_type = 0x00;
-    //        byte data_check_sum = 0x00;
-
-    //        string line = "";
-    //        line = fileStream.ReadLine();
-
-    //        // Skip start code.
-    //        parseLineIndex++;
-
-    //        // Get byte count and convert to int.
-    //        string byteCountStrBfr = line.Substring(parseLineIndex, 2);
-    //        dataByteCount = getByteFrom2HexChar(byteCountStrBfr);
-    //        parseLineIndex += 2;
-
-    //        // Create the byte array for the read about to be read.
-    //        byte[] bytesFromLine = new byte[dataByteCount];
-
-    //        // Get data address and convert to memory address.
-    //        string byteDataAddressStrBfr = line.Substring(parseLineIndex, 2);
-    //        data_address1 = getByteFrom2HexChar(byteDataAddressStrBfr);
-    //        parseLineIndex += 2;
-
-    //        byteDataAddressStrBfr = line.Substring(parseLineIndex, 2);
-    //        data_address2 = getByteFrom2HexChar(byteDataAddressStrBfr);
-    //        parseLineIndex += 2;
-
-    //        fullDataAddress = (UInt16)((data_address1 << 8) | data_address2);
-    //        fullAddressAsInt = (Int16)fullDataAddress;
-
-    //        // Data type.
-    //        string dataRecordTypeStrBfr = line.Substring(parseLineIndex, 2);
-    //        data_record_type = getByteFrom2HexChar(dataRecordTypeStrBfr);
-    //        parseLineIndex += 2;
-
-    //        // If not data, don't bother and return false.
-    //        if (data_record_type != 0x00) { return new Tuple<byte[], Int16>(null, 0); }
-
-    //        // Get the data.
-    //        int dataIndex = 0;
-    //        string dataStrBfr = "";
-    //        while (dataIndex < dataByteCount)
-    //        {
-    //            dataStrBfr = line.Substring(parseLineIndex, 2);
-    //            parseLineIndex += 2;
-    //            bytesFromLine[dataIndex] = getByteFrom2HexChar(dataStrBfr);
-    //            dataIndex++;
-    //        }
-
-    //        // Get checksum
-    //        // IF CHECKSUM NEEDED, GET LATER.
-
-    //        /*Console.WriteLine(
-    //           "\nByte Count: " + dataByteCount.ToString("X2") +
-    //           "  Full address: "+ fullAddressAsInt.ToString("X4") +
-    //           "  Record type: " + data_record_type.ToString("X2") +
-    //           "  Data: "
-    //           );
-    //           for (int i = 0; i < bytesFromLine.Length; i++)
-    //           {
-    //               Console.Write(bytesFromLine[i].ToString("X2"));
-    //           }*/
-
-    //        return new Tuple<byte[], Int16>(bytesFromLine, fullAddressAsInt);
-    //    }
-
-    //    private Tuple<int, int> linesInFile(StreamReader file)
-    //    {
-    //        // 1. Read initial line.
-    //        // 2. If line is null return empty tuple.
-    //        // 3. loop through lines
-    //        // 4. If the line is data
-    //        // 5. Get how many bytes of data and add it to a running count.
-    //        // 6. Increment line counter
-    //        // 7. Read next line.
-    //        // 8. Continue until EOF.
-    //        // 9. Return bytes of data and number of lines in file.
-
-    //        string line = "";
-    //        int lineCount = 0;
-    //        int dataBytes = 0;
-
-    //        line = file.ReadLine();
-    //        while (line != null)
-    //        {
-    //            if (line.Substring(7, 2) == "00")
-    //            {
-    //                dataBytes += getByteFrom2HexChar(line.Substring(1, 2));
-    //                lineCount++;
-    //            }
-    //            line = file.ReadLine();
-    //        }
-    //        return new Tuple<int, int>(dataBytes, lineCount);
-    //    }
-
-    //    public byte getByteFrom2HexChar(string twoHexChars)
-    //    {
-    //        return (byte)Convert.ToInt32(twoHexChars, 16);
-    //    }
-
-    //    public int getNeededPagePadding(int byteCount, int pageSize)
-    //    {
-    //        // 1. Find out if pageSize divides byteCount with no remainder.  If so, return 0.
-    //        // 2. Else, get the number of pages with padding.
-    //        // 3. Get total bytes with padding.
-    //        // 4. Find number of padding bytes needed.
-    //        // 5. Return how many padding bytes are required to make the last page full.
-
-    //        if (byteCount % pageSize == 0)
-    //        {
-    //            return 0;
-    //        }
-    //        else
-    //        {
-    //            return ((int)Math.Floor((float)byteCount / (float)pageSize) + 1);
-    //        }
-    //        return 0;
-    //    }
+            // Read.
+            StreamReader fileStream = new StreamReader(fullReadStream);
+            byte[] bytesThisLine = new byte[16];
+            Tuple<byte[], Int16> lineOfDataAndAddress = new Tuple<byte[], Int16>(null, 0);
+            int indexOfLastDataLine = 0;
 
 
-//}// End Intel Hex File Class
+
+            // Iterate
+            for (int lineIndex = 0; lineIndex < numberOfLinesInFile; lineIndex++)
+            {
+                lineOfDataAndAddress = readLineFromHexFile(fileStream);
+                if (lineOfDataAndAddress.Item1 != null)
+                {
+                    Int16 startAddressOfLine = lineOfDataAndAddress.Item2;
+                    for (int byteIndex = 0; byteIndex < lineOfDataAndAddress.Item1.Length; byteIndex++)
+                    {
+                        if ((byteIndex + lineIndex * 16) < numberOfBytesInFile)
+                        { dataFromFile[byteIndex + startAddressOfLine] = lineOfDataAndAddress.Item1[byteIndex]; }
+                        else
+                        {
+                            dataFromFile[byteIndex + startAddressOfLine] = 0xFF;
+                            indexOfLastDataLine = (byteIndex + startAddressOfLine);
+                        }
+                    }
+                }
+            }
+
+            // Pad page.
+            int blankBytesToFill = (neededPages * pageSize) - indexOfLastDataLine;
+            for (int i = 0; i < blankBytesToFill; i++)
+            {
+                dataFromFile[i + indexOfLastDataLine] = 0xFF;
+            }
+            return dataFromFile;
+        }
+
+        public Tuple<byte[], Int16> readLineFromHexFile(StreamReader fileStream)
+        {
+            // 1. Get a line from file.
+            // 2. Remove the start character
+            // 3. Get byte count and convert to byte, then to int.
+            // 4. Get both address bytes, convert to Int16.
+            // 5. Get data type, return null if not data.
+            // 6. Loop through the data extracting a line of bytes.
+            //    UNIMP: Checksum
+            // 7. Return line of bytes and Int16 address a tuple.
+
+            int parseLineIndex = 0;
+
+            //To hold file hex values.
+            int dataByteCount = 0;
+            byte data_address1 = 0x00;
+            byte data_address2 = 0x00;
+            UInt16 fullDataAddress = 0x00;
+            Int16 fullAddressAsInt = 0;
+            byte data_record_type = 0x00;
+            byte data_check_sum = 0x00;
+
+            string line = "";
+            line = fileStream.ReadLine();
+
+            // Skip start code.
+            parseLineIndex++;
+
+            // Get byte count and convert to int.
+            string byteCountStrBfr = line.Substring(parseLineIndex, 2);
+            dataByteCount = getByteFrom2HexChar(byteCountStrBfr);
+            parseLineIndex += 2;
+
+            // Create the byte array for the read about to be read.
+            byte[] bytesFromLine = new byte[dataByteCount];
+
+            // Get data address and convert to memory address.
+            string byteDataAddressStrBfr = line.Substring(parseLineIndex, 2);
+            data_address1 = getByteFrom2HexChar(byteDataAddressStrBfr);
+            parseLineIndex += 2;
+
+            byteDataAddressStrBfr = line.Substring(parseLineIndex, 2);
+            data_address2 = getByteFrom2HexChar(byteDataAddressStrBfr);
+            parseLineIndex += 2;
+
+            fullDataAddress = (UInt16)((data_address1 << 8) | data_address2);
+            fullAddressAsInt = (Int16)fullDataAddress;
+
+            // Data type.
+            string dataRecordTypeStrBfr = line.Substring(parseLineIndex, 2);
+            data_record_type = getByteFrom2HexChar(dataRecordTypeStrBfr);
+            parseLineIndex += 2;
+
+            // If not data, don't bother and return false.
+            if (data_record_type != 0x00) { return new Tuple<byte[], Int16>(null, 0); }
+
+            // Get the data.
+            int dataIndex = 0;
+            string dataStrBfr = "";
+            while (dataIndex < dataByteCount)
+            {
+                dataStrBfr = line.Substring(parseLineIndex, 2);
+                parseLineIndex += 2;
+                bytesFromLine[dataIndex] = getByteFrom2HexChar(dataStrBfr);
+                dataIndex++;
+            }
+
+            // Get checksum
+            // IF CHECKSUM NEEDED, GET LATER.
+
+            Debug.Write(
+               "\nByte Count: " + dataByteCount.ToString("X2") +
+               "  Full address: "+ fullAddressAsInt.ToString("X4") +
+               "  Record type: " + data_record_type.ToString("X2") +
+               "  Data: "
+               );
+               for (int i = 0; i < bytesFromLine.Length; i++)
+               {
+                   Debug.Write(bytesFromLine[i].ToString("X2"));
+               }
+
+            return new Tuple<byte[], Int16>(bytesFromLine, fullAddressAsInt);
+        }
+
+        private Tuple<int, int> linesInFile(StreamReader file)
+        {
+            // 1. Read initial line.
+            // 2. If line is null return empty tuple.
+            // 3. loop through lines
+            // 4. If the line is data
+            // 5. Get how many bytes of data and add it to a running count.
+            // 6. Increment line counter
+            // 7. Read next line.
+            // 8. Continue until EOF.
+            // 9. Return bytes of data and number of lines in file.
+
+            string line = "";
+            int lineCount = 0;
+            int dataBytes = 0;
+
+            line = file.ReadLine();
+            while (line != null)
+            {
+                if (line.Substring(7, 2) == "00")
+                {
+                    dataBytes += getByteFrom2HexChar(line.Substring(1, 2));
+                    lineCount++;
+                }
+                line = file.ReadLine();
+            }
+            return new Tuple<int, int>(dataBytes, lineCount);
+        }
+
+        public byte getByteFrom2HexChar(string twoHexChars)
+        {
+            return (byte)Convert.ToInt32(twoHexChars, 16);
+        }
+
+        public int getNeededPagePadding(int byteCount, int pageSize)
+        {
+            // 1. Find out if pageSize divides byteCount with no remainder.  If so, return 0.
+            // 2. Else, get the number of pages with padding.
+            // 3. Get total bytes with padding.
+            // 4. Find number of padding bytes needed.
+            // 5. Return how many padding bytes are required to make the last page full.
+
+            if (byteCount % pageSize == 0)
+            {
+                return 0;
+            }
+            else
+            {
+                return ((int)Math.Floor((float)byteCount / (float)pageSize) + 1);
+            }
+            return 0;
+        }
+
+
+    }// End Intel Hex File Class
 
 
 }
