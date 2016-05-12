@@ -187,7 +187,7 @@ namespace bleTest3
         //string filePath = "ms-appx:///thedata.txt";
         string fileName = "";
 
-        StorageFile hexFileToWrite;
+        StorageFile hexFileToRead;
 
         // Firmware date.
         public string firmwareDateString;
@@ -632,6 +632,28 @@ namespace bleTest3
             await FileIO.AppendTextAsync(file, test);
 
         }
+        
+        public async void readHexFile()
+        {
+            if(hexFileToRead == null)
+            {
+                appendText("No HEX File selected.\n", Colors.Crimson);
+            } else
+            {
+                // Code borrowed from SO: 
+                // http://stackoverflow.com/questions/34583303/how-to-read-a-text-file-in-windows-universal-app
+                using (var inputStream = await hexFileToRead.OpenReadAsync())
+                using (var classicStream = inputStream.AsStreamForRead())
+                using (var streamReader = new StreamReader(classicStream))
+                {
+                    while (streamReader.Peek() >= 0)
+                    {
+                        Debug.WriteLine(string.Format("the line is {0}", streamReader.ReadLine()));
+                    }
+                }
+            }
+
+        }
 
         private string getStringFromByteList(List<byte> byteList)
         {
@@ -788,13 +810,13 @@ namespace bleTest3
             openPicker.ViewMode = PickerViewMode.Thumbnail;
             openPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
             openPicker.FileTypeFilter.Add(".hex");
-            hexFileToWrite = await openPicker.PickSingleFileAsync();
+            hexFileToRead = await openPicker.PickSingleFileAsync();
             txbOpenFilePath.TextTrimming = TextTrimming.CharacterEllipsis;
-            txbOpenFilePath.Text = hexFileToWrite.Path;
-            if (hexFileToWrite != null)
+            txbOpenFilePath.Text = hexFileToRead.Path;
+            if (hexFileToRead != null)
             {
                 appendText("File selected to upload: ", Colors.Yellow);
-                appendText(hexFileToWrite.Name + "\n", Colors.LawnGreen);
+                appendText(hexFileToRead.Name + "\n", Colors.LawnGreen);
             }
             else
             {
