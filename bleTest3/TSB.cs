@@ -181,6 +181,7 @@ namespace bleTest3
 
         public IntelHexFile intelHexFileHandler = new IntelHexFile();
         public List<byte> intelHexFileToUpload;
+        int uploadPageIndex = 0;
 
         const int commandAttempts = 3;
 
@@ -271,10 +272,10 @@ namespace bleTest3
             
         }
 
-        private void RXbufferUpdated(object sender, EventArgs args)
+        private async void RXbufferUpdated(object sender, EventArgs args)
         {
             // 1. Route to command-in-progress.
-
+            
             switch (commandInProgress)
             {
                 case commands.error:
@@ -295,6 +296,13 @@ namespace bleTest3
                     break;
                 case commands.readFlash:
                     processFlashRead();
+                    break;
+                case commands.writeFlash:
+                    var writeResponse = await writeDataToFlash();
+                    if (writeResponse)
+                    {
+                        Debug.WriteLine("Yay, there's much rejoicing.");
+                    }
                     break;
                 default:
                     Debug.WriteLine("Defaulted in RXbuffer switch\n");
@@ -661,7 +669,7 @@ namespace bleTest3
             return checkSum;
         }
 
-        public async void uploadFileToChip()
+        public async void openFileForWritingToFlash()
         {
             // 1. Open Intel HEX file.
             // 2. Read file into byte array.
@@ -682,70 +690,76 @@ namespace bleTest3
                 parseAndPrintRawRead(intelHexFileToUpload);
                 //writeDataToFlash(intsFromFile);
             }
+        }
 
+        public async void prepareToWriteToFlash()
+        {
+            if(intelHexFileToUpload.Count != 0)
+            {
+                await serialPorts.write(commandsAsStrings[(int)commands.writeFlash]);
+                commandInProgress = commands.writeFlash;
+                appendText("\n\n\nWrite in progress: \nPlease do not disconnect device or exit the application.\n", Colors.Yellow);
+                scrollToBottomOfTerminal();
+            }
+            else
+            {
+                appendText("No file to write.\n", Colors.Crimson);
+            }
 
         }
 
-        //public bool writeDataToFlash(List<byte> dataToWrite)
-        //{
-        //    // 1. Send Flash write character.
-        //    // 2. Get response and check for RQ ('?').
-        //    // 3. Write page of data.
-        //    // 4. Wait and check for RQ ('?') or CF ('!').
-        //    // 5. Repeat steps 3-4 until last page.
-        //    // 6. Write RQ ('?').
-        //    // 7. Wait and check for CF ('!').
-        //    // 8. Return true if process successful.
+        public async Task<bool> writeDataToFlash()
+        {
+            // 1. Send Flash write character.
+            // 2. Get response and check for RQ ('?').
+            // 3. Write page of data.
+            // 4. Wait and check for RQ ('?') or CF ('!').
+            // 5. Repeat steps 3-4 until last page.
+            // 6. Write RQ ('?').
+            // 7. Wait and check for CF ('!').
+            // 8. Return true if process successful.
 
-        //    appendText("\n\n\nWrite in progress: \nPlease do not disconnect device or exit the application.\n", Color.Yellow);
-        //    scrollToBottomOfTerminal();
+            int pagesToWrite = intelHexFileToUpload.Count / pageSize;
 
+            byte[] rxByteArray = serialBuffer.readAllBytesFromRXBuffer();
 
+            //string readyForData = rxByteArray.ToString();
 
-        //    int pagesToWrite = dataToWrite.Length / pageSize;
-
-        //    serialPorts.WriteData(commandsAsStrings[(int)commands.writeFlash]);
-        //    Thread.Sleep(1200);
-
-        //    string readyForData = serialPorts.ReadExistingAsString();
-
-        //    if (readyForData.Contains("?"))
-        //    {
-        //        for (int i = 0; i < pagesToWrite; i++)
-        //        {
-        //            // From byte array to string
-        //            string stringToWrite = getStringFromIntBytes(dataToWrite.Skip(i * pageSize).Take(pageSize).ToArray());
-        //            serialPorts.WriteData(commandsAsStrings[(int)commands.confirm]);
-        //            Thread.Sleep(100);
-        //            serialPorts.WriteData(stringToWrite);
-        //            Thread.Sleep(500);
-        //            readyForData = serialPorts.ReadExistingAsString();
-        //            if (readyForData.Contains("!"))
-        //            {
-        //                appendText("ERROR writing Page #" + i + "\n", Color.Red);
-        //                return false;
-        //            }
-        //            appendText("Page #" + i + " ", Color.Yellow);
-        //            appendText("OK.\n", Color.LawnGreen);
-        //            scrollToBottomOfTerminal();
-        //        }
-        //        serialPorts.WriteData(commandsAsStrings[(int)commands.request]);
-        //        Thread.Sleep(100);
-        //        readyForData = serialPorts.ReadExistingAsString();
-        //        if (readyForData.Contains("!"))
-        //        {
-        //            scrollToBottomOfTerminal();
-        //            appendText("\nThe file ", Color.LawnGreen);
-        //            appendText(fileName, Color.Yellow);
-        //            appendText(" was written succesfully!", Color.LawnGreen);
-        //            scrollToBottomOfTerminal();
-        //            return true;
-        //        }
-
-        //    }
-
-        //    return true;
-        //}
+            if (rxByteArray[0] == 0x3F) // ?
+            {
+                if (uploadPageIndex < pagesToWrite)
+                {
+                    // From byte array to string 
+                    //string stringToWrite = getStringFromIntBytes(dataToWrite.Skip(i * pageSize).Take(pageSize).ToArray());
+                    byte[] bytesToWrite = intelHexFileToUpload.Skip(uploadPageIndex * pageSize).Take(pageSize).ToArray();
+                    await serialPorts.write(commandsAsStrings[(int)commands.confirm]);
+                    await serialPorts.writeBytes(bytesToWrite);
+                    appendText("Page #" + uploadPageIndex + " ", Colors.Yellow);
+                    appendText("OK.\n", Colors.LawnGreen);
+                    scrollToBottomOfTerminal();
+                    uploadPageIndex++;
+                } else
+                {
+                    await serialPorts.write(commandsAsStrings[(int)commands.request]);
+                }
+                return true;
+            }
+            else if (rxByteArray[0] == 0x21) // !
+            {
+                scrollToBottomOfTerminal();
+                appendText("\nThe file ", Colors.LawnGreen);
+                appendText(fileName, Colors.Yellow);
+                appendText(" was written succesfully!", Colors.LawnGreen);
+                scrollToBottomOfTerminal();
+                return true;
+            } else
+            {
+                // Error writing to flash.
+                appendText("ERROR writing Page #" + uploadPageIndex + "\n", Colors.Crimson);
+                return false;
+            }
+            return false;
+        }
 
         public string getStringFromBytes(byte[] bytes)
         {
@@ -791,6 +805,7 @@ namespace bleTest3
                 {
                     appendText("File selected to upload: ", Colors.Yellow);
                     appendText(hexFileToRead.Name + "\n", Colors.LawnGreen);
+                    openFileForWritingToFlash();
                 }
                 else
                 {
@@ -865,6 +880,7 @@ namespace bleTest3
             Tuple<byte[], Int16> lineOfDataAndAddress = new Tuple<byte[], Int16>(null, 0);
             int indexOfLastDataLine = 0;
 
+            int numberOfBytesUpToThisLine = 0;
 
 
             // Iterate
@@ -876,8 +892,10 @@ namespace bleTest3
                     Int16 startAddressOfLine = lineOfDataAndAddress.Item2;
                     for (int byteIndex = 0; byteIndex < lineOfDataAndAddress.Item1.Length; byteIndex++)
                     {
-                        if ((byteIndex + lineIndex * 16) < numberOfBytesInFile)
-                        { dataFromFile[byteIndex + startAddressOfLine] = lineOfDataAndAddress.Item1[byteIndex]; }
+                        if ((byteIndex + numberOfBytesUpToThisLine) < numberOfBytesInFile)
+                        { dataFromFile[byteIndex + startAddressOfLine] = lineOfDataAndAddress.Item1[byteIndex];
+                            indexOfLastDataLine = (byteIndex + startAddressOfLine);
+                        }
                         else
                         {
                             dataFromFile[byteIndex + startAddressOfLine] = 0xFF;
@@ -885,6 +903,7 @@ namespace bleTest3
                         }
                     }
                 }
+                numberOfBytesUpToThisLine += lineOfDataAndAddress.Item1.Length;
             }
 
             // Pad page.
@@ -965,7 +984,7 @@ namespace bleTest3
 
             // Get checksum
             // IF CHECKSUM NEEDED, GET LATER.
-
+            /*
             Debug.Write(
                "\nByte Count: " + dataByteCount.ToString("X2") +
                "  Full address: "+ fullAddressAsInt.ToString("X4") +
@@ -976,7 +995,7 @@ namespace bleTest3
                {
                    Debug.Write(bytesFromLine[i].ToString("X2"));
                }
-
+               */
             return new Tuple<byte[], Int16>(bytesFromLine, fullAddressAsInt);
         }
 
@@ -1024,7 +1043,7 @@ namespace bleTest3
 
             if (byteCount % pageSize == 0)
             {
-                return 0;
+                return ((int)(byteCount / pageSize) + 1);
             }
             else
             {
