@@ -69,7 +69,7 @@
                     <RowDefinition Height="35"/>
                     <RowDefinition Height="2*"/>
                 </Grid.RowDefinitions>
-                <ScrollViewer Grid.Row="0" Background="Black">
+                <ScrollViewer x:Name="mainDisplayScroll" Grid.Row="0" Background="Black" VerticalScrollMode="Enabled" >
                     <StackPanel  Height="auto" Background="Black" HorizontalAlignment="Stretch">
                         <RichTextBlock x:Name="rtbMainDisplay" FontFamily="Courier" Height="auto" Padding="5">
                             <RichTextBlock.Blocks>
@@ -94,7 +94,7 @@
                     <Button Grid.Column="1" x:Name="btnSendText" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="btnSendText_Click">Send</Button>
                     <Button Grid.Column="2" x:Name="btnClearSendText" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">Clear</Button>
                 </Grid>
-                <Pivot Grid.Row="2" Height="274">
+                <Pivot x:Name="mainPivotTable" Grid.Row="2" Height="274">
                     <PivotItem x:Name="pvtPortSettings" Header="Port Settings" IsEnabled="false">
                         <Grid>
                             <Grid.RowDefinitions>
@@ -185,7 +185,7 @@
                             <TextBlock x:Name="txbFilePathForFlashOutput" Grid.Row="1" Grid.Column="1" FontSize="20" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Padding="2" Margin="2">None</TextBlock>
                             <Button x:Name="btnSelectFileForFlashOutput"  Grid.Row="1" Grid.Column="0" FontSize="20" HorizontalAlignment="Stretch" VerticalAlignment="Center" Click="Button_ReadFlash" Padding="2" Margin="2">Path for Output</Button>
                             <Button Grid.Row="2" Grid.Column="1" FontSize="20" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Click="OpenFile_ButtonClick" Padding="2" Margin="2">Open File</Button>
-                            <Button Grid.Row="2" Grid.Column="0" FontSize="20" HorizontalAlignment="Stretch" VerticalAlignment="Center" Padding="2" Margin="2">Write Flash</Button>
+                            <Button Grid.Row="2" Grid.Column="0" FontSize="20" HorizontalAlignment="Stretch" VerticalAlignment="Center" Padding="2" Margin="2" Click="Button_WriteFlash">Write Flash</Button>
                             <Button Grid.Row="3" Grid.Column="0" FontSize="20" HorizontalAlignment="Stretch" VerticalAlignment="Center" Padding="2" Margin="2">Get Security Info</Button>
                             <TextBlock x:Name="txbOpenFilePath" FontSize="20" Grid.Row="2" Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TextAlignment="Left" Padding="2" Margin="2">None</TextBlock>
                         </Grid>

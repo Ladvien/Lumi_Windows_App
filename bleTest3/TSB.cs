@@ -188,7 +188,6 @@ namespace bleTest3
         private string rxBuffer = "";
 
         string filePath = @"C:\Users\cthom\Documents\myFileTest.txt";
-        //string filePath = "ms-appx:///thedata.txt";
         string fileName = "";
 
         StorageFile hexFileToRead;
@@ -221,6 +220,8 @@ namespace bleTest3
         Paragraph theOneParagraph;
         ProgressBar progressBar;
         TextBlock txbOpenFilePath;
+        RichTextBlock mainDisplay;
+        ScrollViewer mainDisplayScrollView;
 
         #endregion properties
 
@@ -231,15 +232,17 @@ namespace bleTest3
         // When a write command is sent, then timeout timer is started.
         public DispatcherTimer writeTimer = new DispatcherTimer();
 
-        public void init(serialPortsExtended serialPortMain, Paragraph mainDisplayMain, ProgressBar mainProgressBar, SerialBuffer _serialBuffer, TextBlock _openFilePath)
+        public void init(serialPortsExtended serialPortMain, ScrollViewer _mainDisplayScrollView,RichTextBlock _rtbMainDisplay, Paragraph _theOneParagraph, ProgressBar mainProgressBar, SerialBuffer _serialBuffer, TextBlock _openFilePath)
         {
             rxByteArray = new List<byte>();
             intelHexFileToUpload = new List<byte>();
             serialPorts = serialPortMain;
-            theOneParagraph = mainDisplayMain;
+            theOneParagraph = _theOneParagraph;
             progressBar = mainProgressBar;
             serialBuffer = _serialBuffer;
             txbOpenFilePath = _openFilePath;
+            mainDisplay = _rtbMainDisplay;
+            mainDisplayScrollView = _mainDisplayScrollView;
 
             // Write timeout timer.
             writeTimer.Tick += writeTimer_Tick;
@@ -312,8 +315,7 @@ namespace bleTest3
 
         public void scrollToBottomOfTerminal()
         {
-            //mainDisplay.SelectionStart = mainDisplay.Text.Length;
-            //mainDisplay.ScrollToCaret();
+            mainDisplayScrollView.ScrollToVerticalOffset(mainDisplay.ContentEnd.Offset+50);
         }
 
         public void setFilePath(string path)
@@ -456,6 +458,7 @@ namespace bleTest3
             r.Foreground = getColoredBrush(color);
             r.Text = str;
             theOneParagraph.Inlines.Add(r);
+            scrollToBottomOfTerminal();
         }
 
         public void clearMainDisplay()
@@ -562,7 +565,7 @@ namespace bleTest3
                     getIntelFileHexString(location.ToString("X4"), lineBuffer.ToString());
                     lineBuffer = "";
                 }
-                var currentProgressBarValue = 100 * ((float)i / (float)numberOfPages);
+                var currentProgressBarValue = 100 * ((float)i+1 / (float)numberOfPagesRead);
                 progressBar.Value = map(currentProgressBarValue, 0, 100, 50, 100);
             }
 
@@ -616,6 +619,7 @@ namespace bleTest3
                     appendText(data + "\n", Colors.LawnGreen);
                     break;
             }
+            scrollToBottomOfTerminal();
             return intelHexFileLine;
         }
 
@@ -692,7 +696,12 @@ namespace bleTest3
             }
         }
 
-        public async void prepareToWriteToFlash()
+        public void writeToFlash()
+        {
+            prepareToWriteToFlash();
+        }
+
+        private async void prepareToWriteToFlash()
         {
             if(intelHexFileToUpload.Count != 0)
             {
@@ -708,7 +717,7 @@ namespace bleTest3
 
         }
 
-        public async Task<bool> writeDataToFlash()
+        private async Task<bool> writeDataToFlash()
         {
             // 1. Send Flash write character.
             // 2. Get response and check for RQ ('?').
@@ -736,6 +745,10 @@ namespace bleTest3
                     await serialPorts.writeBytes(bytesToWrite);
                     appendText("Page #" + uploadPageIndex + " ", Colors.Yellow);
                     appendText("OK.\n", Colors.LawnGreen);
+                    byte[] tmpRxByteArray = serialBuffer.readAllBytesFromRXBuffer();
+
+                    var currentProgressBarValue = 100 * ((float)(uploadPageIndex+1) / (float)pagesToWrite);
+                    progressBar.Value = map(currentProgressBarValue, 0, 100, 0, 100);
                     scrollToBottomOfTerminal();
                     uploadPageIndex++;
                 } else
@@ -748,8 +761,9 @@ namespace bleTest3
             {
                 scrollToBottomOfTerminal();
                 appendText("\nThe file ", Colors.LawnGreen);
-                appendText(fileName, Colors.Yellow);
+                appendText(hexFileToRead.Name, Colors.Yellow);
                 appendText(" was written succesfully!", Colors.LawnGreen);
+                TsbUpdatedCommand(statuses.uploadSuccessful);
                 scrollToBottomOfTerminal();
                 return true;
             } else

@@ -19,6 +19,8 @@ using Windows.Foundation;
 using lumi;
 using Windows.Storage.Pickers;
 using Windows.Storage;
+using System.Windows;
+
 
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
@@ -54,7 +56,6 @@ namespace bleTest3
             blue.Callback += new blue.CallBackEventHandler(blueCallback);
 
 
-
             // Until other thread reports COM port discovered
             btnConnect.IsEnabled = false;
             btnTsbConnect.IsEnabled = false;
@@ -68,12 +69,13 @@ namespace bleTest3
             // Start the port discovery.
             serialPorts.ListAvailablePorts();
 
-            
+  
+
             // Have the serialPortsExtended object populate the combo boxes.
             serialPorts.populateComboBoxesWithPortSettings(cmbBaud, cmbDataBits, cmbStopBits, cmbParity, cmbHandshaking);
             serialPorts.init(theOneParagraph, serialBufffer);
 
-            tsb.init(serialPorts, theOneParagraph, pbSys, serialBufffer, txbOpenFilePath);
+            tsb.init(serialPorts, mainDisplayScroll, rtbMainDisplay, theOneParagraph, pbSys, serialBufffer, txbOpenFilePath);
             // Delegate callback for TSB updates.
             tsb.TsbUpdatedCommand += new TSB.TsbUpdateCommand(tsbcommandUpdate);
             blue.init(this.Height, this.Width);
@@ -96,6 +98,7 @@ namespace bleTest3
                     connectionLabelBackGround.Background = getColoredBrush(Colors.LawnGreen);
                     labelConnectionStatus.Text = "Connected to TSB";
                     tabTSB.IsEnabled = true;
+                    mainPivotTable.SelectedIndex = 2;
                     break;
                 case TSB.statuses.error:
                     tabTSB.IsEnabled = false;
@@ -103,6 +106,9 @@ namespace bleTest3
                     btnTsbConnect.IsEnabled = true;
                     connectionLabelBackGround.Background = getColoredBrush(Colors.Crimson);
                     labelConnectionStatus.Text = "Error";
+                    break;
+                case TSB.statuses.uploadSuccessful:
+                    reset();
                     break;
             }
         }
@@ -476,7 +482,7 @@ namespace bleTest3
 
         private async void btnTest_Click(object sender, RoutedEventArgs e)
         {
-            tsb.prepareToWriteToFlash();   
+
         }
 
         public async Task reset()
@@ -502,6 +508,10 @@ namespace bleTest3
             await tsb.selectFileToRead();
         }
 
+        private void Button_WriteFlash(object sender, RoutedEventArgs e)
+        {
+            tsb.writeToFlash();
+        }
 
     }// End MainPage
 } // End Namespace
