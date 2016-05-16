@@ -14,26 +14,25 @@
         </Grid.ColumnDefinitions>
         <Grid HorizontalAlignment="Left" Width="1020" Height="Auto" VerticalAlignment="Top" Grid.ColumnSpan="2">
             <StackPanel x:Name="consolePanel">
-                <Grid HorizontalAlignment="Left" Height="720" Margin="5,5,0,0" VerticalAlignment="Top" Width="232">
+                <Grid HorizontalAlignment="Left" Height="710" Margin="5,5,0,0" VerticalAlignment="Top" Width="232">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="40"/>
-                        <RowDefinition Height="40"/>
-                        <RowDefinition Height="40"/>
-                        <RowDefinition Height="40"/>
-                        <RowDefinition Height="40"/>
-                        <RowDefinition Height="40"/>
-                        <RowDefinition Height="40"/>
-                        <RowDefinition Height="40"/>
-                        <RowDefinition Height="40"/>
-                        <RowDefinition Height="40"/>
-                        <RowDefinition Height="40"/>
-                        <RowDefinition Height="40"/>
-                        <RowDefinition Height="40"/>
-                        <RowDefinition Height="40"/>
-                        <RowDefinition Height="40"/>
-                        <RowDefinition Height="40"/>
-                        <RowDefinition Height="40"/>
-                        <RowDefinition Height="40"/>
+                        <RowDefinition Height="42"/>
+                        <RowDefinition Height="42"/>
+                        <RowDefinition Height="42"/>
+                        <RowDefinition Height="42"/>
+                        <RowDefinition Height="42"/>
+                        <RowDefinition Height="42"/>
+                        <RowDefinition Height="42"/>
+                        <RowDefinition Height="42"/>
+                        <RowDefinition Height="42"/>
+                        <RowDefinition Height="42"/>
+                        <RowDefinition Height="42"/>
+                        <RowDefinition Height="42"/>
+                        <RowDefinition Height="42"/>
+                        <RowDefinition Height="42"/>
+                        <RowDefinition Height="42"/>
+                        <RowDefinition Height="42"/>
+                        <RowDefinition Height="42"/>
                     </Grid.RowDefinitions>
                     <TextBlock Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="24" FontWeight="Bold" Width="Auto" Height="Auto" Margin="3">
             		<Run Text="Lumi"/>
@@ -58,9 +57,9 @@
                     <TextBlock Grid.Row="8" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="20" Width="Auto" Height="Auto" Margin="3">
             		<Run Text="TinySafeBoot"/>
                     </TextBlock>
-                    <Button x:Name="btnTsbConnect" Grid.Row="9" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Conect to TSB" Click="Button_Click_1"/>
+                    <Button x:Name="btnTsbConnect" Grid.Row="9" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Conect to TSB" Click="btnTsbConnect_Click"/>
                     <Button x:Name="btnTest" Grid.Row="10" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Test" Click="btnTest_Click"/>
-                    <ProgressBar x:Name="pbSys" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="16"/>
+                    <ProgressBar x:Name="pbSys" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="17"/>
                 </Grid>
             </StackPanel>
             <Grid HorizontalAlignment="Left" Margin="250,0,0,0" Width="750" Height="720">
@@ -172,11 +171,11 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="1*"/>
                                 <ColumnDefinition Width="1*"/>
-                                <ColumnDefinition Width="1*"/>
-                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="2*"/>
+                                
                             </Grid.ColumnDefinitions>
-                            <Button Grid.Row="0" Grid.Column="0" FontSize="20" HorizontalAlignment="Stretch" VerticalAlignment="Center" Click="Button_ReadFlash" Padding="2">Read Flash</Button>
-                            <ComboBox x:Name="cmbFlashDisplay" SelectedIndex="2" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch" SelectionChanged="displayFlashType_SelectionChanged" Padding="2">
+                            <Button Grid.Row="0" Grid.Column="0" FontSize="20" HorizontalAlignment="Stretch" VerticalAlignment="Center" Click="Button_ReadFlash" Padding="2" Margin="2">Read Flash</Button>
+                            <ComboBox x:Name="cmbFlashDisplay" SelectedIndex="2" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch" SelectionChanged="displayFlashType_SelectionChanged" Margin="2" Padding="2">
                                 <ComboBoxItem>None</ComboBoxItem>
                                 <ComboBoxItem>Data</ComboBoxItem>
                                 <ComboBoxItem>Address and Data</ComboBoxItem>

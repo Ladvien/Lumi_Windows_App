@@ -15,6 +15,7 @@ using Windows.UI.Xaml.Documents;
 using Windows.UI;
 using Windows.Security.Cryptography;
 using lumi;
+using Windows.UI.Xaml;
 
 namespace bleTest3
 {
@@ -32,24 +33,35 @@ namespace bleTest3
 
     public class serialPortsExtended
     {
+        #region enums
+        public enum serialPortStatuses
+        {
+            error = 0,
+            unknown = 1,
+            foundDevices = 2,
+            didNotFindDevices = 3
+        }
+        #endregion
+
         #region fields
-        
-        public delegate void CallBackEventHandler(object sender, EventArgs args);
+
+        // Main UI.
+        public serialPortStatuses serialPortStatus = new serialPortStatuses();
+        public delegate void CallBackEventHandler(object sender, serialPortStatuses serialPortStatus);
         public event CallBackEventHandler Callback;
-
-        public SerialBuffer serialBuffer = new SerialBuffer();
-
         public Paragraph theOneParagraph;
 
-        //DataWriter dataWriteObject = null;
-        DataReader dataReaderObject = null;
+        // Serial Buffer.
+        public SerialBuffer serialBuffer = new SerialBuffer();
 
+        // Device fields.
         private Dictionary<string, DeviceInformation> listOfDevices = new Dictionary<string, DeviceInformation>();
         private Dictionary<string, SerialDevice> listOfPorts= new Dictionary<string, SerialDevice>();
+        DataReader dataReaderObject = null;
         private CancellationTokenSource ReadCancellationTokenSource;
-
-        // public ObservableCollection<DeviceAccessInformation> aqsList = new ObservableCollection<DeviceAccessInformation>();
         public DeviceInformationCollection dis;
+        public DispatcherTimer readyToListPortsTimer = new DispatcherTimer();
+        
         #endregion fields
 
         #region properties
@@ -89,34 +101,11 @@ namespace bleTest3
 
         }
 
-        public byte[] getBytes(int numberOfBytes)
-        {
-            // 1. Get the characters to return: Range<0, numberOfBytes>
-            // 2. Remove the number of bytes from the buffer.
-            // 3. Return the wanted bytes.
-            if(rxBuffer.Length > 0)
-            {
-                byte[] returnBytes = rxBuffer.Take(numberOfBytes).ToArray();
-                rxBuffer = rxBuffer.Skip(numberOfBytes).Take(rxBuffer.Length - numberOfBytes).ToArray();
-                return returnBytes;
-            } else
-            {
-                byte[] empty =  {0x00};
-                return empty;
-            }
 
-        }
-
-        public int numberBufferedBytes()
+        private async void ReadyToListPortsTimer_Tick(object sender, object e)
         {
-            if(rxBuffer != null)
-            {
-                return rxBuffer.Length;
-            } else
-            {
-                return 0;
-            }
-            
+            await ListAvailablePorts();
+            readyToListPortsTimer.Stop();
         }
 
         #endregion properties
@@ -131,6 +120,7 @@ namespace bleTest3
             theOneParagraph = theParagraph;
             serialBuffer.RXbufferUpdated += new SerialBuffer.CallBackEventHandler(RXbufferUpdated);
             serialBuffer.TXbufferUpdated += new SerialBuffer.CallBackEventHandler(TXbufferUpdated);
+            readyToListPortsTimer.Tick += ReadyToListPortsTimer_Tick;
         }
 
         public void RXbufferUpdated(object sender, EventArgs args)
@@ -191,6 +181,7 @@ namespace bleTest3
 
                 SerialDevice newSerialDevice;
                 
+                
                 for (int i = 0; i < dis.Count; i++)
                 {
                     
@@ -200,7 +191,10 @@ namespace bleTest3
                         listOfDevices.Add(dis[i].Id, dis[i]);
                         listOfPorts.Add(newSerialDevice.PortName, newSerialDevice);
                     }
-                    Callback(this, null);
+
+                    if(listOfPorts.Count != 0) { serialPortStatus = serialPortStatuses.foundDevices; }
+                    else { serialPortStatus = serialPortStatuses.didNotFindDevices; }
+                    Callback(this, serialPortStatus);
                 }
             }
             catch (Exception ex)
@@ -330,6 +324,10 @@ namespace bleTest3
 
         public bool openPort()
         {
+            // 1. Assert there is a selected device.
+            // 2. Setup Read and Write timeouts.
+            // 3. Create cancellation token so read / write actions may be canceled.
+
             if(selectedSerialDevice != null)
             {
                 selectedSerialDevice.WriteTimeout = TimeSpan.FromMilliseconds(100);
@@ -343,47 +341,30 @@ namespace bleTest3
 
         public async Task<uint> write(string data)
         {
+            // Note: Adapted from Microsoft sample.
             // 1. Assert dataWriteObject is using selectedSerialDevice.
             // 2. Create the WriteString operation.
             // 3. Create the async Write task.
             // 4. Execute the write operation; await how many bytes are written.
             // 5. Return the number of bytes written.
-
-            //DataWriter dataWriteObject = new DataWriter(selectedSerialDevice.OutputStream);
-            //Task<uint> storeAsyncTask;
-            //dataWriteObject.WriteString(data);
-            //storeAsyncTask = dataWriteObject.StoreAsync().AsTask();
-
             
-            DataWriter dataWriter = new DataWriter();       // Creates a new writing stream.
-            dataWriter.WriteString(data);                   // Prepares the string into a byte[] buffered in
-                                                            // the dataWriter object, which is ready to write
-                                                            // back out as a string. Weird.
-            // Here's where it get's tricky.  WriteAsync takes a IBuffer object, which as I understand it, is
-            // simply a buffered string attached to an abstract object.  Now, DetachBuffer basically returns
-            // the data, formatted in a streaming-ready format (ie, IBuffer), once the data is returned, it
-            // deletes the buffered data.  Weird.
+            DataWriter dataWriter = new DataWriter();
+            dataWriter.WriteString(data);
             uint bytesWritten = await selectedSerialDevice.OutputStream.WriteAsync(dataWriter.DetachBuffer());
-
             return bytesWritten;
         }
 
         public async Task<uint> writeBytes(byte[] data)
         {
+            // Note: Adapted from Microsoft sample.
             // 1. Assert dataWriteObject is using selectedSerialDevice.
             // 2. Create the WriteString operation.
             // 3. Create the async Write task.
             // 4. Execute the write operation; await how many bytes are written.
             // 5. Return the number of bytes written.
 
-            //DataWriter dataWriteObject = new DataWriter(selectedSerialDevice.OutputStream);
-            //Task<uint> storeAsyncTask;
-            //dataWriteObject.WriteString(data);
-            //storeAsyncTask = dataWriteObject.StoreAsync().AsTask();
-
-
             DataWriter dataWriter = new DataWriter();       // Creates a new writing stream.
-            dataWriter.WriteBytes(data);                   // Prepares the string into a byte[] buffered in
+            dataWriter.WriteBytes(data);                    // Prepares the string into a byte[] buffered in
                                                             // the dataWriter object, which is ready to write
                                                             // back out as a string. Weird.
                                                             // Here's where it get's tricky.  WriteAsync takes a IBuffer object, which as I understand it, is
@@ -397,83 +378,53 @@ namespace bleTest3
 
         private async Task ReadAsync(CancellationToken cancellationToken)
         {
+            // Code adapted from: Microsoft Samples.
+            // 1. Setup load task.
+            // 2. Setup RX buffer.
+            // 3. If task cancellation was requested, comply
+            // 4. Set InputStreamOptions to complete the asynchronous read operation when one or more bytes is available
+            // 5. Create a task object to wait for data on the serialPort.InputStream
+            // 6. Launch the task and wait
             Task<UInt32> loadAsyncTask;
 
             uint ReadBufferLength = 1024;
-
-            //dataReaderObject.UnicodeEncoding = Windows.Storage.Streams.UnicodeEncoding.Utf16BE;
-
-            // If task cancellation was requested, comply
             cancellationToken.ThrowIfCancellationRequested();
-
-            // Set InputStreamOptions to complete the asynchronous read operation when one or more bytes is available
             dataReaderObject.InputStreamOptions = InputStreamOptions.Partial;
-
-            // Create a task object to wait for data on the serialPort.InputStream
             loadAsyncTask = dataReaderObject.LoadAsync(ReadBufferLength).AsTask(cancellationToken);
-
-            // Launch the task and wait
             UInt32 bytesRead = await loadAsyncTask;
             byte[] tempByteArray = new byte[bytesRead];
             dataReaderObject.ReadBytes(tempByteArray);
             rxBuffer = tempByteArray;
-
-            string fancyString = byteArrayToReadableString(rxBuffer);
-
             if (bytesRead > 0)
             {
                 serialBuffer.RxBuffer = tempByteArray;
-                //appendText(fancyString, Colors.Red); 
             }
 
         }
 
-        public async Task Listen(int timeOut)
+        public async Task dtrToggle()
         {
-            try
-            {
-                if (selectedSerialDevice != null)
-                {
-                    dataReaderObject = new DataReader(selectedSerialDevice.InputStream);
-                    ReadCancellationTokenSource = new CancellationTokenSource(timeOut);
+            // 1. Disable DTR (send it LOW).
+            // 2. Enable DTR (send it HIGH).
 
-                    // keep reading the serial input
-                    while (true)
-                    {
-                        await ReadAsync(ReadCancellationTokenSource.Token);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                if (ex.GetType().Name == "TaskCanceledException")
-                {
-                    appendLine("Timed out waiting for response.", Colors.Crimson);
-                }
-                else
-                {
-                    appendLine(ex.Message, Colors.White);
-                }
-            }
-            finally
-            {
-                // Cleanup once complete
-                if (dataReaderObject != null)
-                {
-                    dataReaderObject.DetachStream();
-                    dataReaderObject = null;
-                }
-            }
+            // NOTE: The DTR pin is the typical Arduino Reset pin.  
+            // This allows the board to be reset by the software
+            // so the TSB may find it.
+            selectedSerialDevice.IsDataTerminalReadyEnabled = false;
+            await Task.Delay(TimeSpan.FromMilliseconds(50));
+            selectedSerialDevice.IsDataTerminalReadyEnabled = true;
+            await Task.Delay(TimeSpan.FromMilliseconds(50));
         }
 
-        public void stopListing()
-        {
-            ReadCancellationTokenSource.Cancel();
-        }
 
         public async void AlwaysListening()
         {
-            
+            // 1. Make sure there is a selected serial device.
+            // 2. Setup a DataReader object and use the RX stream from
+            //    the selectedDevice.
+            // 3. Start an asynchoronos read; with a cancellation token so it may
+            //    be stopped be the user.
+
             try
             {
                 if (selectedSerialDevice != null)
@@ -509,12 +460,10 @@ namespace bleTest3
             }
         }
 
-        public async Task dtrToggle()
+        public void stopListing()
         {
-            selectedSerialDevice.IsDataTerminalReadyEnabled = false;
-            await Task.Delay(TimeSpan.FromMilliseconds(50));
-            selectedSerialDevice.IsDataTerminalReadyEnabled = true;
-            await Task.Delay(TimeSpan.FromMilliseconds(50));
+            // 1. Tell the token we provided to the ReadAsync that we want to stop.
+            ReadCancellationTokenSource.Cancel();
         }
 
         public void CloseDevice()
@@ -524,6 +473,8 @@ namespace bleTest3
                 // 1. Remove the selectedSerialDevice from portList.
                 // 2. Disconnect streams.
                 // 3. Dispose of selected COM port.
+                // 4. Wait 1 second before refreshing port list.  This assures
+                //    the recently disconnected port can be found.
 
                 listOfPorts.Remove(selectedSerialDevice.PortName);
                 selectedSerialDevice.OutputStream.Dispose();
@@ -531,38 +482,8 @@ namespace bleTest3
                 selectedSerialDevice.Dispose();
             }
             listOfDevices.Clear();
-        }
-
-        public string byteArrayToReadableString(byte[] byteArray)
-        {
-            string charOrTwoCharHexString = "";
-
-            for (int i = 0; i < byteArray.Length; i++)
-            {
-             if((int)byteArray[i] < 127)
-                {
-                    charOrTwoCharHexString += (char)byteArray[i];
-                }
-                else
-                {
-                    charOrTwoCharHexString += " " + byteArray[i].ToString("X2");
-                } 
-            }
-
-            //Debug.Write(bytesReadByteArray[i].ToString("X2"));
-            return charOrTwoCharHexString;
-        }
-
-        public void stopListening()
-        {
-            ReadCancellationTokenSource.Cancel();
-        }
-
-        public async Task disposeStream()
-        {
-            //await dataWriteObject.FlushAsync();
-            //dataWriteObject.DetachStream();
-            //dataWriteObject.Dispose();
+            readyToListPortsTimer.Interval = new TimeSpan(0, 0, 0, 1);
+            readyToListPortsTimer.Start();
         }
 
         #endregion port use

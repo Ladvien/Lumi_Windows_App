@@ -93,12 +93,11 @@ namespace bleTest3
             switch (tsbConnectionStatus)
             {
                 case TSB.statuses.connected:
-                    //btnTsbConnect.Content = "Disconnect";
-                    btnTsbConnect.IsEnabled = false;
+                    btnTsbConnect.Content = "Disconnect";
                     connectionLabelBackGround.Background = getColoredBrush(Colors.LawnGreen);
                     labelConnectionStatus.Text = "Connected to TSB";
-                    tabTSB.IsEnabled = true;
                     mainPivotTable.SelectedIndex = 2;
+                    tabTSB.IsEnabled = true;
                     break;
                 case TSB.statuses.error:
                     tabTSB.IsEnabled = false;
@@ -106,6 +105,7 @@ namespace bleTest3
                     btnTsbConnect.IsEnabled = true;
                     connectionLabelBackGround.Background = getColoredBrush(Colors.Crimson);
                     labelConnectionStatus.Text = "Error";
+                    tabTSB.IsEnabled = false;
                     break;
                 case TSB.statuses.uploadSuccessful:
                     reset();
@@ -140,7 +140,7 @@ namespace bleTest3
             blue.closeBleDevice();
         }
 
-        public void serialPortCallback(object sender, EventArgs args)
+        public void serialPortCallback(object sender, serialPortsExtended.serialPortStatuses serialPortStatus)
         {
             IAsyncAction ignored;
 
@@ -149,7 +149,15 @@ namespace bleTest3
             {
                 ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                 {
-                    populatePortComboBox();
+                    switch (serialPortStatus)
+                    {
+                        case serialPortsExtended.serialPortStatuses.foundDevices:
+                            populatePortComboBox();
+                            break;
+                        case serialPortsExtended.serialPortStatuses.didNotFindDevices:
+                            appendLine("Did not find any serial devices.\n", Colors.Crimson);
+                            break;
+                    }                    
                 });
             }
         }
@@ -205,7 +213,7 @@ namespace bleTest3
                             pvtPortSettings.IsEnabled = false;
                             cmbFoundDevices.IsEnabled = false;
                             cmbDeviceSelector.IsEnabled = false;
-
+                            btnTsbConnect.IsEnabled = true;
                             portOpen = true;
                             /////////////////////////////
                             serialPorts.AlwaysListening();
@@ -218,24 +226,24 @@ namespace bleTest3
                     }
                     else
                     {
-                        btnTsbConnect.IsEnabled = false;
-                        btnConnect.IsEnabled = false;
-                        connectionLabelBackGround.Background = getColoredBrush(Colors.Crimson);
-                        labelConnectionStatus.Text = "Disconnected";
-                        btnConnect.Content = "Connect";
-                        cmbFoundDevices.IsEnabled = true;
-                        cmbDeviceSelector.IsEnabled = true;
-                        pvtPortSettings.IsEnabled = true;
                         try
                         {
                             serialPorts.CloseDevice();
+                            btnTsbConnect.IsEnabled = false;
+                            btnConnect.IsEnabled = false;
+                            connectionLabelBackGround.Background = getColoredBrush(Colors.Crimson);
+                            labelConnectionStatus.Text = "Disconnected";
+                            btnConnect.Content = "Connect";
+                            cmbFoundDevices.IsEnabled = true;
+                            cmbDeviceSelector.IsEnabled = true;
+                            pvtPortSettings.IsEnabled = true;
+                            cmbFoundDevices.Items.Clear();
                         } catch (Exception exArgs)
                         {
                             Debug.WriteLine(exArgs.Message);
                         }
                         portOpen = false;                        
-                        await serialPorts.ListAvailablePorts();
-
+                   
                     }
                     break;
                 case 1: // Bluetooth LE
@@ -246,7 +254,7 @@ namespace bleTest3
         }
 
 
-        private async void Button_Click_1(object sender, RoutedEventArgs e)
+        private async void btnTsbConnect_Click(object sender, RoutedEventArgs e)
         {
             btnConnect.IsEnabled = false;
             await reset();
@@ -266,15 +274,24 @@ namespace bleTest3
             appendLine(text, color);
         }
 
-        private void btnBleSearch_Click(object sender, RoutedEventArgs e)
+        private async void btnBleSearch_Click(object sender, RoutedEventArgs e)
         {
-            btnBleSearch.Content = "Searching";
-            btnBleSearch.IsEnabled = false;
-            btnConnect.IsEnabled = false;
-            cmbFoundDevices.IsEnabled = false;
-            cmbDeviceSelector.IsEnabled = false;
-            blue.startBLEWatcher(5);
-            DeviceSelectorInfo bluetoothLESelectorPaired = DeviceSelectorChoices.BluetoothLEPairedOnly;
+            switch (cmbDeviceSelector.SelectedIndex)
+            {
+                case 0:
+                    await serialPorts.ListAvailablePorts();
+                    break;
+                case 1:
+                    btnBleSearch.Content = "Searching";
+                    btnBleSearch.IsEnabled = false;
+                    btnConnect.IsEnabled = false;
+                    cmbFoundDevices.IsEnabled = false;
+                    cmbDeviceSelector.IsEnabled = false;
+                    blue.startBLEWatcher(5);
+                    DeviceSelectorInfo bluetoothLESelectorPaired = DeviceSelectorChoices.BluetoothLEPairedOnly;
+                    break;
+            }
+
         }
 
         private void cmbFoundDevices_SelectionChanged(object sender, SelectionChangedEventArgs e)
