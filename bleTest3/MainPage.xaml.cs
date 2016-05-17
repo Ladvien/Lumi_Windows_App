@@ -287,7 +287,7 @@ namespace bleTest3
                     btnConnect.IsEnabled = false;
                     cmbFoundDevices.IsEnabled = false;
                     cmbDeviceSelector.IsEnabled = false;
-                    blue.startBLEWatcher(5);
+                    blue.startBLEWatcher(2);
                     DeviceSelectorInfo bluetoothLESelectorPaired = DeviceSelectorChoices.BluetoothLEPairedOnly;
                     break;
             }
@@ -499,7 +499,7 @@ namespace bleTest3
 
         private async void btnTest_Click(object sender, RoutedEventArgs e)
         {
-
+            blue.writeToBleDevice("Blah");
         }
 
         public async Task reset()

@@ -322,15 +322,59 @@ namespace bleTest3
                 await connectToBLEDevice();
             }
 
-            for (int i = 0; i < bleDevice.GattServices.Count; i++)
+//            var devices = await DeviceInformation.FindAllAsync(GattDeviceService.GetDeviceSelectorFromUuid(GattServiceUuids.GenericAttribute));
+
+            // add device into your UI here
+
+
+
+            var services = bleDevice.GattServices;
+            foreach(GattDeviceService service in services)
             {
-                var characteristics = bleDevice.GattServices[i].GetAllCharacteristics();
-                for (int j = 0; j < characteristics.Count; j++)
+                service.Device.ConnectionStatusChanged += OnConnectionStatusChanged;
+                var characteristics = service.GetAllCharacteristics();
+                foreach (GattCharacteristic characteristic in characteristics)
                 {
-                    Debug.WriteLine("Service UUID: " + characteristics[j].Service.Uuid.ToString() + "Gatt #: " + i.ToString() + " Characteristic #: " + j.ToString());
+
+                    // var currentDescriptorValue = await characteristic.ReadClientCharacteristicConfigurationDescriptorAsync();
+
+                    // if ((currentDescriptorValue.Status != GattCommunicationStatus.Success) || (currentDescriptorValue.ClientCharacteristicConfigurationDescriptor != GattClientCharacteristicConfigurationDescriptorValue.Notify))
+                    // {
+                    try
+                    {
+                        await characteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
+                    } catch (Exception ex)
+                    {
+                        Debug.WriteLine(ex.Message);
+                    }
+
+                    // }
+                    characteristic.ValueChanged += Oncharacteristic_ValueChanged;
                 }
             }
 
+                    
+
+
+            //for (int i = 0; i < bleDevice.GattServices.Count; i++)
+            //{
+            //    var characteristics = bleDevice.GattServices[i].GetAllCharacteristics();
+            //    for (int j = 0; j < characteristics.Count; j++)
+            //    {
+            //        Debug.WriteLine("Service UUID: " + characteristics[j].Service.Uuid.ToString() + "Gatt #: " + i.ToString() + " Characteristic #: " + j.ToString());
+            //    }
+            //}
+
+        }
+
+        private void Oncharacteristic_ValueChanged(GattCharacteristic sender, GattValueChangedEventArgs args)
+        {
+            Debug.WriteLine(CryptographicBuffer.ConvertBinaryToString(BinaryStringEncoding.Utf8, args.CharacteristicValue));
+        }
+
+        private void OnConnectionStatusChanged(BluetoothLEDevice sender, object args)
+        {
+            throw new NotImplementedException();
         }
 
         public async void writeToBleDevice(string sendStr)
@@ -363,11 +407,28 @@ namespace bleTest3
                 var pairCharacteristic = miliService.GetAllCharacteristics().FirstOrDefault();
                 var pairStatus = await readWriteCharacteristic.WriteValueAsync(writer.DetachBuffer(), GattWriteOption.WriteWithoutResponse);
 
-                //Debug.WriteLine(pairStatus);
+                var read = await readWriteCharacteristic.ReadValueAsync();
+
+                Debug.WriteLine(read.Value);
+
+                
+                Debug.WriteLine(CryptographicBuffer.ConvertBinaryToString(BinaryStringEncoding.Utf8, read.Value));
+
+                try
+                {
+                    await readWriteCharacteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.Message);
+                }
+
+                // }
+                readWriteCharacteristic.ValueChanged += Oncharacteristic_ValueChanged;
             }
             catch (Exception ex)
             {
-                throw ex;
+                Debug.WriteLine(ex.Message);
             }
         }
 
