@@ -101,7 +101,9 @@ namespace bleTest3
             deviceWatcher.Updated += DeviceWatcher_Updated;
             deviceWatcher.Start();
 
-            
+
+
+
             bleAdvertWatcher.Received += OnAdvertisementReceived;
             bleAdvertWatcher.Stopped += OnAdvertisementWatcherStopped;
 
@@ -128,10 +130,11 @@ namespace bleTest3
 
         private void DeviceWatcher_Updated(DeviceWatcher sender, DeviceInformationUpdate args)
         {
-            
+
             if (bleDevice != null)
             {
-                if (bleDevice.DeviceId == args.Id)
+
+                if (bleDevice.DeviceInformation.Id == args.Id)
                 {
                     Debug.WriteLine("Total Gatts added: "+gattAddedCounter);
                     gattAddedCounter++;
@@ -157,13 +160,23 @@ namespace bleTest3
             }
         }
 
-        private void DeviceWatcher_Added(DeviceWatcher sender, DeviceInformation args)
+        private async void DeviceWatcher_Added(DeviceWatcher sender, DeviceInformation device)
         {
             if(bleDevice != null)
             {
-                if (bleDevice.DeviceId == args.Id)
+                
+                if (bleDevice.Name == device.Name)
                 {
-                    Debug.WriteLine("Added");
+                    try
+                    {
+                        var service = await GattDeviceService.FromIdAsync(device.Id);
+                        Debug.WriteLine("Added");
+                        populateCharacteristics(service);
+                    } catch (Exception ex)
+                    {
+                        Debug.WriteLine(ex.Message);
+                    }
+
                 }
             }
 
@@ -171,6 +184,7 @@ namespace bleTest3
 
         private void DeviceWatcher_EnumerationCompleted(DeviceWatcher sender, object args)
         {
+            Debug.WriteLine("HERE");
             
         }
 
@@ -300,9 +314,51 @@ namespace bleTest3
         #endregion BLEadvertisementWatcher
 
         #region BLEdevice
-        private void BleDevice_ConnectionStatusChanged(BluetoothLEDevice sender, object args)
+        private async void BleDevice_ConnectionStatusChanged(BluetoothLEDevice sender, object args)
         {
             Debug.WriteLine("Conn. Changed: " + sender.ConnectionStatus);
+
+        }
+
+        public async void populateCharacteristics(GattDeviceService service)
+        {
+            //if (bleDevice != null) { Debug.WriteLine(bleDevice.GattServices.Count); }
+            //var services = bleDevice.GattServices;
+            //foreach (GattDeviceService service in services)
+            //{
+                service.Device.ConnectionStatusChanged += OnConnectionStatusChanged;
+                var characteristics = service.GetAllCharacteristics();
+                foreach (GattCharacteristic characteristic in characteristics)
+                {
+
+                    //var currentDescriptorValue = await characteristic.ReadClientCharacteristicConfigurationDescriptorAsync();
+
+                    // if ((currentDescriptorValue.Status != GattCommunicationStatus.Success) || (currentDescriptorValue.ClientCharacteristicConfigurationDescriptor != GattClientCharacteristicConfigurationDescriptorValue.Notify))
+                    // {
+                    try
+                    {
+                        await characteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine(ex.Message);
+                    }
+
+                    // }
+                    characteristic.ValueChanged += Oncharacteristic_ValueChanged;
+                }
+            //}
+        }
+
+        private async Task<bool> connectToBLEDevice(DeviceInformation device)
+        {
+            // 1. Pair the device
+            // 2. Add event handlers
+            // 3. Returned the pairing status.
+            var connectedBleDevice = await device.Pairing.PairAsync(DevicePairingProtectionLevel.None);
+
+            //populateCharacteristics();
+            return bleDevice.DeviceInformation.Pairing.IsPaired;
         }
 
         public async Task connect(ulong bluetoothAddress)
@@ -311,25 +367,31 @@ namespace bleTest3
             // 2. If device is not paired, pair it.
             // 3. Enumerate Gatt services.
 
-
+            
             // Get a BLE device from address.
             bleDevice = await BluetoothLEDevice.FromBluetoothAddressAsync(bluetoothAddress);
-            
+
+            DeviceInformation bleDeviceInfo = bleDevice.DeviceInformation;
+
+            bleDevice.Dispose();
+
+            //bleDevice.ConnectionStatusChanged += BleDevice_ConnectionStatusChanged;
+            //bleDevice.GattServicesChanged += BleDevice_GattServicesChanged;
+
+
             // Assert existing connection.
             if (bleDevice.DeviceInformation.Pairing.IsPaired == false)
             {
                 // Attempt to pair the BLE device
-                await connectToBLEDevice();
+                await connectToBLEDevice(bleDeviceInfo);
+                Debug.WriteLine(bleDevice.GattServices.Count);
             }
 
-//            var devices = await DeviceInformation.FindAllAsync(GattDeviceService.GetDeviceSelectorFromUuid(GattServiceUuids.GenericAttribute));
-
-            // add device into your UI here
-
+            //            var devices = await DeviceInformation.FindAllAsync(GattDeviceService.GetDeviceSelectorFromUuid(GattServiceUuids.GenericAttribute));
 
 
             var services = bleDevice.GattServices;
-            foreach(GattDeviceService service in services)
+            foreach (GattDeviceService service in services)
             {
                 service.Device.ConnectionStatusChanged += OnConnectionStatusChanged;
                 var characteristics = service.GetAllCharacteristics();
@@ -343,7 +405,8 @@ namespace bleTest3
                     try
                     {
                         await characteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
-                    } catch (Exception ex)
+                    }
+                    catch (Exception ex)
                     {
                         Debug.WriteLine(ex.Message);
                     }
@@ -353,17 +416,17 @@ namespace bleTest3
                 }
             }
 
-                    
 
 
-            //for (int i = 0; i < bleDevice.GattServices.Count; i++)
-            //{
-            //    var characteristics = bleDevice.GattServices[i].GetAllCharacteristics();
-            //    for (int j = 0; j < characteristics.Count; j++)
-            //    {
-            //        Debug.WriteLine("Service UUID: " + characteristics[j].Service.Uuid.ToString() + "Gatt #: " + i.ToString() + " Characteristic #: " + j.ToString());
-            //    }
-            //}
+
+            for (int i = 0; i < bleDevice.GattServices.Count; i++)
+            {
+                var characteristics = bleDevice.GattServices[i].GetAllCharacteristics();
+                for (int j = 0; j < characteristics.Count; j++)
+                {
+                    Debug.WriteLine("Service UUID: " + characteristics[j].Service.Uuid.ToString() + "Gatt #: " + i.ToString() + " Characteristic #: " + j.ToString());
+                }
+            }
 
         }
 
@@ -432,17 +495,7 @@ namespace bleTest3
             }
         }
 
-        private async Task<bool> connectToBLEDevice()
-        {
-            // 1. Pair the device
-            // 2. Add event handlers
-            // 3. Returned the pairing status.
 
-            var connectedBleDevice = await bleDevice.DeviceInformation.Pairing.PairAsync(DevicePairingProtectionLevel.None);
-            bleDevice.ConnectionStatusChanged += BleDevice_ConnectionStatusChanged;
-            bleDevice.GattServicesChanged += BleDevice_GattServicesChanged;
-            return bleDevice.DeviceInformation.Pairing.IsPaired;
-        }
 
         private void BleDevice_GattServicesChanged(BluetoothLEDevice sender, object args)
         {
