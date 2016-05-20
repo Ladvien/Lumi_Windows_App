@@ -59,7 +59,7 @@ namespace bleTest3
 
         // Bluetooth LE Discovery
         BluetoothLEAdvertisementWatcher bleAdvertWatcher = new BluetoothLEAdvertisementWatcher();
-        public Dictionary<string, ulong> bleDevices = new Dictionary<string, ulong>();
+        public Dictionary<string, ulong> bleDeviceAddresses = new Dictionary<string, ulong>();
         public Dictionary<string, short> bleDevicesRSSI = new Dictionary<string, short>();
         public DispatcherTimer bleSearchTimer = new DispatcherTimer();
         public DispatcherTimer gattDelayPopulateTimer = new DispatcherTimer();
@@ -73,10 +73,6 @@ namespace bleTest3
         // Used for enumeration information.
         public DeviceWatcher deviceWatcher;
 
-        DevicePicker devicePicker = new DevicePicker();
-        double height = 0;
-        double width = 0;
-
         // Used to determine discovery of BLE services.  
         int gattAddedCounter = 0;
         // Used to workaround MS' crappy API.
@@ -86,14 +82,12 @@ namespace bleTest3
         public ulong bleAddress = 0;
         #endregion properties_and_methods
 
-        public void init(double appHeight, double appWidth)
+        public void init(SerialBuffer _serialBuffer)
         {
+            serialBuffer = _serialBuffer;
             rxBuffer = new List<byte>();
             // Create and initialize a new watcher instance.
             bleAdvertWatcher = new BluetoothLEAdvertisementWatcher();
-            
-            height = appHeight;
-            width = appWidth;
 
             // Watcher created for determination of enumeration of connected BLE.  This is needed
             // for the workaround to Microsoft's crappy BLE API.
@@ -103,9 +97,6 @@ namespace bleTest3
             deviceWatcher.Removed += DeviceWatcher_Removed;
             deviceWatcher.Updated += DeviceWatcher_Updated;
             deviceWatcher.Start();
-
-
-
 
             bleAdvertWatcher.Received += OnAdvertisementReceived;
             bleAdvertWatcher.Stopped += OnAdvertisementWatcherStopped;
@@ -204,7 +195,7 @@ namespace bleTest3
             // 2. Loop through all paired devices and unpair them (BLAST YOU MS!)
             // 3. Clear discovered device lists.
             // 4. Start the search for unpaired devices.
-
+           
             bleSearchTimer.Interval = new TimeSpan(0, 0, 0, seconds);
             var selector = BluetoothLEDevice.GetDeviceSelector();
             var devices = await DeviceInformation.FindAllAsync(selector);
@@ -226,8 +217,7 @@ namespace bleTest3
         {
             // 1. Clear discovered BLE devices.
             // 2. Reset "Uknown" device counter.
-            bleDevices.Clear();
-            bleDevices.Clear();
+            bleDeviceAddresses.Clear();
             deviceCounter = 0;
         }
 
@@ -240,65 +230,26 @@ namespace bleTest3
             // 4. Add device name and rssi, if not in dictionary.
 
             string deviceName = eventArgs.Advertisement.LocalName;
-            var address = eventArgs.BluetoothAddress;
-            short rssi = eventArgs.RawSignalStrengthInDBm;
 
-            if(deviceName == "") { deviceName = "Unknown_" + deviceCounter; deviceCounter++; }
-            
-            if (!bleDevices.ContainsKey(deviceName))
+            if (deviceName != "")
             {
-                bleDevices.Add(deviceName, address);
+                var address = eventArgs.BluetoothAddress;
+                short rssi = eventArgs.RawSignalStrengthInDBm;
+
+                //if (deviceName == "") { deviceName = "Unknown_" + deviceCounter; deviceCounter++; }
+
+                if (!bleDeviceAddresses.ContainsKey(deviceName))
+                {
+                    bleDeviceAddresses.Add(deviceName, address);
+                }
+
+                if (!bleDeviceAddresses.ContainsKey(deviceName))
+                {
+                    bleDevicesRSSI.Add(deviceName, rssi);
+                }
             }
 
-            if (!bleDevices.ContainsKey(deviceName)) 
-            {
-                bleDevicesRSSI.Add(deviceName, rssi);
-            }
             
-            //blueEvent = BlueEvent.searchFinished;
-            //callback();
-
-            //int numberOfGattServices = eventArgs.Advertisement.ServiceUuids.Count;
-            //var data = eventArgs.Advertisement.DataSections[1];
-            //byte[] dataAsBA = new byte[data.Data.Length];
-            //CryptographicBuffer.CopyToByteArray(data.Data, out dataAsBA);
-            //string name = byteArrayToReadableString(dataAsBA);
-
-            //Debug.WriteLine(name);
-
-
-            //var = even
-
-            //try
-            //{
-            //    BluetoothLEDevice device = await BluetoothLEDevice.FromBluetoothAddressAsync(address);
-            //    var cnt = device.GattServices.Count;
-            //    watcher.Stop();
-            //    if (device.Name == "HMSoft")
-            //    {
-            //        DeviceInformation deviceIno = device.DeviceInformation;
-            //        Debug.WriteLine(device.BluetoothAddress);
-            //        device.Dispose();
-
-            //        IDevicePairingSettings pairSettings;
-            //        Debug.WriteLine(deviceIno.Pairing.ProtectionLevel);
-            //        DevicePairingResult dpr = await deviceIno.Pairing.PairAsync(DevicePairingProtectionLevel.None);
-            //        //var service = await GattDeviceService.FromIdAsync(eventArgs.Advertisement.ServiceUuids.ToString());
-            //        Debug.WriteLine(dpr.Status);
-            //        Debug.WriteLine(device.BluetoothAddress.ToString("X2"));
-            //        Debug.WriteLine("Device name: " + device.Name);
-            //        Debug.WriteLine("Connection status: " + device.ConnectionStatus);
-            //        Debug.WriteLine(device.DeviceInformation.Kind);
-            //        Debug.WriteLine(device.GattServices);
-            //    } else
-            //    {
-            //        //watcher.Start();
-            //    }
-            //} catch (Exception ex)
-            //{
-            //    Debug.WriteLine(ex);
-            //}
-
         }
 
         private void OnAdvertisementWatcherStopped(BluetoothLEAdvertisementWatcher watcher, BluetoothLEAdvertisementWatcherStoppedEventArgs eventArgs)
@@ -328,21 +279,14 @@ namespace bleTest3
 
         private async void GattDelayPopulateTimer_Tick(object sender, object e)
         {
-            //if (bleDevice != null) { Debug.WriteLine(bleDevice.GattServices.Count); }
             bleDevice = await BluetoothLEDevice.FromBluetoothAddressAsync(bleAddress);
             var services = bleDevice.GattServices;
-
             foreach (GattDeviceService service in services)
             {
                 service.Device.ConnectionStatusChanged += OnConnectionStatusChanged;
                 var characteristics = service.GetAllCharacteristics();
                 foreach (GattCharacteristic characteristic in characteristics)
                 {
-
-                    //var currentDescriptorValue = await characteristic.ReadClientCharacteristicConfigurationDescriptorAsync();
-
-                    // if ((currentDescriptorValue.Status != GattCommunicationStatus.Success) || (currentDescriptorValue.ClientCharacteristicConfigurationDescriptor != GattClientCharacteristicConfigurationDescriptorValue.Notify))
-                    // {
                     try
                     {
                         await characteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
@@ -351,18 +295,10 @@ namespace bleTest3
                     catch (Exception ex)
                     {
                         Debug.WriteLine(ex.Message);
-                    }
-
-                    // }
-                    
+                    }                    
                 }
             }
             gattDelayPopulateTimer.Stop();
-        }
-
-        public async void populateCharacteristics()
-        {
-
         }
 
         private async Task<bool> connectToBLEDevice(DeviceInformation device)
@@ -371,8 +307,6 @@ namespace bleTest3
             // 2. Add event handlers
             // 3. Returned the pairing status.
             var connectedBleDevice = await device.Pairing.PairAsync(DevicePairingProtectionLevel.None);
-
-            //populateCharacteristics();
             return bleDevice.DeviceInformation.Pairing.IsPaired;
         }
 
@@ -390,10 +324,6 @@ namespace bleTest3
 
             bleDevice.Dispose();
 
-            //bleDevice.ConnectionStatusChanged += BleDevice_ConnectionStatusChanged;
-            //bleDevice.GattServicesChanged += BleDevice_GattServicesChanged;
-
-
             // Assert existing connection.
             if (bleDevice.DeviceInformation.Pairing.IsPaired == false)
             {
@@ -404,54 +334,16 @@ namespace bleTest3
 
             }
 
-            //            var devices = await DeviceInformation.FindAllAsync(GattDeviceService.GetDeviceSelectorFromUuid(GattServiceUuids.GenericAttribute));
-
-
-            //var services = bleDevice.GattServices;
-            //foreach (GattDeviceService service in services)
-            //{
-            //    service.Device.ConnectionStatusChanged += OnConnectionStatusChanged;
-            //    var characteristics = service.GetAllCharacteristics();
-            //    foreach (GattCharacteristic characteristic in characteristics)
-            //    {
-
-            //        // var currentDescriptorValue = await characteristic.ReadClientCharacteristicConfigurationDescriptorAsync();
-
-            //        // if ((currentDescriptorValue.Status != GattCommunicationStatus.Success) || (currentDescriptorValue.ClientCharacteristicConfigurationDescriptor != GattClientCharacteristicConfigurationDescriptorValue.Notify))
-            //        // {
-            //        try
-            //        {
-            //            await characteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
-            //        }
-            //        catch (Exception ex)
-            //        {
-            //            Debug.WriteLine(ex.Message);
-            //        }
-
-            //        // }
-            //        characteristic.ValueChanged += Oncharacteristic_ValueChanged;
-            //    }
-            //}
-
-
-
-
-            //for (int i = 0; i < bleDevice.GattServices.Count; i++)
-            //{
-            //    var characteristics = bleDevice.GattServices[i].GetAllCharacteristics();
-            //    for (int j = 0; j < characteristics.Count; j++)
-            //    {
-            //        Debug.WriteLine("Service UUID: " + characteristics[j].Service.Uuid.ToString() + "Gatt #: " + i.ToString() + " Characteristic #: " + j.ToString());
-            //    }
-            //}
-
         }
         
         private void Oncharacteristic_ValueChanged(GattCharacteristic sender, GattValueChangedEventArgs args)
         {
             try
             {
+                byte[] charValueByteArray = new byte[args.CharacteristicValue.Length];
                 Debug.Write(CryptographicBuffer.ConvertBinaryToString(BinaryStringEncoding.Utf8, args.CharacteristicValue));
+                CryptographicBuffer.CopyToByteArray(args.CharacteristicValue, out charValueByteArray);
+                serialBuffer.RxBuffer = charValueByteArray;
                 
             } catch (Exception ex)
             {
@@ -470,7 +362,6 @@ namespace bleTest3
             writer = new DataWriter();
 
             sendStr = "Hey baby!";
-            //writeToBleDevice(sendStr);
 
             byte[] sendPacket = GetBytes(sendStr);
             writer.WriteBytes(sendPacket);
@@ -480,8 +371,6 @@ namespace bleTest3
                 GattDeviceService serviceID = bleDevice.GattServices[2];
                 Guid serviceGUUID = serviceID.Uuid;
 
-                //Debug.WriteLine(serviceID.Uuid);
-                //var service = await GattDeviceService.FromIdAsync(bleDevice.DeviceId);
                 var miliService = await GattDeviceService.FromIdAsync(serviceID.DeviceId);
 
                 Debug.WriteLine("HEYHEY! " + miliService.GetAllCharacteristics().Count);
@@ -489,9 +378,6 @@ namespace bleTest3
                 // Will tell you what the characteristic is about (Does it allow read? Write? Etc.)
                 Debug.WriteLine("Characteristic value: " + readWriteCharacteristic.CharacteristicProperties);
                 readWriteCharacteristic.ProtectionLevel = GattProtectionLevel.Plain;
-
-
-                //var miliService = await GattDeviceService.FromIdAsync(GatDevices[0].Id);
                 var pairCharacteristic = miliService.GetAllCharacteristics().FirstOrDefault();
                 var pairStatus = await readWriteCharacteristic.WriteValueAsync(writer.DetachBuffer(), GattWriteOption.WriteWithoutResponse);
 
@@ -510,8 +396,6 @@ namespace bleTest3
                 {
                     Debug.WriteLine(ex.Message);
                 }
-
-                // }
                 readWriteCharacteristic.ValueChanged += Oncharacteristic_ValueChanged;
             }
             catch (Exception ex)

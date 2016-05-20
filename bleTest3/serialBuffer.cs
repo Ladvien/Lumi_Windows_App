@@ -31,7 +31,6 @@ namespace lumi
                 RXbufferUpdated(this, null);          
             }
             private get { return _RxBuffer; }
-
         }
 
         public byte[] ReadFromRxBuffer(int numberOfBytes)

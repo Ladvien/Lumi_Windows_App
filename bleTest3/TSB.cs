@@ -308,6 +308,13 @@ namespace bleTest3
                     }
                     break;
                 default:
+                    byte[] rxByteArray = serialBuffer.readAllBytesFromRXBuffer();
+                    string str = "";
+                    for(int i = 0; i < rxByteArray.Length; i++)
+                    {
+                        str += rxByteArray[i].ToString("X2");
+                    }
+                    appendText(str, Colors.LightBlue);
                     Debug.WriteLine("Defaulted in RXbuffer switch\n");
                     break;
             }
@@ -453,12 +460,19 @@ namespace bleTest3
         
         public void appendText(string str, Color color)
         {
-            Run r = new Run();
-            //r.FontFamily = new FontFamily("Courier New");
-            r.Foreground = getColoredBrush(color);
-            r.Text = str;
-            theOneParagraph.Inlines.Add(r);
-            scrollToBottomOfTerminal();
+            try
+            {
+                Run r = new Run();
+                //r.FontFamily = new FontFamily("Courier New");
+                r.Foreground = getColoredBrush(color);
+                r.Text = str;
+                theOneParagraph.Inlines.Add(r);
+                scrollToBottomOfTerminal();
+            } catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
+
         }
 
         public void clearMainDisplay()

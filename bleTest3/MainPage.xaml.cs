@@ -78,7 +78,7 @@ namespace bleTest3
             tsb.init(serialPorts, mainDisplayScroll, rtbMainDisplay, theOneParagraph, pbSys, serialBufffer, txbOpenFilePath);
             // Delegate callback for TSB updates.
             tsb.TsbUpdatedCommand += new TSB.TsbUpdateCommand(tsbcommandUpdate);
-            blue.init(this.Height, this.Width);
+            blue.init(serialBufffer);
 
             //devicePicker.DeviceSelected += DevicePicker_DeviceSelected;
 
@@ -247,7 +247,7 @@ namespace bleTest3
                     }
                     break;
                 case 1: // Bluetooth LE
-                    if(cmbFoundDevices.SelectedItem != null) { var success = blue.connect(blue.bleDevices[cmbFoundDevices.SelectedItem.ToString()]); }
+                    if(cmbFoundDevices.SelectedItem != null) { var success = blue.connect(blue.bleDeviceAddresses[cmbFoundDevices.SelectedItem.ToString()]); }
                     
                     break;
             }   
@@ -287,7 +287,7 @@ namespace bleTest3
                     btnConnect.IsEnabled = false;
                     cmbFoundDevices.IsEnabled = false;
                     cmbDeviceSelector.IsEnabled = false;
-                    blue.startBLEWatcher(2);
+                    blue.startBLEWatcher(5);
                     //DeviceSelectorInfo bluetoothLESelectorPaired = DeviceSelectorChoices.BluetoothLEPairedOnly;
                     break;
             }
@@ -409,16 +409,16 @@ namespace bleTest3
                 case blue.BlueEvent.searchFinished:
                     ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                     {
-                        if (blue.bleDevices.Count > 0)
+                        if (blue.bleDeviceAddresses.Count > 0)
                         {
-                            int deviceCount = blue.bleDevices.Count;
+                            int deviceCount = blue.bleDeviceAddresses.Count;
                             string[] key = new string[deviceCount];
 
                             cmbFoundDevices.Items.Clear();
 
                             for (int i = 0; i < deviceCount; i++)
                             {
-                                blue.bleDevices.Keys.CopyTo(key, 0);
+                                blue.bleDeviceAddresses.Keys.CopyTo(key, 0);
                                 cmbFoundDevices.Items.Insert(i, key[i]);
                             }
                             cmbFoundDevices.SelectedIndex = 0;
