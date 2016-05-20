@@ -62,6 +62,7 @@ namespace bleTest3
         public Dictionary<string, ulong> bleDevices = new Dictionary<string, ulong>();
         public Dictionary<string, short> bleDevicesRSSI = new Dictionary<string, short>();
         public DispatcherTimer bleSearchTimer = new DispatcherTimer();
+        public DispatcherTimer gattDelayPopulateTimer = new DispatcherTimer();
 
         // Bluetooth LE Connection
         BluetoothLEDevice bleDevice;
@@ -81,6 +82,8 @@ namespace bleTest3
         // Used to workaround MS' crappy API.
         public bool pairedUnpairedThisSession = false;
         private int deviceCounter;
+
+        public ulong bleAddress = 0;
         #endregion properties_and_methods
 
         public void init(double appHeight, double appWidth)
@@ -112,10 +115,13 @@ namespace bleTest3
             bleAdvertWatcher.Start();
 
             bleSearchTimer.Tick += BleSearchTimer_Tick;
+            gattDelayPopulateTimer.Tick += GattDelayPopulateTimer_Tick;
 
             serialBuffer.RXbufferUpdated += new SerialBuffer.CallBackEventHandler(RXbufferUpdated);
             serialBuffer.TXbufferUpdated += new SerialBuffer.CallBackEventHandler(TXbufferUpdated);
         }
+
+
 
         private void RXbufferUpdated(object sender, EventArgs args)
         {
@@ -171,7 +177,7 @@ namespace bleTest3
                     {
                         var service = await GattDeviceService.FromIdAsync(device.Id);
                         Debug.WriteLine("Added");
-                        populateCharacteristics(service);
+                        //populateCharacteristics(service);
                     } catch (Exception ex)
                     {
                         Debug.WriteLine(ex.Message);
@@ -244,7 +250,7 @@ namespace bleTest3
                 bleDevices.Add(deviceName, address);
             }
 
-            if (!bleDevices.ContainsKey(deviceName))
+            if (!bleDevices.ContainsKey(deviceName)) 
             {
                 bleDevicesRSSI.Add(deviceName, rssi);
             }
@@ -320,12 +326,14 @@ namespace bleTest3
 
         }
 
-        public async void populateCharacteristics(GattDeviceService service)
+        private async void GattDelayPopulateTimer_Tick(object sender, object e)
         {
             //if (bleDevice != null) { Debug.WriteLine(bleDevice.GattServices.Count); }
-            //var services = bleDevice.GattServices;
-            //foreach (GattDeviceService service in services)
-            //{
+            bleDevice = await BluetoothLEDevice.FromBluetoothAddressAsync(bleAddress);
+            var services = bleDevice.GattServices;
+
+            foreach (GattDeviceService service in services)
+            {
                 service.Device.ConnectionStatusChanged += OnConnectionStatusChanged;
                 var characteristics = service.GetAllCharacteristics();
                 foreach (GattCharacteristic characteristic in characteristics)
@@ -338,6 +346,7 @@ namespace bleTest3
                     try
                     {
                         await characteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
+                        characteristic.ValueChanged += Oncharacteristic_ValueChanged;
                     }
                     catch (Exception ex)
                     {
@@ -345,9 +354,15 @@ namespace bleTest3
                     }
 
                     // }
-                    characteristic.ValueChanged += Oncharacteristic_ValueChanged;
+                    
                 }
-            //}
+            }
+            gattDelayPopulateTimer.Stop();
+        }
+
+        public async void populateCharacteristics()
+        {
+
         }
 
         private async Task<bool> connectToBLEDevice(DeviceInformation device)
@@ -367,10 +382,10 @@ namespace bleTest3
             // 2. If device is not paired, pair it.
             // 3. Enumerate Gatt services.
 
-            
             // Get a BLE device from address.
             bleDevice = await BluetoothLEDevice.FromBluetoothAddressAsync(bluetoothAddress);
 
+            bleAddress = bluetoothAddress;
             DeviceInformation bleDeviceInfo = bleDevice.DeviceInformation;
 
             bleDevice.Dispose();
@@ -384,60 +399,70 @@ namespace bleTest3
             {
                 // Attempt to pair the BLE device
                 await connectToBLEDevice(bleDeviceInfo);
-                Debug.WriteLine(bleDevice.GattServices.Count);
+                gattDelayPopulateTimer.Interval = new TimeSpan(0, 0, 5);
+                gattDelayPopulateTimer.Start();
+
             }
 
             //            var devices = await DeviceInformation.FindAllAsync(GattDeviceService.GetDeviceSelectorFromUuid(GattServiceUuids.GenericAttribute));
 
 
-            var services = bleDevice.GattServices;
-            foreach (GattDeviceService service in services)
-            {
-                service.Device.ConnectionStatusChanged += OnConnectionStatusChanged;
-                var characteristics = service.GetAllCharacteristics();
-                foreach (GattCharacteristic characteristic in characteristics)
-                {
+            //var services = bleDevice.GattServices;
+            //foreach (GattDeviceService service in services)
+            //{
+            //    service.Device.ConnectionStatusChanged += OnConnectionStatusChanged;
+            //    var characteristics = service.GetAllCharacteristics();
+            //    foreach (GattCharacteristic characteristic in characteristics)
+            //    {
 
-                    // var currentDescriptorValue = await characteristic.ReadClientCharacteristicConfigurationDescriptorAsync();
+            //        // var currentDescriptorValue = await characteristic.ReadClientCharacteristicConfigurationDescriptorAsync();
 
-                    // if ((currentDescriptorValue.Status != GattCommunicationStatus.Success) || (currentDescriptorValue.ClientCharacteristicConfigurationDescriptor != GattClientCharacteristicConfigurationDescriptorValue.Notify))
-                    // {
-                    try
-                    {
-                        await characteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine(ex.Message);
-                    }
+            //        // if ((currentDescriptorValue.Status != GattCommunicationStatus.Success) || (currentDescriptorValue.ClientCharacteristicConfigurationDescriptor != GattClientCharacteristicConfigurationDescriptorValue.Notify))
+            //        // {
+            //        try
+            //        {
+            //            await characteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
+            //        }
+            //        catch (Exception ex)
+            //        {
+            //            Debug.WriteLine(ex.Message);
+            //        }
 
-                    // }
-                    characteristic.ValueChanged += Oncharacteristic_ValueChanged;
-                }
-            }
-
-
+            //        // }
+            //        characteristic.ValueChanged += Oncharacteristic_ValueChanged;
+            //    }
+            //}
 
 
-            for (int i = 0; i < bleDevice.GattServices.Count; i++)
-            {
-                var characteristics = bleDevice.GattServices[i].GetAllCharacteristics();
-                for (int j = 0; j < characteristics.Count; j++)
-                {
-                    Debug.WriteLine("Service UUID: " + characteristics[j].Service.Uuid.ToString() + "Gatt #: " + i.ToString() + " Characteristic #: " + j.ToString());
-                }
-            }
+
+
+            //for (int i = 0; i < bleDevice.GattServices.Count; i++)
+            //{
+            //    var characteristics = bleDevice.GattServices[i].GetAllCharacteristics();
+            //    for (int j = 0; j < characteristics.Count; j++)
+            //    {
+            //        Debug.WriteLine("Service UUID: " + characteristics[j].Service.Uuid.ToString() + "Gatt #: " + i.ToString() + " Characteristic #: " + j.ToString());
+            //    }
+            //}
 
         }
-
+        
         private void Oncharacteristic_ValueChanged(GattCharacteristic sender, GattValueChangedEventArgs args)
         {
-            Debug.WriteLine(CryptographicBuffer.ConvertBinaryToString(BinaryStringEncoding.Utf8, args.CharacteristicValue));
+            try
+            {
+                Debug.Write(CryptographicBuffer.ConvertBinaryToString(BinaryStringEncoding.Utf8, args.CharacteristicValue));
+                
+            } catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
+            
         }
 
         private void OnConnectionStatusChanged(BluetoothLEDevice sender, object args)
         {
-            throw new NotImplementedException();
+       
         }
 
         public async void writeToBleDevice(string sendStr)
