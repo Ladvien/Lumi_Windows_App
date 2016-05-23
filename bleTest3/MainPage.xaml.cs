@@ -531,6 +531,25 @@ namespace bleTest3
             tsb.writeToFlash();
         }
 
+        private void cmbOTADevice_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            switch (cmbOTADevice.SelectedIndex)
+            {
+                case 0:
+                    tsb.setOTADevice(TSB.OTAType.none);
+                    break;
+                case 1:
+                    tsb.setOTADevice(TSB.OTAType.hm1x);
+                    break;
+                case 2:
+                    tsb.setOTADevice(TSB.OTAType.esp);
+                    break;
+                default:
+                    tsb.setOTADevice(TSB.OTAType.none);
+                    appendText("Problems selecting Over-the-Air device", Colors.Crimson);
+                    break;
+            }
+        }
     }// End MainPage
 } // End Namespace
 

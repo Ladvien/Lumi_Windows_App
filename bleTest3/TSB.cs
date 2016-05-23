@@ -131,21 +131,26 @@ namespace bleTest3
             writeEEPROM = 7,
             readUserData = 8,
             writeUserData = 9,
-            error = 10
+            otaLow = 10,
+            otaHigh = 11,
+            error = 12
         }
 
         public static string[] commandsAsStrings =
         {
-            "",
-            "@@@",
-            "?",
-            "!",
-            "f",
-            "F",
-            "e",
-            "E",
-            "c",
-            "C",
+            "",           // 0
+            "@@@",        // 1
+            "?",          // 2
+            "!",          // 3
+            "f",          // 4
+            "F",          // 5
+            "e",          // 6
+            "E",          // 7
+            "c",          // 8
+            "C",          // 9
+            "AT+PIO20",   // 10
+            "AT+PIO21",   // 11
+
         };
 
         public enum displayFlash
@@ -170,6 +175,16 @@ namespace bleTest3
             y = 9,
             error = 10
         }
+
+        
+        public enum OTAType: int
+        {
+            none = 0,
+            hm1x = 1,
+            esp = 2
+        }
+        OTAType OTASelected = new OTAType();
+
         #endregion enumerations
 
         #region properties
@@ -231,6 +246,8 @@ namespace bleTest3
         public SerialBuffer serialBuffer = new SerialBuffer();
         // When a write command is sent, then timeout timer is started.
         public DispatcherTimer writeTimer = new DispatcherTimer();
+
+
 
         public void init(serialPortsExtended serialPortMain, ScrollViewer _mainDisplayScrollView,RichTextBlock _rtbMainDisplay, Paragraph _theOneParagraph, ProgressBar mainProgressBar, SerialBuffer _serialBuffer, TextBlock _openFilePath)
         {
@@ -307,6 +324,12 @@ namespace bleTest3
                         Debug.WriteLine("Yay, there's much rejoicing.");
                     }
                     break;
+                case commands.otaLow:
+                    helloRouting();
+                    break;
+                case commands.otaHigh:
+                    helloRouting();
+                    break;
                 default:
                     byte[] rxByteArray = serialBuffer.readAllBytesFromRXBuffer();
                     string str = "";
@@ -318,6 +341,11 @@ namespace bleTest3
                     Debug.WriteLine("Defaulted in RXbuffer switch\n");
                     break;
             }
+        }
+
+        public void setOTADevice(OTAType device)
+        {
+            OTASelected = device;
         }
 
         public void scrollToBottomOfTerminal()
@@ -351,12 +379,82 @@ namespace bleTest3
             displayFlashType = displayFlashTypeArgument;
         }
 
-        public async void hello()
+        public string getAsciiStringFromByteArray(byte[] byteArray)
+        {
+            string str = "";
+
+            for(int i = 0; i < byteArray.Length; i++)
+            {
+                str += (char)byteArray[i];
+            }
+
+            return str;
+        }
+
+        public void hello()
         {
             commandInProgress = commands.hello;
-            startWriteTimeoutTimer(1);
-            serialBuffer.txBuffer = getCommand(commands.hello);
-//            await serialPorts.write(commandsAsStrings[(int)commands.hello]);
+            helloRouting();
+        }
+
+        public async void helloRouting()
+        {
+            byte[] rxData;
+            string str = "";
+            writeTimer.Stop();
+            switch (OTASelected)
+            {
+                case OTAType.none:
+                    startWriteTimeoutTimer(1);
+                    serialBuffer.txBuffer = getCommand(commands.hello);
+                    //            await serialPorts.write(commandsAsStrings[(int)commands.hello]);
+                    break;
+                case OTAType.hm1x:
+                    switch (commandInProgress)
+                    {
+                        case commands.hello:
+                            startWriteTimeoutTimer(2);
+                            serialBuffer.txBuffer = getCommand(commands.otaLow);
+                            commandInProgress = commands.otaLow;
+                            break;
+                        case commands.otaLow:
+                            rxData = serialBuffer.readAllBytesFromRXBuffer();
+
+                            str = getAsciiStringFromByteArray(rxData);
+
+                            if (str.Contains("OK+"))
+                            {
+                                startWriteTimeoutTimer(2);
+                                serialBuffer.txBuffer = getCommand(commands.otaHigh);
+                                commandInProgress = commands.otaHigh;
+                            }
+                            break;
+                        case commands.otaHigh:
+
+                            rxData = serialBuffer.readAllBytesFromRXBuffer();
+
+                            str = getAsciiStringFromByteArray(rxData);
+
+                            if (str.Contains("OK+"))
+                            {
+                                startWriteTimeoutTimer(1);
+                                commandInProgress = commands.hello;
+                                serialBuffer.txBuffer = getCommand(commands.hello);
+                            }
+                            break;
+                    }
+
+                    break;
+                case OTAType.esp:
+                    appendText("ESP8266 is not yet implemented.", Colors.Crimson);
+                    break;
+                default:
+                    appendText("Uh-oh.  There was a problem selecting a device for TSB handshake.", Colors.Crimson);
+                    break;
+
+
+            }
+
         }
 
         public bool helloProcessing()
