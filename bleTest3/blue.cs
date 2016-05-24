@@ -44,6 +44,13 @@ namespace bleTest3
 
         List<byte> rxBuffer;
 
+        GattDeviceService _service;
+
+        List<BluetoothLEDevice> bleDevices;
+        List<GattDeviceService> gattServices;
+        List<GattCharacteristic> gattCharacteristics;
+
+        GattCharacteristic readWriteCharacteristic;
         // Used for UI callback.
         public enum BlueEvent
         {
@@ -67,7 +74,7 @@ namespace bleTest3
         // Bluetooth LE Connection
         BluetoothLEDevice bleDevice;
 
-        GattCharacteristic readWriteCharacteristic;
+
         DataWriter writer = new DataWriter();
 
         // Used for enumeration information.
@@ -86,6 +93,11 @@ namespace bleTest3
         {
             serialBuffer = _serialBuffer;
             rxBuffer = new List<byte>();
+
+            bleDevices = new List<BluetoothLEDevice>();
+            gattServices = new List<GattDeviceService>();
+            gattCharacteristics = new List<GattCharacteristic>();
+
             // Create and initialize a new watcher instance.
             bleAdvertWatcher = new BluetoothLEAdvertisementWatcher();
 
@@ -121,7 +133,8 @@ namespace bleTest3
 
         private void TXbufferUpdated(object sender, EventArgs args)
         {
-            Debug.WriteLine("blue Callback for TX bufferUpdated");
+            //int numberOfBytes = serialBuffer.bytesInTxBuffer();
+            //writeByteArrayToBle(serialBuffer.ReadFromTxBuffer(numberOfBytes));
         }
         #region devicewatcher
 
@@ -133,11 +146,11 @@ namespace bleTest3
 
                 if (bleDevice.DeviceInformation.Id == args.Id)
                 {
-                    Debug.WriteLine("Total Gatts added: "+gattAddedCounter);
+                    Debug.WriteLine("Total Gatts added: " + gattAddedCounter);
                     gattAddedCounter++;
                     // This would be better if BluetoothAdvertisementWatcher discovered Gatt services
                     // rather than presuming them.
-                    if(gattAddedCounter == 7)
+                    if (gattAddedCounter == 7)
                     {
                         callback();
                     }
@@ -159,9 +172,9 @@ namespace bleTest3
 
         private async void DeviceWatcher_Added(DeviceWatcher sender, DeviceInformation device)
         {
-            if(bleDevice != null)
+            if (bleDevice != null)
             {
-                
+
                 if (bleDevice.Name == device.Name)
                 {
                     try
@@ -182,7 +195,7 @@ namespace bleTest3
         private void DeviceWatcher_EnumerationCompleted(DeviceWatcher sender, object args)
         {
             Debug.WriteLine("HERE");
-            
+
         }
 
         #endregion devicewatcher
@@ -195,14 +208,14 @@ namespace bleTest3
             // 2. Loop through all paired devices and unpair them (BLAST YOU MS!)
             // 3. Clear discovered device lists.
             // 4. Start the search for unpaired devices.
-           
+
             bleSearchTimer.Interval = new TimeSpan(0, 0, 0, seconds);
             var selector = BluetoothLEDevice.GetDeviceSelector();
             var devices = await DeviceInformation.FindAllAsync(selector);
 
             // Hacker fix.  Each time the app closes the "User Session Token" for the BLE connection
             // is lost.  To re-enable it for our new session, pairing and unpairing must be done.
-            for (int i =0; i < devices.Count; i++)
+            for (int i = 0; i < devices.Count; i++)
             {
                 await devices[i].Pairing.UnpairAsync();
             }
@@ -222,7 +235,7 @@ namespace bleTest3
         }
 
 
-        private void OnAdvertisementReceived(BluetoothLEAdvertisementWatcher watcher, BluetoothLEAdvertisementReceivedEventArgs eventArgs)
+        private async void OnAdvertisementReceived(BluetoothLEAdvertisementWatcher watcher, BluetoothLEAdvertisementReceivedEventArgs eventArgs)
         {
             // 1. Clear discovered devices
             // 2. If no device name, make one.
@@ -230,6 +243,8 @@ namespace bleTest3
             // 4. Add device name and rssi, if not in dictionary.
 
             string deviceName = eventArgs.Advertisement.LocalName;
+
+            // discoverChars(eventArgs.BluetoothAddress);
 
             if (deviceName != "")
             {
@@ -249,7 +264,7 @@ namespace bleTest3
                 }
             }
 
-            
+
         }
 
         private void OnAdvertisementWatcherStopped(BluetoothLEAdvertisementWatcher watcher, BluetoothLEAdvertisementWatcherStoppedEventArgs eventArgs)
@@ -277,27 +292,72 @@ namespace bleTest3
 
         }
 
-        private async void GattDelayPopulateTimer_Tick(object sender, object e)
+        public async Task<bool> discoverChars(ulong address)
         {
-            bleDevice = await BluetoothLEDevice.FromBluetoothAddressAsync(bleAddress);
-            var services = bleDevice.GattServices;
+            var device = await BluetoothLEDevice.FromBluetoothAddressAsync(address);
+            bleDevices.Add(device);
+            var services =  device.GattServices;
+
             foreach (GattDeviceService service in services)
             {
                 service.Device.ConnectionStatusChanged += OnConnectionStatusChanged;
+                gattServices.Add(service);
+                //var characteristics = service.GetAllCharacteristics();
                 var characteristics = service.GetAllCharacteristics();
                 foreach (GattCharacteristic characteristic in characteristics)
                 {
                     try
                     {
-                        await characteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
-                        characteristic.ValueChanged += Oncharacteristic_ValueChanged;
+                        Debug.WriteLine(characteristic.CharacteristicProperties);
+                        Debug.WriteLine(characteristic.ProtectionLevel);
+                        //if (characteristic.CharacteristicProperties == (GattCharacteristicProperties. | GattCharacteristicProperties.Notify))
+                        //{
+                            
+                            var status = await characteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
+                            //Debug.WriteLine(status);
+                            characteristic.ValueChanged += Oncharacteristic_ValueChanged;
+                            
+                            gattCharacteristics.Add(characteristic);
+                        writeToChar("AT+PIO21");
+                            
+
+                        //}
+
+
+                        //Debug.WriteLine(status);
+
                     }
                     catch (Exception ex)
                     {
                         Debug.WriteLine(ex.Message);
-                    }                    
+                    }
                 }
             }
+            return true;
+        }
+
+        public async void writeToChar(string str)
+        {
+            IBuffer bufferString = CryptographicBuffer.ConvertStringToBinary(str, BinaryStringEncoding.Utf8);
+
+                foreach(GattCharacteristic chars in gattCharacteristics)
+                {
+                    try
+                    {
+                        await chars.WriteValueAsync(bufferString, GattWriteOption.WriteWithoutResponse);
+                    } catch
+                    {
+
+                    }
+
+                }                
+                
+
+        }
+
+        private async void GattDelayPopulateTimer_Tick(object sender, object e)
+        {
+            await discoverChars(bleAddress);
             gattDelayPopulateTimer.Stop();
         }
 
@@ -322,7 +382,7 @@ namespace bleTest3
             bleAddress = bluetoothAddress;
             DeviceInformation bleDeviceInfo = bleDevice.DeviceInformation;
 
-            bleDevice.Dispose();
+            //bleDevice.Dispose();
 
             // Assert existing connection.
             if (bleDevice.DeviceInformation.Pairing.IsPaired == false)
@@ -338,10 +398,11 @@ namespace bleTest3
         
         private void Oncharacteristic_ValueChanged(GattCharacteristic sender, GattValueChangedEventArgs args)
         {
+            Debug.WriteLine("blah");
             try
             {
                 byte[] charValueByteArray = new byte[args.CharacteristicValue.Length];
-                Debug.Write(CryptographicBuffer.ConvertBinaryToString(BinaryStringEncoding.Utf8, args.CharacteristicValue));
+                Debug.WriteLine(CryptographicBuffer.ConvertBinaryToString(BinaryStringEncoding.Utf8, args.CharacteristicValue));
                 CryptographicBuffer.CopyToByteArray(args.CharacteristicValue, out charValueByteArray);
                 serialBuffer.RxBuffer = charValueByteArray;
                 
@@ -357,11 +418,9 @@ namespace bleTest3
        
         }
 
-        public async void writeToBleDevice(string sendStr)
+        public async void writeStringToBle(string sendStr)
         {
             writer = new DataWriter();
-
-            sendStr = "Hey baby!";
 
             byte[] sendPacket = GetBytes(sendStr);
             writer.WriteBytes(sendPacket);
@@ -373,30 +432,12 @@ namespace bleTest3
 
                 var miliService = await GattDeviceService.FromIdAsync(serviceID.DeviceId);
 
-                Debug.WriteLine("HEYHEY! " + miliService.GetAllCharacteristics().Count);
                 readWriteCharacteristic = miliService.GetAllCharacteristics()[0];
                 // Will tell you what the characteristic is about (Does it allow read? Write? Etc.)
-                Debug.WriteLine("Characteristic value: " + readWriteCharacteristic.CharacteristicProperties);
                 readWriteCharacteristic.ProtectionLevel = GattProtectionLevel.Plain;
                 var pairCharacteristic = miliService.GetAllCharacteristics().FirstOrDefault();
                 var pairStatus = await readWriteCharacteristic.WriteValueAsync(writer.DetachBuffer(), GattWriteOption.WriteWithoutResponse);
 
-                var read = await readWriteCharacteristic.ReadValueAsync();
-
-                Debug.WriteLine(read.Value);
-
-                
-                Debug.WriteLine(CryptographicBuffer.ConvertBinaryToString(BinaryStringEncoding.Utf8, read.Value));
-
-                try
-                {
-                    await readWriteCharacteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex.Message);
-                }
-                readWriteCharacteristic.ValueChanged += Oncharacteristic_ValueChanged;
             }
             catch (Exception ex)
             {
@@ -404,6 +445,29 @@ namespace bleTest3
             }
         }
 
+        public async void writeByteArrayToBle(byte[] sendStr)
+        {
+            writer = new DataWriter();
+            writer.WriteBytes(sendStr);
+            try
+            {
+                GattDeviceService serviceID = bleDevice.GattServices[2];
+                Guid serviceGUUID = serviceID.Uuid;
+
+                var miliService = await GattDeviceService.FromIdAsync(serviceID.DeviceId);
+
+                readWriteCharacteristic = miliService.GetAllCharacteristics()[0];
+                // Will tell you what the characteristic is about (Does it allow read? Write? Etc.)
+                readWriteCharacteristic.ProtectionLevel = GattProtectionLevel.Plain;
+                var pairCharacteristic = miliService.GetAllCharacteristics().FirstOrDefault();
+                var pairStatus = await readWriteCharacteristic.WriteValueAsync(writer.DetachBuffer(), GattWriteOption.WriteWithoutResponse);
+
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
+        }
 
 
         private void BleDevice_GattServicesChanged(BluetoothLEDevice sender, object args)

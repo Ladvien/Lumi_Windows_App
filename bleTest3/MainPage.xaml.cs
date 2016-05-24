@@ -499,8 +499,7 @@ namespace bleTest3
 
         private async void btnTest_Click(object sender, RoutedEventArgs e)
         {
-            blue.writeToBleDevice("Blah");
-            //blue.connectToAlreadyPaired();
+            
         }
 
         public async Task reset()
