@@ -20,6 +20,7 @@ using System.Collections;
 using Windows.Storage;
 using System.IO;
 using Windows.Storage.Pickers;
+using Windows.UI.Core;
 
 namespace bleTest3
 {
@@ -133,7 +134,9 @@ namespace bleTest3
             writeUserData = 9,
             otaLow = 10,
             otaHigh = 11,
-            error = 12
+            bleHello = 12,
+            helloProcessing = 13,
+            error = 14
         }
 
         public static string[] commandsAsStrings =
@@ -247,6 +250,7 @@ namespace bleTest3
         // When a write command is sent, then timeout timer is started.
         public DispatcherTimer writeTimer = new DispatcherTimer();
 
+        public CoreDispatcher dispatcher;
 
 
         public void init(serialPortsExtended serialPortMain, ScrollViewer _mainDisplayScrollView,RichTextBlock _rtbMainDisplay, Paragraph _theOneParagraph, ProgressBar mainProgressBar, SerialBuffer _serialBuffer, TextBlock _openFilePath)
@@ -276,8 +280,15 @@ namespace bleTest3
 
         public void startWriteTimeoutTimer(int seconds)
         {
-            writeTimer.Interval = new TimeSpan(0, 0, 0, seconds);
-            writeTimer.Start();
+
+            var ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+            () =>
+            {
+                writeTimer.Interval = new TimeSpan(0, 0, 0, seconds);
+                writeTimer.Start();
+            });
+
+
         }
 
         private void writeTimer_Tick(object sender, object e)
@@ -292,6 +303,11 @@ namespace bleTest3
             
         }
 
+        public async void writeToTsb(string dataToWrit)
+        {
+
+        }
+
         private async void RXbufferUpdated(object sender, EventArgs args)
         {
             // 1. Route to command-in-progress.
@@ -304,7 +320,14 @@ namespace bleTest3
                     break;
                 case commands.hello:
                     bool outcome = helloProcessing();
-                    writeTimer.Stop();
+
+                    var ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+                    () =>
+                    {
+                        writeTimer.Stop();
+                    });
+
+
                     if (outcome)
                     {
                         TsbUpdatedCommand(statuses.connected);
@@ -324,20 +347,20 @@ namespace bleTest3
                         Debug.WriteLine("Yay, there's much rejoicing.");
                     }
                     break;
+                case commands.bleHello:
+                    helloRouting();
+                    break;
                 case commands.otaLow:
                     helloRouting();
                     break;
                 case commands.otaHigh:
                     helloRouting();
                     break;
+                case commands.helloProcessing:
+                    helloProcessing();
+                    break;
                 default:
-                    byte[] rxByteArray = serialBuffer.readAllBytesFromRXBuffer();
-                    string str = "";
-                    for(int i = 0; i < rxByteArray.Length; i++)
-                    {
-                        str += rxByteArray[i].ToString("X2");
-                    }
-                    appendText(str, Colors.LightBlue);
+
                     Debug.WriteLine("Defaulted in RXbuffer switch\n");
                     break;
             }
@@ -393,7 +416,7 @@ namespace bleTest3
 
         public void hello()
         {
-            commandInProgress = commands.hello;
+            commandInProgress = commands.bleHello;
             helloRouting();
         }
 
@@ -401,7 +424,7 @@ namespace bleTest3
         {
             byte[] rxData;
             string str = "";
-            writeTimer.Stop();
+            //writeTimer.Stop();
             switch (OTASelected)
             {
                 case OTAType.none:
@@ -412,7 +435,7 @@ namespace bleTest3
                 case OTAType.hm1x:
                     switch (commandInProgress)
                     {
-                        case commands.hello:
+                        case commands.bleHello:
                             startWriteTimeoutTimer(2);
                             serialBuffer.txBuffer = getCommand(commands.otaLow);
                             commandInProgress = commands.otaLow;
@@ -438,7 +461,7 @@ namespace bleTest3
                             if (str.Contains("OK+"))
                             {
                                 startWriteTimeoutTimer(1);
-                                commandInProgress = commands.hello;
+                                commandInProgress = commands.helloProcessing;
                                 serialBuffer.txBuffer = getCommand(commands.hello);
                             }
                             break;
@@ -536,7 +559,13 @@ namespace bleTest3
                          + "\nPage Size\t" + pageSizeString
                          + "\nFlash Free:\t" + flashLeft
                          + "\nEEPROM size:\t" + eeprom + "\n";
-                    appendText(tsbHanshakeInfo, Colors.White);
+
+                    Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+                    () =>
+                    {
+                        appendText(tsbHanshakeInfo, Colors.White);
+                    });
+
                     commandInProgress = commands.none;
                     //setTsbConnectionSafely(true);
                     return true;

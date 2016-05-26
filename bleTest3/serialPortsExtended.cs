@@ -114,13 +114,18 @@ namespace bleTest3
 
         #region interface methods
 
-        public void init(Paragraph theParagraph, SerialBuffer buffer)
+        public void init(Paragraph theParagraph)
         {
-            serialBuffer = buffer;
             theOneParagraph = theParagraph;
+
+            readyToListPortsTimer.Tick += ReadyToListPortsTimer_Tick;
+        }
+
+        public void attachSerialBuffer(SerialBuffer _serialBuffer)
+        {
+            serialBuffer = _serialBuffer;
             serialBuffer.RXbufferUpdated += new SerialBuffer.CallBackEventHandler(RXbufferUpdated);
             serialBuffer.TXbufferUpdated += new SerialBuffer.CallBackEventHandler(TXbufferUpdated);
-            readyToListPortsTimer.Tick += ReadyToListPortsTimer_Tick;
         }
 
         public void RXbufferUpdated(object sender, EventArgs args)

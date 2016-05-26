@@ -73,12 +73,12 @@ namespace bleTest3
 
             // Have the serialPortsExtended object populate the combo boxes.
             serialPorts.populateComboBoxesWithPortSettings(cmbBaud, cmbDataBits, cmbStopBits, cmbParity, cmbHandshaking);
-            serialPorts.init(theOneParagraph, serialBufffer);
+            serialPorts.init(theOneParagraph);
 
             tsb.init(serialPorts, mainDisplayScroll, rtbMainDisplay, theOneParagraph, pbSys, serialBufffer, txbOpenFilePath);
             // Delegate callback for TSB updates.
             tsb.TsbUpdatedCommand += new TSB.TsbUpdateCommand(tsbcommandUpdate);
-            blue.init(serialBufffer);
+            blue.init();
 
             //devicePicker.DeviceSelected += DevicePicker_DeviceSelected;
 
@@ -88,29 +88,32 @@ namespace bleTest3
 
         private void tsbcommandUpdate(TSB.statuses tsbConnectionStatus)
         {
-            Debug.WriteLine("Insert command updates here");
+            //Debug.WriteLine("Insert command updates here");
             Debug.Write(tsbConnectionStatus);
-            switch (tsbConnectionStatus)
-            {
-                case TSB.statuses.connected:
-                    btnTsbConnect.Content = "Disconnect";
-                    connectionLabelBackGround.Background = getColoredBrush(Colors.LawnGreen);
-                    labelConnectionStatus.Text = "Connected to TSB";
-                    mainPivotTable.SelectedIndex = 2;
-                    tabTSB.IsEnabled = true;
-                    break;
-                case TSB.statuses.error:
-                    tabTSB.IsEnabled = false;
-                    btnTsbConnect.Content = "Connect";
-                    btnTsbConnect.IsEnabled = true;
-                    connectionLabelBackGround.Background = getColoredBrush(Colors.Crimson);
-                    labelConnectionStatus.Text = "Error";
-                    tabTSB.IsEnabled = false;
-                    break;
-                case TSB.statuses.uploadSuccessful:
-                    reset();
-                    break;
-            }
+            var ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => {
+                switch (tsbConnectionStatus)
+                {
+                    case TSB.statuses.connected:
+                        btnTsbConnect.Content = "Disconnect";
+                        connectionLabelBackGround.Background = getColoredBrush(Colors.LawnGreen);
+                        labelConnectionStatus.Text = "Connected to TSB";
+                        mainPivotTable.SelectedIndex = 2;
+                        tabTSB.IsEnabled = true;
+                        break;
+                    case TSB.statuses.error:
+                        tabTSB.IsEnabled = false;
+                        btnTsbConnect.Content = "Connect";
+                        btnTsbConnect.IsEnabled = true;
+                        connectionLabelBackGround.Background = getColoredBrush(Colors.Crimson);
+                        labelConnectionStatus.Text = "Error";
+                        tabTSB.IsEnabled = false;
+                        break;
+                    case TSB.statuses.uploadSuccessful:
+                        reset();
+                        break;
+                }
+            });
+
         }
 
         public void RXbufferUpdated(object sender, EventArgs args)
@@ -218,6 +221,7 @@ namespace bleTest3
                             /////////////////////////////
                             serialPorts.AlwaysListening();
                             /////////////////////////////
+                            serialPorts.attachSerialBuffer(serialBufffer);
                         }
                         else
                         {
@@ -432,6 +436,13 @@ namespace bleTest3
                         btnBleSearch.IsEnabled = true;
                         btnBleSearch.Content = "Search";
                         cmbDeviceSelector.IsEnabled = true;
+                    });
+                    break;
+                case blue.BlueEvent.connected:
+                    ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                    {
+                        btnTsbConnect.IsEnabled = true;
+                        blue.attachSerialBuffer(serialBufffer);
                     });
                     break;
             }

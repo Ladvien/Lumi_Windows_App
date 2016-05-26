@@ -56,7 +56,8 @@ namespace bleTest3
         {
             none = 0,
             finishedConnecting = 1,
-            searchFinished = 2
+            searchFinished = 2,
+            connected = 3
         }
 
         // Callback to the main UI.
@@ -89,9 +90,9 @@ namespace bleTest3
         public ulong bleAddress = 0;
         #endregion properties_and_methods
 
-        public void init(SerialBuffer _serialBuffer)
+        public void init()
         {
-            serialBuffer = _serialBuffer;
+
             rxBuffer = new List<byte>();
 
             bleDevices = new List<BluetoothLEDevice>();
@@ -120,6 +121,12 @@ namespace bleTest3
             bleSearchTimer.Tick += BleSearchTimer_Tick;
             gattDelayPopulateTimer.Tick += GattDelayPopulateTimer_Tick;
 
+
+        }
+
+        public void attachSerialBuffer(SerialBuffer _serialBuffer)
+        {
+            serialBuffer = _serialBuffer;
             serialBuffer.RXbufferUpdated += new SerialBuffer.CallBackEventHandler(RXbufferUpdated);
             serialBuffer.TXbufferUpdated += new SerialBuffer.CallBackEventHandler(TXbufferUpdated);
         }
@@ -133,8 +140,8 @@ namespace bleTest3
 
         private void TXbufferUpdated(object sender, EventArgs args)
         {
-            //int numberOfBytes = serialBuffer.bytesInTxBuffer();
-            //writeByteArrayToBle(serialBuffer.ReadFromTxBuffer(numberOfBytes));
+            int numberOfBytes = serialBuffer.bytesInTxBuffer();
+            writeByteArrayToBle(serialBuffer.ReadFromTxBuffer(numberOfBytes));
         }
         #region devicewatcher
 
@@ -310,21 +317,12 @@ namespace bleTest3
                     {
                         Debug.WriteLine(characteristic.CharacteristicProperties);
                         Debug.WriteLine(characteristic.ProtectionLevel);
-                        //if (characteristic.CharacteristicProperties == (GattCharacteristicProperties. | GattCharacteristicProperties.Notify))
-                        //{
-                            
-                            var status = await characteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
-                            //Debug.WriteLine(status);
-                            characteristic.ValueChanged += Oncharacteristic_ValueChanged;
-                            
-                            gattCharacteristics.Add(characteristic);
+                        var status = await characteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
+                        characteristic.ValueChanged += Oncharacteristic_ValueChanged;                          
+                        gattCharacteristics.Add(characteristic);
                         writeToChar("AT+PIO21");
-                            
 
-                        //}
-
-
-                        //Debug.WriteLine(status);
+                        Callback(this, BlueEvent.connected);
 
                     }
                     catch (Exception ex)
@@ -382,8 +380,6 @@ namespace bleTest3
             bleAddress = bluetoothAddress;
             DeviceInformation bleDeviceInfo = bleDevice.DeviceInformation;
 
-            //bleDevice.Dispose();
-
             // Assert existing connection.
             if (bleDevice.DeviceInformation.Pairing.IsPaired == false)
             {
@@ -391,17 +387,16 @@ namespace bleTest3
                 await connectToBLEDevice(bleDeviceInfo);
                 gattDelayPopulateTimer.Interval = new TimeSpan(0, 0, 5);
                 gattDelayPopulateTimer.Start();
-
             }
 
         }
         
         private void Oncharacteristic_ValueChanged(GattCharacteristic sender, GattValueChangedEventArgs args)
         {
-            Debug.WriteLine("blah");
             try
             {
                 byte[] charValueByteArray = new byte[args.CharacteristicValue.Length];
+                
                 Debug.WriteLine(CryptographicBuffer.ConvertBinaryToString(BinaryStringEncoding.Utf8, args.CharacteristicValue));
                 CryptographicBuffer.CopyToByteArray(args.CharacteristicValue, out charValueByteArray);
                 serialBuffer.RxBuffer = charValueByteArray;
@@ -409,6 +404,9 @@ namespace bleTest3
             } catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message);
+                byte[] charValueByteArray = new byte[args.CharacteristicValue.Length];
+                CryptographicBuffer.CopyToByteArray(args.CharacteristicValue, out charValueByteArray);
+                serialBuffer.RxBuffer = charValueByteArray;
             }
             
         }
@@ -427,17 +425,10 @@ namespace bleTest3
 
             try
             {
-                GattDeviceService serviceID = bleDevice.GattServices[2];
-                Guid serviceGUUID = serviceID.Uuid;
-
-                var miliService = await GattDeviceService.FromIdAsync(serviceID.DeviceId);
-
-                readWriteCharacteristic = miliService.GetAllCharacteristics()[0];
-                // Will tell you what the characteristic is about (Does it allow read? Write? Etc.)
-                readWriteCharacteristic.ProtectionLevel = GattProtectionLevel.Plain;
-                var pairCharacteristic = miliService.GetAllCharacteristics().FirstOrDefault();
-                var pairStatus = await readWriteCharacteristic.WriteValueAsync(writer.DetachBuffer(), GattWriteOption.WriteWithoutResponse);
-
+                foreach(GattCharacteristic gattCharacteristic in gattCharacteristics)
+                {
+                    var pairStatus = await gattCharacteristic.WriteValueAsync(writer.DetachBuffer(), GattWriteOption.WriteWithoutResponse);
+                }
             }
             catch (Exception ex)
             {
@@ -445,23 +436,16 @@ namespace bleTest3
             }
         }
 
-        public async void writeByteArrayToBle(byte[] sendStr)
+        public async void writeByteArrayToBle(byte[] sendPacket)
         {
             writer = new DataWriter();
-            writer.WriteBytes(sendStr);
+            writer.WriteBytes(sendPacket);
             try
             {
-                GattDeviceService serviceID = bleDevice.GattServices[2];
-                Guid serviceGUUID = serviceID.Uuid;
-
-                var miliService = await GattDeviceService.FromIdAsync(serviceID.DeviceId);
-
-                readWriteCharacteristic = miliService.GetAllCharacteristics()[0];
-                // Will tell you what the characteristic is about (Does it allow read? Write? Etc.)
-                readWriteCharacteristic.ProtectionLevel = GattProtectionLevel.Plain;
-                var pairCharacteristic = miliService.GetAllCharacteristics().FirstOrDefault();
-                var pairStatus = await readWriteCharacteristic.WriteValueAsync(writer.DetachBuffer(), GattWriteOption.WriteWithoutResponse);
-
+                foreach (GattCharacteristic gattCharacteristic in gattCharacteristics)
+                {
+                    var pairStatus = await gattCharacteristic.WriteValueAsync(writer.DetachBuffer(), GattWriteOption.WriteWithoutResponse);
+                }
             }
             catch (Exception ex)
             {
@@ -498,39 +482,6 @@ namespace bleTest3
         }
 
 
-
-        private async Task ReadAsync(CancellationToken cancellationToken)
-        {
-            Task<UInt32> loadAsyncTask;
-
-            uint ReadBufferLength = 1024;
-
-            //dataReaderObject.UnicodeEncoding = Windows.Storage.Streams.UnicodeEncoding.Utf16BE;
-
-            // If task cancellation was requested, comply
-            cancellationToken.ThrowIfCancellationRequested();
-
-            // Set InputStreamOptions to complete the asynchronous read operation when one or more bytes is available
-            dataReaderObject.InputStreamOptions = InputStreamOptions.Partial;
-
-            // Create a task object to wait for data on the serialPort.InputStream
-            loadAsyncTask = dataReaderObject.LoadAsync(ReadBufferLength).AsTask(cancellationToken);
-
-            // Launch the task and wait
-            UInt32 bytesRead = await loadAsyncTask;
-            byte[] tempByteArray = new byte[bytesRead];
-            dataReaderObject.ReadBytes(tempByteArray);
-            rxBuffer.AddRange(tempByteArray);
-
-            string fancyString = byteArrayToReadableString(rxBuffer.ToArray());
-
-            if (bytesRead > 0)
-            {
-                serialBuffer.RxBuffer = tempByteArray;
-                //appendText(fancyString, Colors.Red); 
-            }
-
-        }
 
         public void closeBleDevice()
         {
