@@ -88,6 +88,9 @@ namespace bleTest3
         private int deviceCounter;
 
         public ulong bleAddress = 0;
+
+        private List<byte> writeBleBuffer = new List<byte>();
+
         #endregion properties_and_methods
 
         public void init()
@@ -138,10 +141,11 @@ namespace bleTest3
             Debug.WriteLine("blue Callback for RX bufferUpdated");
         }
 
-        private void TXbufferUpdated(object sender, EventArgs args)
+
+        public async void TXbufferUpdated(object sender, EventArgs args)
         {
             int numberOfBytes = serialBuffer.bytesInTxBuffer();
-            writeByteArrayToBle(serialBuffer.ReadFromTxBuffer(numberOfBytes));
+            await writeByteArrayToBle(serialBuffer.ReadFromTxBuffer(numberOfBytes));
         }
         #region devicewatcher
 
@@ -436,21 +440,37 @@ namespace bleTest3
             }
         }
 
-        public async void writeByteArrayToBle(byte[] sendPacket)
+        public async Task<bool> writeByteArrayToBle(byte[] sendPacket)
         {
-            writer = new DataWriter();
-            writer.WriteBytes(sendPacket);
-            try
+            writeBleBuffer.AddRange(sendPacket);
+
+            foreach (GattCharacteristic gattCharacteristic in gattCharacteristics)
             {
-                foreach (GattCharacteristic gattCharacteristic in gattCharacteristics)
+                while(writeBleBuffer.Count > 0)
                 {
-                    var pairStatus = await gattCharacteristic.WriteValueAsync(writer.DetachBuffer(), GattWriteOption.WriteWithoutResponse);
+                    writer = new DataWriter();
+                    byte[] data = writeBleBuffer.Take(19).ToArray();
+                    writer.WriteBytes(data);
+                    try
+                    {
+                        var pairStatus = await gattCharacteristic.WriteValueAsync(writer.DetachBuffer(), GattWriteOption.WriteWithoutResponse);
+                        if(writeBleBuffer.Count > 19)
+                        {
+                            writeBleBuffer.RemoveRange(0, 19);
+                        } else
+                        {
+                            writeBleBuffer.RemoveRange(0, writeBleBuffer.Count);
+                        }
+                        //return true;
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine(ex.Message);
+                    }
                 }
+                return true;           
             }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message);
-            }
+            return false;
         }
 
 

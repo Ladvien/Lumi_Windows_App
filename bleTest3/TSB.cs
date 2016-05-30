@@ -21,6 +21,7 @@ using Windows.Storage;
 using System.IO;
 using Windows.Storage.Pickers;
 using Windows.UI.Core;
+using Windows.Foundation;
 
 namespace bleTest3
 {
@@ -188,6 +189,15 @@ namespace bleTest3
         }
         OTAType OTASelected = new OTAType();
 
+        public enum device: int
+        {
+            none = 0,
+            serial = 1,
+            hm1x = 2,
+            esp8266 = 3
+        }
+        device deviceSelected = new device();
+
         #endregion enumerations
 
         #region properties
@@ -252,6 +262,8 @@ namespace bleTest3
 
         public CoreDispatcher dispatcher;
 
+        public List<byte> readFlashBfr = new List<byte>();
+
 
         public void init(serialPortsExtended serialPortMain, ScrollViewer _mainDisplayScrollView,RichTextBlock _rtbMainDisplay, Paragraph _theOneParagraph, ProgressBar mainProgressBar, SerialBuffer _serialBuffer, TextBlock _openFilePath)
         {
@@ -272,6 +284,8 @@ namespace bleTest3
             serialBuffer.TXbufferUpdated += new SerialBuffer.CallBackEventHandler(TXbufferUpdated);
             readFlashBuffer.bufferUpdated += new SerialBuffer.CallBackEventHandler(ReadFlashBuffer_bufferUpdated);
         }
+
+
 
         private void ReadFlashBuffer_bufferUpdated(object sender, EventArgs args)
         {
@@ -311,17 +325,18 @@ namespace bleTest3
         private async void RXbufferUpdated(object sender, EventArgs args)
         {
             // 1. Route to command-in-progress.
-            
+
+            IAsyncAction ignored;
             switch (commandInProgress)
             {
                 case commands.error:
                     appendText("Uh-oh. Bad stuff happened.\n", Colors.Crimson);
                     TsbUpdatedCommand(statuses.error);
-                    break;
+                    break; 
                 case commands.hello:
-                    bool outcome = helloProcessing();
+                    bool outcome = await helloProcessing();
 
-                    var ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+                    ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
                     () =>
                     {
                         writeTimer.Stop();
@@ -341,11 +356,21 @@ namespace bleTest3
                     processFlashRead();
                     break;
                 case commands.writeFlash:
-                    var writeResponse = await writeDataToFlash();
-                    if (writeResponse)
+
+                    try
                     {
-                        Debug.WriteLine("Yay, there's much rejoicing.");
+                        var writeResponse = await writeDataToFlash();
+                        if (writeResponse)
+                        {
+                            Debug.WriteLine("Yay, there's much rejoicing.");
+                        }
                     }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine(ex.Message);
+                    }
+
+
                     break;
                 case commands.bleHello:
                     helloRouting();
@@ -360,7 +385,6 @@ namespace bleTest3
                     helloProcessing();
                     break;
                 default:
-
                     Debug.WriteLine("Defaulted in RXbuffer switch\n");
                     break;
             }
@@ -371,8 +395,14 @@ namespace bleTest3
             OTASelected = device;
         }
 
+        public void setDevice(device _device)
+        {
+            deviceSelected = _device;
+        }
+
         public void scrollToBottomOfTerminal()
         {
+
             mainDisplayScrollView.ScrollToVerticalOffset(mainDisplay.ContentEnd.Offset+50);
         }
 
@@ -416,8 +446,17 @@ namespace bleTest3
 
         public void hello()
         {
-            commandInProgress = commands.bleHello;
-            helloRouting();
+            switch (deviceSelected)
+            {
+                case device.serial:
+                    helloRouting();
+                    break;
+                case device.hm1x:
+                    commandInProgress = commands.bleHello;
+                    helloRouting();
+                    break;
+            }
+            
         }
 
         public async void helloRouting()
@@ -429,6 +468,7 @@ namespace bleTest3
             {
                 case OTAType.none:
                     startWriteTimeoutTimer(1);
+                    commandInProgress = commands.helloProcessing;
                     serialBuffer.txBuffer = getCommand(commands.hello);
                     //            await serialPorts.write(commandsAsStrings[(int)commands.hello]);
                     break;
@@ -480,7 +520,7 @@ namespace bleTest3
 
         }
 
-        public bool helloProcessing()
+        public async Task<bool> helloProcessing()
         {
             
             // 1. Try handshake ("@@@") three times; or continue if successful.
@@ -560,10 +600,12 @@ namespace bleTest3
                          + "\nFlash Free:\t" + flashLeft
                          + "\nEEPROM size:\t" + eeprom + "\n";
 
-                    Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+                    await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
                     () =>
                     {
                         appendText(tsbHanshakeInfo, Colors.White);
+                        writeTimer.Stop();
+                        TsbUpdatedCommand(statuses.connected);
                     });
 
                     commandInProgress = commands.none;
@@ -623,34 +665,50 @@ namespace bleTest3
             // 1. Set readFlash as the commandInProgress
             // 2. Write read Flash command.
             commandInProgress = commands.readFlash;
-            await serialPorts.write(commandsAsStrings[(int)commands.readFlash]);
-            await serialPorts.write(commandsAsStrings[(int)commands.confirm]);
+            //await serialPorts.write(commandsAsStrings[(int)commands.readFlash]);
+            //await serialPorts.write(commandsAsStrings[(int)commands.confirm]);
+            serialBuffer.txBuffer = getCommand(commands.readFlash);
+            serialBuffer.txBuffer = getCommand(commands.confirm);
         }
 
-        public async void processFlashRead()
-        {
-            // 1. Update progressBar based on pages read.
-            // 2. Add new serialBuffer data (recently received) to rxByteArray List.
-            // 3. Check the dogear of the page (bottom  corner bytes)
-            // 3. If last two bytes are FF FF, then break, as end of Flash.
-            // 3. If all pages are collected, process read.
-            // 4. Continue to get data until buffer is full.
-            // 5. If not the end, request another page.
+        public async void processFlashRead() {
 
-            byte[] tmpRxByteArray = serialBuffer.readAllBytesFromRXBuffer();
-            var currentProgressBarValue = 100*((float)rxByteArray.Count / (float)flashSize);
-            progressBar.Value = map(currentProgressBarValue, 0, 100, 0, 50);
-            rxByteArray.AddRange(tmpRxByteArray);
-            if (dogEarCheck(tmpRxByteArray.ToArray())){
-                progressBar.Value = 50;
-                parseAndPrintRawRead(rxByteArray);
-                progressBar.Value = 100;
+            // 1. Read RX buffer into a temporary buffer.
+            // 2. If the temporary buffer is smaller than a page, exit method.
+            // 3. If the larger than a page...
+            // 4. Update the progress bar, using the main thread.
+            // 5. Move the bytes received so far into the rxByteArray (full read-out buffer).
+            // 6. Check if this is the last page, if so parse and print the read-out buffer.
+            // 7. If not, request another page.
+            // 8. Clear the temporary buffer.
+
+            IAsyncAction ignored;
+
+            readFlashBfr.AddRange(serialBuffer.readAllBytesFromRXBuffer());
+            if(readFlashBfr.Count < pageSize) { return; }
+
+            var currentProgressBarValue = 1000*((float)rxByteArray.Count / (float)flashSize);
+            ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+            () =>
+            {
+                progressBar.Value = currentProgressBarValue;
+            });
+
+            rxByteArray.AddRange(readFlashBfr.ToArray());
+            if (dogEarCheck(readFlashBfr.ToArray())){
+                ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+                () =>
+                {
+                    parseAndPrintRawRead(rxByteArray);
+                    progressBar.Value = 100;
+                });
                 return;
             }
-            else if (tmpRxByteArray.Length >= pageSize)
+            else if (readFlashBfr.Count >= pageSize)
             {
-                await serialPorts.write(commandsAsStrings[(int)commands.confirm]);
+                serialBuffer.txBuffer = getCommand(commands.confirm);
             }
+            readFlashBfr.Clear();
         }
 
         private bool dogEarCheck(byte[] byteArray)
@@ -707,7 +765,7 @@ namespace bleTest3
                     lineBuffer = "";
                 }
                 var currentProgressBarValue = 100 * ((float)i+1 / (float)numberOfPagesRead);
-                progressBar.Value = map(currentProgressBarValue, 0, 100, 50, 100);
+                //progressBar.Value = map(currentProgressBarValue, 0, 100, 50, 100);
             }
 
             scrollToBottomOfTerminal();
@@ -846,7 +904,7 @@ namespace bleTest3
         {
             if(intelHexFileToUpload.Count != 0)
             {
-                await serialPorts.write(commandsAsStrings[(int)commands.writeFlash]);
+                serialBuffer.txBuffer = getCommand(commands.writeFlash);
                 commandInProgress = commands.writeFlash;
                 appendText("\n\n\nWrite in progress: \nPlease do not disconnect device or exit the application.\n", Colors.Yellow);
                 scrollToBottomOfTerminal();
@@ -869,6 +927,8 @@ namespace bleTest3
             // 7. Wait and check for CF ('!').
             // 8. Return true if process successful.
 
+            IAsyncAction ignored;
+
             int pagesToWrite = intelHexFileToUpload.Count / pageSize;
 
             byte[] rxByteArray = serialBuffer.readAllBytesFromRXBuffer();
@@ -882,35 +942,62 @@ namespace bleTest3
                     // From byte array to string 
                     //string stringToWrite = getStringFromIntBytes(dataToWrite.Skip(i * pageSize).Take(pageSize).ToArray());
                     byte[] bytesToWrite = intelHexFileToUpload.Skip(uploadPageIndex * pageSize).Take(pageSize).ToArray();
-                    await serialPorts.write(commandsAsStrings[(int)commands.confirm]);
-                    await serialPorts.writeBytes(bytesToWrite);
-                    appendText("Page #" + uploadPageIndex + " ", Colors.Yellow);
-                    appendText("OK.\n", Colors.LawnGreen);
+
+                    //ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                    //{
+                        serialBuffer.txBuffer = getCommand(commands.confirm);
+                        serialBuffer.txBuffer = bytesToWrite;
+                    //});
+
+                    
+                    //await serialPorts.write(commandsAsStrings[(int)commands.confirm]);
+                    //await serialPorts.writeBytes(bytesToWrite);
+
+
                     byte[] tmpRxByteArray = serialBuffer.readAllBytesFromRXBuffer();
 
-                    var currentProgressBarValue = 100 * ((float)(uploadPageIndex+1) / (float)pagesToWrite);
-                    progressBar.Value = map(currentProgressBarValue, 0, 100, 0, 100);
-                    scrollToBottomOfTerminal();
+                    ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+                    () =>
+                    {
+                        appendText("Page #" + uploadPageIndex + " ", Colors.Yellow);
+                        appendText("OK.\n", Colors.LawnGreen);
+                        scrollToBottomOfTerminal();
+                        var currentProgressBarValue = 100 * ((float)(uploadPageIndex + 1) / (float)pagesToWrite);
+                        progressBar.Value = map(currentProgressBarValue, 0, 100, 0, 100);
+                    });
+
                     uploadPageIndex++;
                 } else
                 {
-                    await serialPorts.write(commandsAsStrings[(int)commands.request]);
+                    serialBuffer.txBuffer = getCommand(commands.request);
+                    //await serialPorts.write(commandsAsStrings[(int)commands.request]);
                 }
                 return true;
             }
             else if (rxByteArray[0] == 0x21) // !
             {
-                scrollToBottomOfTerminal();
-                appendText("\nThe file ", Colors.LawnGreen);
-                appendText(hexFileToRead.Name, Colors.Yellow);
-                appendText(" was written succesfully!", Colors.LawnGreen);
+
+                ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+                () =>
+                {
+
+                    scrollToBottomOfTerminal();
+                    appendText("\nThe file ", Colors.LawnGreen);
+                    appendText(hexFileToRead.Name, Colors.Yellow);
+                    appendText(" was written succesfully!", Colors.LawnGreen);
+                    scrollToBottomOfTerminal();
+                });
                 TsbUpdatedCommand(statuses.uploadSuccessful);
-                scrollToBottomOfTerminal();
                 return true;
             } else
             {
                 // Error writing to flash.
-                appendText("ERROR writing Page #" + uploadPageIndex + "\n", Colors.Crimson);
+
+                ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+                () =>
+                {
+                    appendText("ERROR writing Page #" + uploadPageIndex + "\n", Colors.Crimson);
+                });
                 return false;
             }
             return false;

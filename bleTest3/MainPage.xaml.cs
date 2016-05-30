@@ -69,7 +69,7 @@ namespace bleTest3
             // Start the port discovery.
             serialPorts.ListAvailablePorts();
 
-  
+            tsb.setDevice(TSB.device.serial);
 
             // Have the serialPortsExtended object populate the combo boxes.
             serialPorts.populateComboBoxesWithPortSettings(cmbBaud, cmbDataBits, cmbStopBits, cmbParity, cmbHandshaking);
@@ -326,6 +326,7 @@ namespace bleTest3
                         cmbFoundDevices.Visibility = Visibility.Visible;
                         cmbFoundDevices.IsEnabled = false;
                         populatePortComboBox();
+                        tsb.setDevice(TSB.device.serial);
                         break;
                     case 1:
                         cmbFoundDevices.Items.Clear();
@@ -333,6 +334,7 @@ namespace bleTest3
                         btnBleSearch.Visibility = Visibility.Visible;
                         cmbFoundDevices.Visibility = Visibility.Visible;
                         cmbFoundDevices.IsEnabled = false;
+                        tsb.setDevice(TSB.device.hm1x);
                         break;
                 }                
             }
@@ -428,6 +430,10 @@ namespace bleTest3
                             cmbFoundDevices.SelectedIndex = 0;
                             cmbFoundDevices.IsEnabled = true;
                             btnConnect.IsEnabled = true;
+                            // Make sure the OTA is set to BLE, since, yanno, we are searching for a BLE device.
+                            mainPivotTable.SelectedIndex = 2;
+                            cmbOTADevice.SelectedIndex = 1;
+
                         }
                         else
                         {
@@ -510,7 +516,8 @@ namespace bleTest3
 
         private async void btnTest_Click(object sender, RoutedEventArgs e)
         {
-            
+            byte[] blah = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60 };
+            var waitResponse = blue.writeByteArrayToBle(blah);
         }
 
         public async Task reset()
