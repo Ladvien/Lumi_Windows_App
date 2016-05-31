@@ -141,7 +141,6 @@ namespace bleTest3
             Debug.WriteLine("blue Callback for RX bufferUpdated");
         }
 
-
         public async void TXbufferUpdated(object sender, EventArgs args)
         {
             int numberOfBytes = serialBuffer.bytesInTxBuffer();
@@ -205,7 +204,7 @@ namespace bleTest3
 
         private void DeviceWatcher_EnumerationCompleted(DeviceWatcher sender, object args)
         {
-            Debug.WriteLine("HERE");
+            Debug.WriteLine("DeviceWatcher_EnumerationCompleted");
 
         }
 
@@ -307,13 +306,12 @@ namespace bleTest3
         {
             var device = await BluetoothLEDevice.FromBluetoothAddressAsync(address);
             bleDevices.Add(device);
-            var services =  device.GattServices;
+            var services = device.GattServices;
 
             foreach (GattDeviceService service in services)
             {
                 service.Device.ConnectionStatusChanged += OnConnectionStatusChanged;
                 gattServices.Add(service);
-                //var characteristics = service.GetAllCharacteristics();
                 var characteristics = service.GetAllCharacteristics();
                 foreach (GattCharacteristic characteristic in characteristics)
                 {
@@ -340,27 +338,23 @@ namespace bleTest3
 
         public async void writeToChar(string str)
         {
-            IBuffer bufferString = CryptographicBuffer.ConvertStringToBinary(str, BinaryStringEncoding.Utf8);
-
-                foreach(GattCharacteristic chars in gattCharacteristics)
-                {
-                    try
-                    {
-                        await chars.WriteValueAsync(bufferString, GattWriteOption.WriteWithoutResponse);
-                    } catch
-                    {
-
-                    }
-
-                }                
-                
-
+            byte[] tmpBfr = GetBytes(str);
+            await writeByteArrayToBle(tmpBfr);    
         }
 
         private async void GattDelayPopulateTimer_Tick(object sender, object e)
         {
-            await discoverChars(bleAddress);
-            gattDelayPopulateTimer.Stop();
+            try
+            {
+                await discoverChars(bleAddress);
+                gattDelayPopulateTimer.Stop();
+            } catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                Debug.WriteLine("Did not finish populating Gatt options");
+                gattDelayPopulateTimer.Start();
+            }
+
         }
 
         private async Task<bool> connectToBLEDevice(DeviceInformation device)

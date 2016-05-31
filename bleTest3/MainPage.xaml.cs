@@ -86,7 +86,7 @@ namespace bleTest3
             serialBufffer.TXbufferUpdated += new SerialBuffer.CallBackEventHandler(TXbufferUpdated);
         }
 
-        private void tsbcommandUpdate(TSB.statuses tsbConnectionStatus)
+        private void tsbcommandUpdate(TSB.statuses tsbConnectionStatus, Run message)
         {
             //Debug.WriteLine("Insert command updates here");
             Debug.Write(tsbConnectionStatus);
@@ -99,6 +99,7 @@ namespace bleTest3
                         labelConnectionStatus.Text = "Connected to TSB";
                         mainPivotTable.SelectedIndex = 2;
                         tabTSB.IsEnabled = true;
+                        appendRunToMainDisplay(message);
                         break;
                     case TSB.statuses.error:
                         tabTSB.IsEnabled = false;
@@ -110,6 +111,9 @@ namespace bleTest3
                         break;
                     case TSB.statuses.uploadSuccessful:
                         reset();
+                        break;
+                    case TSB.statuses.displayMessage:
+                        appendRunToMainDisplay(message);
                         break;
                 }
             });
@@ -501,6 +505,11 @@ namespace bleTest3
             Run r = new Run();
             r.Foreground = getColoredBrush(color);
             r.Text = str + '\n';
+            theOneParagraph.Inlines.Add(r);
+        }
+
+        public void appendRunToMainDisplay(Run r)
+        {
             theOneParagraph.Inlines.Add(r);
         }
 

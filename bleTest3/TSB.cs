@@ -175,7 +175,7 @@ namespace bleTest3
             readSuccessful = 5,
             downloadSuccessful = 6,
             uploadSuccessful = 7,
-            x = 8,
+            displayMessage = 8,
             y = 9,
             error = 10
         }
@@ -201,7 +201,7 @@ namespace bleTest3
         #endregion enumerations
 
         #region properties
-        public delegate void TsbUpdateCommand(statuses tsbConnectionStatus);
+        public delegate void TsbUpdateCommand(statuses tsbConnectionStatus, Run message = null);
         public event TsbUpdateCommand TsbUpdatedCommand;
 
         public SerialBuffer readFlashBuffer = new SerialBuffer();
@@ -330,7 +330,7 @@ namespace bleTest3
             switch (commandInProgress)
             {
                 case commands.error:
-                    appendText("Uh-oh. Bad stuff happened.\n", Colors.Crimson);
+                    displayMessage("Uh-oh. Bad stuff happened.\n", Colors.Crimson);
                     TsbUpdatedCommand(statuses.error);
                     break; 
                 case commands.hello:
@@ -349,7 +349,7 @@ namespace bleTest3
                         // Whatever says we are successful.
                     } else
                     {
-                        appendText("Failed to connect to TinySafeBoot", Colors.Crimson);
+                        displayMessage("Failed to connect to TinySafeBoot", Colors.Crimson);
                     } 
                     break;
                 case commands.readFlash:
@@ -509,10 +509,10 @@ namespace bleTest3
 
                     break;
                 case OTAType.esp:
-                    appendText("ESP8266 is not yet implemented.", Colors.Crimson);
+                    displayMessage("ESP8266 is not yet implemented.", Colors.Crimson);
                     break;
                 default:
-                    appendText("Uh-oh.  There was a problem selecting a device for TSB handshake.", Colors.Crimson);
+                    displayMessage("Uh-oh.  There was a problem selecting a device for TSB handshake.", Colors.Crimson);
                     break;
 
 
@@ -603,9 +603,9 @@ namespace bleTest3
                     await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
                     () =>
                     {
-                        appendText(tsbHanshakeInfo, Colors.White);
+                        //displayMessage(tsbHanshakeInfo, Colors.White);
                         writeTimer.Stop();
-                        TsbUpdatedCommand(statuses.connected);
+                        TsbUpdatedCommand(statuses.connected, (getRun(tsbHanshakeInfo, Colors.White)));
                     });
 
                     commandInProgress = commands.none;
@@ -616,7 +616,7 @@ namespace bleTest3
             else
             {
                 string error = "Could not handshake with TSB. Please reset and try again.\n";
-                appendText(error, Colors.Crimson);
+                
                 return false;
             }
             return false;
@@ -627,22 +627,6 @@ namespace bleTest3
             return new SolidColorBrush(color);
         }
         
-        public void appendText(string str, Color color)
-        {
-            try
-            {
-                Run r = new Run();
-                //r.FontFamily = new FontFamily("Courier New");
-                r.Foreground = getColoredBrush(color);
-                r.Text = str;
-                theOneParagraph.Inlines.Add(r);
-                scrollToBottomOfTerminal();
-            } catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message);
-            }
-
-        }
 
         public void clearMainDisplay()
         {
@@ -748,12 +732,12 @@ namespace bleTest3
 
             byte[] byteArray = rawFlashRead.ToArray();
 
-            appendText("\nFlash readout for " + deviceSignatureValue + "\n\n", Colors.White);
+            displayMessage("\nFlash readout for " + deviceSignatureValue + "\n\n", Colors.White);
 
             for (int i = 0; i < numberOfPagesRead; i++)
             {
                 if (displayFlashType != displayFlash.none)
-                { appendText("\n\t Page #:" + i + "\n", Colors.Yellow); }
+                { displayMessage("\n\t Page #:" + i + "\n", Colors.Yellow); }
                 for (int j = 0; j < pageDepth; j++)
                 {
                     int location = ((i * pageSize) + (j * pageWidth));
@@ -800,22 +784,22 @@ namespace bleTest3
                     // No display.
                     break;
                 case displayFlash.dataOnly:
-                    appendText(data + "\n", Colors.LawnGreen);
+                    displayMessage(data + "\n", Colors.LawnGreen);
                     break;
                 case displayFlash.addressAndData:
-                    appendText(address + ": ", Colors.Yellow);
-                    appendText(data + "\n", Colors.LawnGreen);
+                    displayMessage(address + ": ", Colors.Yellow);
+                    displayMessage(data + "\n", Colors.LawnGreen);
                     break;
                 case displayFlash.asIntelHexFile:
-                    appendText(":", Colors.Yellow);                  // Start code
-                    appendText(byteCount, Colors.Green);             // Byte count
-                    appendText(address, Colors.Purple);              // Address
-                    appendText(recordType, Colors.Pink);             // Record type.
-                    appendText(data, Colors.CadetBlue);              // Data
-                    appendText(checkSumString + "\n", Colors.Gray);  // Checksum
+                    displayMessage(":", Colors.Yellow);                  // Start code
+                    displayMessage(byteCount, Colors.Green);             // Byte count
+                    displayMessage(address, Colors.Purple);              // Address
+                    displayMessage(recordType, Colors.Pink);             // Record type.
+                    displayMessage(data, Colors.CadetBlue);              // Data
+                    displayMessage(checkSumString + "\n", Colors.Gray);  // Checksum
                     break;
                 default:
-                    appendText(data + "\n", Colors.LawnGreen);
+                    displayMessage(data + "\n", Colors.LawnGreen);
                     break;
             }
             scrollToBottomOfTerminal();
@@ -906,12 +890,12 @@ namespace bleTest3
             {
                 serialBuffer.txBuffer = getCommand(commands.writeFlash);
                 commandInProgress = commands.writeFlash;
-                appendText("\n\n\nWrite in progress: \nPlease do not disconnect device or exit the application.\n", Colors.Yellow);
+                displayMessage("\n\n\nWrite in progress: \nPlease do not disconnect device or exit the application.\n", Colors.Yellow);
                 scrollToBottomOfTerminal();
             }
             else
             {
-                appendText("No file to write.\n", Colors.Crimson);
+                displayMessage("No file to write.\n", Colors.Crimson);
             }
 
         }
@@ -933,34 +917,23 @@ namespace bleTest3
 
             byte[] rxByteArray = serialBuffer.readAllBytesFromRXBuffer();
 
-            //string readyForData = rxByteArray.ToString();
-
             if (rxByteArray[0] == 0x3F) // ?
             {
                 if (uploadPageIndex < pagesToWrite)
                 {
                     // From byte array to string 
-                    //string stringToWrite = getStringFromIntBytes(dataToWrite.Skip(i * pageSize).Take(pageSize).ToArray());
                     byte[] bytesToWrite = intelHexFileToUpload.Skip(uploadPageIndex * pageSize).Take(pageSize).ToArray();
 
-                    //ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-                    //{
-                        serialBuffer.txBuffer = getCommand(commands.confirm);
-                        serialBuffer.txBuffer = bytesToWrite;
-                    //});
-
-                    
-                    //await serialPorts.write(commandsAsStrings[(int)commands.confirm]);
-                    //await serialPorts.writeBytes(bytesToWrite);
-
+                    serialBuffer.txBuffer = getCommand(commands.confirm);
+                    serialBuffer.txBuffer = bytesToWrite;
 
                     byte[] tmpRxByteArray = serialBuffer.readAllBytesFromRXBuffer();
 
                     ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
                     () =>
                     {
-                        appendText("Page #" + uploadPageIndex + " ", Colors.Yellow);
-                        appendText("OK.\n", Colors.LawnGreen);
+                        displayMessage("Page #" + uploadPageIndex + " ", Colors.Yellow);
+                        displayMessage("OK.\n", Colors.LawnGreen);
                         scrollToBottomOfTerminal();
                         var currentProgressBarValue = 100 * ((float)(uploadPageIndex + 1) / (float)pagesToWrite);
                         progressBar.Value = map(currentProgressBarValue, 0, 100, 0, 100);
@@ -982,9 +955,9 @@ namespace bleTest3
                 {
 
                     scrollToBottomOfTerminal();
-                    appendText("\nThe file ", Colors.LawnGreen);
-                    appendText(hexFileToRead.Name, Colors.Yellow);
-                    appendText(" was written succesfully!", Colors.LawnGreen);
+                    displayMessage("\nThe file ", Colors.LawnGreen);
+                    displayMessage(hexFileToRead.Name, Colors.Yellow);
+                    displayMessage(" was written succesfully!", Colors.LawnGreen);
                     scrollToBottomOfTerminal();
                 });
                 TsbUpdatedCommand(statuses.uploadSuccessful);
@@ -996,7 +969,7 @@ namespace bleTest3
                 ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
                 () =>
                 {
-                    appendText("ERROR writing Page #" + uploadPageIndex + "\n", Colors.Crimson);
+                    displayMessage("ERROR writing Page #" + uploadPageIndex + "\n", Colors.Crimson);
                 });
                 return false;
             }
@@ -1045,17 +1018,17 @@ namespace bleTest3
                 txbOpenFilePath.Text = hexFileToRead.Path;
                 if (hexFileToRead.Path != "")
                 {
-                    appendText("File selected to upload: ", Colors.Yellow);
-                    appendText(hexFileToRead.Name + "\n", Colors.LawnGreen);
+                    displayMessage("File selected to upload: ", Colors.Yellow);
+                    displayMessage(hexFileToRead.Name + "\n", Colors.LawnGreen);
                     openFileForWritingToFlash();
                 }
                 else
                 {
-                    appendText("Open HEX File Operation cancelled.", Colors.Crimson);
+                    displayMessage("Open HEX File Operation cancelled.", Colors.Crimson);
                 }
             } catch (NullReferenceException)
             {
-                appendText("No file selected.\n", Colors.Crimson);
+                displayMessage("No file selected.\n", Colors.Crimson);
             }
 
         }
@@ -1064,7 +1037,7 @@ namespace bleTest3
         {
             if (hexFileToRead == null)
             {
-                appendText("No HEX File selected.\n", Colors.Crimson);
+                displayMessage("No HEX File selected.\n", Colors.Crimson);
             }
             else
             {
@@ -1078,6 +1051,20 @@ namespace bleTest3
                 }
             }
             return null;
+        }
+
+        public Run getRun(string str, Color color)
+        {
+            Run r = new Run();
+            r.Foreground = getColoredBrush(color);
+            r.Text = str;
+            return r;
+        }
+
+        private void displayMessage(string message, Color color)
+        {
+            Run r = getRun(message, color);
+            TsbUpdatedCommand(statuses.displayMessage, r);
         }
 
     } // End TSB Class
