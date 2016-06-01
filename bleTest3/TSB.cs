@@ -133,8 +133,8 @@ namespace bleTest3
             writeEEPROM = 7,
             readUserData = 8,
             writeUserData = 9,
-            otaLow = 10,
-            otaHigh = 11,
+            hm1xReset = 10,
+            hm1xResetSuccess = 11,
             bleHello = 12,
             helloProcessing = 13,
             error = 14
@@ -176,7 +176,7 @@ namespace bleTest3
             downloadSuccessful = 6,
             uploadSuccessful = 7,
             displayMessage = 8,
-            y = 9,
+            bootloaderDisconnected = 9,
             error = 10
         }
 
@@ -251,6 +251,41 @@ namespace bleTest3
         RichTextBlock mainDisplay;
         ScrollViewer mainDisplayScrollView;
 
+
+        public enum HM1X_Pin : int
+        {
+            PIO0 = 0,
+            PIO1 = 1,
+            PIO2 = 2,
+            PIO3 = 3,
+            PIO4 = 4,
+            PIO5 = 5,
+            PIO6 = 6,
+            PIO7 = 7,
+            PIO8 = 8,
+            PIO9 = 9,
+            PIOA = 10,
+            PIOB = 11
+        }
+        public HM1X_Pin pin = new HM1X_Pin();
+        private string resetPinStr = "";
+
+        Dictionary<HM1X_Pin, string> resetPinDictionary = new Dictionary<HM1X_Pin, string>
+            {
+                {HM1X_Pin.PIO0, "PIO0"},
+                {HM1X_Pin.PIO1, "PIO1"},
+                {HM1X_Pin.PIO2, "PIO2"},
+                {HM1X_Pin.PIO3, "PIO3"},
+                {HM1X_Pin.PIO4, "PIO4"},
+                {HM1X_Pin.PIO5, "PIO5"},
+                {HM1X_Pin.PIO6, "PIO6"},
+                {HM1X_Pin.PIO7, "PIO7"},
+                {HM1X_Pin.PIO8, "PIO8"},
+                {HM1X_Pin.PIO9, "PIO9"},
+                {HM1X_Pin.PIOA, "PIOA"},
+                {HM1X_Pin.PIOB, "PIOB"}
+            };
+
         #endregion properties
 
         public delegate void CallBackEventHandler(object sender, EventArgs args);
@@ -259,6 +294,7 @@ namespace bleTest3
         public SerialBuffer serialBuffer = new SerialBuffer();
         // When a write command is sent, then timeout timer is started.
         public DispatcherTimer writeTimer = new DispatcherTimer();
+        private DispatcherTimer resetTimer = new DispatcherTimer();
 
         public CoreDispatcher dispatcher;
 
@@ -283,6 +319,8 @@ namespace bleTest3
             serialBuffer.RXbufferUpdated += new SerialBuffer.CallBackEventHandler(RXbufferUpdated);
             serialBuffer.TXbufferUpdated += new SerialBuffer.CallBackEventHandler(TXbufferUpdated);
             readFlashBuffer.bufferUpdated += new SerialBuffer.CallBackEventHandler(ReadFlashBuffer_bufferUpdated);
+
+            resetTimer.Tick += ResetTimer_Tick;
         }
 
 
@@ -320,6 +358,31 @@ namespace bleTest3
         public async void writeToTsb(string dataToWrit)
         {
 
+        }
+
+        public void setResetPin(int _pin)
+        {
+            pin = (HM1X_Pin)_pin;
+            if ((int)pin > -1)
+            {
+                resetPinStr = resetPinDictionary[pin];
+            }
+            else
+            {
+                resetPinStr = "";
+            }
+        }
+
+        public ComboBox populateResetPinCmbBox(ComboBox _comboBox)
+        {
+            _comboBox.ItemsSource = resetPinDictionary.Values;
+            _comboBox.SelectedIndex = 0;
+            return _comboBox;
+        }
+
+        public string getResetPinAsString()
+        {
+            return resetPinStr;
         }
 
         private async void RXbufferUpdated(object sender, EventArgs args)
@@ -375,11 +438,11 @@ namespace bleTest3
                 case commands.bleHello:
                     helloRouting();
                     break;
-                case commands.otaLow:
+                case commands.hm1xReset:
                     helloRouting();
                     break;
-                case commands.otaHigh:
-                    helloRouting();
+                case commands.hm1xResetSuccess:
+                    //TsbUpdateCommand(statuses.)
                     break;
                 case commands.helloProcessing:
                     helloProcessing();
@@ -453,60 +516,57 @@ namespace bleTest3
                     break;
                 case device.hm1x:
                     commandInProgress = commands.bleHello;
-                    helloRouting();
+                    string test = "AT+" + getResetPinAsString() + "0";
+                    serialBuffer.txBuffer = GetBytes(test);
                     break;
             }
             
         }
 
-        public async void helloRouting()
+        public void helloRouting()
         {
             byte[] rxData;
             string str = "";
-            //writeTimer.Stop();
             switch (OTASelected)
             {
                 case OTAType.none:
                     startWriteTimeoutTimer(1);
                     commandInProgress = commands.helloProcessing;
                     serialBuffer.txBuffer = getCommand(commands.hello);
-                    //            await serialPorts.write(commandsAsStrings[(int)commands.hello]);
                     break;
                 case OTAType.hm1x:
                     switch (commandInProgress)
                     {
-                        case commands.bleHello:
-                            startWriteTimeoutTimer(2);
-                            serialBuffer.txBuffer = getCommand(commands.otaLow);
-                            commandInProgress = commands.otaLow;
-                            break;
-                        case commands.otaLow:
+                        case commands.hm1xReset:
                             rxData = serialBuffer.readAllBytesFromRXBuffer();
-
                             str = getAsciiStringFromByteArray(rxData);
-
-                            if (str.Contains("OK+"))
+                            if (str.Contains("OK+" + getResetPinAsString() + ":0"))
                             {
                                 startWriteTimeoutTimer(2);
-                                serialBuffer.txBuffer = getCommand(commands.otaHigh);
-                                commandInProgress = commands.otaHigh;
+                                serialBuffer.txBuffer = GetBytes("AT+" + getResetPinAsString() + "1");
+                            }
+                            else if (str.Contains("OK+" + getResetPinAsString() + ":1"))
+                            {
+                                startWriteTimeoutTimer(2);
+                                commandInProgress = commands.hm1xResetSuccess;
                             }
                             break;
-                        case commands.otaHigh:
-
+                        case commands.bleHello:
                             rxData = serialBuffer.readAllBytesFromRXBuffer();
-
                             str = getAsciiStringFromByteArray(rxData);
-
-                            if (str.Contains("OK+"))
+                            if (str.Contains("OK+" + getResetPinAsString() + ":0"))
                             {
-                                startWriteTimeoutTimer(1);
-                                commandInProgress = commands.helloProcessing;
+                                startWriteTimeoutTimer(2);
+                                serialBuffer.txBuffer = GetBytes("AT+" + getResetPinAsString() + "1");
+                            }
+                            else if (str.Contains("OK+" + getResetPinAsString() + ":1"))
+                            {
+                                startWriteTimeoutTimer(2);
                                 serialBuffer.txBuffer = getCommand(commands.hello);
+                                commandInProgress = commands.helloProcessing;
                             }
                             break;
                     }
-
                     break;
                 case OTAType.esp:
                     displayMessage("ESP8266 is not yet implemented.", Colors.Crimson);
@@ -514,10 +574,22 @@ namespace bleTest3
                 default:
                     displayMessage("Uh-oh.  There was a problem selecting a device for TSB handshake.", Colors.Crimson);
                     break;
-
-
             }
 
+        }
+
+        public async void remoteReset()
+        {
+            commandInProgress = commands.hm1xReset;
+            serialBuffer.txBuffer = GetBytes("AT+" + getResetPinAsString() + "0");
+            //resetTimer.Interval = new TimeSpan(0, 0, 0, 0, 500);
+            //resetTimer.Start();
+        }
+
+        private void ResetTimer_Tick(object sender, object e)
+        {
+            resetTimer.Stop();
+            serialBuffer.txBuffer = GetBytes("AT+PIO21");
         }
 
         public async Task<bool> helloProcessing()
@@ -997,6 +1069,16 @@ namespace bleTest3
             }
 
             return str;
+        }
+
+        static byte[] GetBytes(string str)
+        {
+            byte[] bytes = new byte[str.Length];
+            for (int i = 0; i < str.Length; i++)
+            {
+                bytes[i] = (byte)str[i];
+            }
+            return bytes;
         }
 
         double map(double x, double in_min, double in_max, double out_min, double out_max)

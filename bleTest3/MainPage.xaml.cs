@@ -54,8 +54,7 @@ namespace bleTest3
             // Add the callback handlers for serialPortsExtended isntance
             serialPorts.Callback += new serialPortsExtended.CallBackEventHandler(serialPortCallback);
             blue.Callback += new blue.CallBackEventHandler(blueCallback);
-
-
+            
             // Until other thread reports COM port discovered
             btnConnect.IsEnabled = false;
             btnTsbConnect.IsEnabled = false;
@@ -84,6 +83,8 @@ namespace bleTest3
 
             serialBufffer.RXbufferUpdated += new SerialBuffer.CallBackEventHandler(RXbufferUpdated);
             serialBufffer.TXbufferUpdated += new SerialBuffer.CallBackEventHandler(TXbufferUpdated);
+
+            tsb.populateResetPinCmbBox(cmbResetPin);
         }
 
         private void tsbcommandUpdate(TSB.statuses tsbConnectionStatus, Run message)
@@ -100,6 +101,7 @@ namespace bleTest3
                         mainPivotTable.SelectedIndex = 2;
                         tabTSB.IsEnabled = true;
                         appendRunToMainDisplay(message);
+                        mainPivotTable.SelectedIndex = 3;
                         break;
                     case TSB.statuses.error:
                         tabTSB.IsEnabled = false;
@@ -114,6 +116,14 @@ namespace bleTest3
                         break;
                     case TSB.statuses.displayMessage:
                         appendRunToMainDisplay(message);
+                        break;
+                    case TSB.statuses.bootloaderDisconnected:
+                        tabTSB.IsEnabled = false;
+                        btnTsbConnect.Content = "Connect to TSB";
+                        btnTsbConnect.IsEnabled = true;
+                        connectionLabelBackGround.Background = getColoredBrush(Colors.Yellow);
+                        labelConnectionStatus.Text = "TSB Disconnected";
+                        tabTSB.IsEnabled = false;
                         break;
                 }
             });
@@ -264,15 +274,23 @@ namespace bleTest3
 
         private async void btnTsbConnect_Click(object sender, RoutedEventArgs e)
         {
-            btnConnect.IsEnabled = false;
-            await reset();
-            try
+            if(btnTsbConnect.Content == "Disconnect")
             {
-                tsb.hello();
-            } catch (Exception ex)
+                await reset();
+                btnTsbConnect.Content = "Connect to TSB";
+            } else
             {
-                //await serialPorts.disposeStream();
-                Debug.WriteLine(ex.Message);
+                btnConnect.IsEnabled = false;
+                await reset();
+                try
+                {
+                    tsb.hello();
+                }
+                catch (Exception ex)
+                {
+                    //await serialPorts.disposeStream();
+                    Debug.WriteLine(ex.Message);
+                }
             }
             
         }
@@ -282,7 +300,12 @@ namespace bleTest3
             appendLine(text, color);
         }
 
-        private async void btnBleSearch_Click(object sender, RoutedEventArgs e)
+        private async void btnWirelessSearch_Click(object sender, RoutedEventArgs e)
+        {
+            wirelessSearch();
+        }
+
+        public async void wirelessSearch()
         {
             switch (cmbDeviceSelector.SelectedIndex)
             {
@@ -290,8 +313,8 @@ namespace bleTest3
                     await serialPorts.ListAvailablePorts();
                     break;
                 case 1:
-                    btnBleSearch.Content = "Searching";
-                    btnBleSearch.IsEnabled = false;
+                    btnWirelessSearch.Content = "Searching";
+                    btnWirelessSearch.IsEnabled = false;
                     btnConnect.IsEnabled = false;
                     cmbFoundDevices.IsEnabled = false;
                     cmbDeviceSelector.IsEnabled = false;
@@ -323,22 +346,28 @@ namespace bleTest3
             {
                 switch (cmbDeviceSelector.SelectedIndex)
                 {
-                    case 0:
+                    case 0: // Serial
                         cmbFoundDevices.Items.Clear();
                         pvtPortSettings.Visibility = Visibility.Visible;
-                        btnBleSearch.Visibility = Visibility.Collapsed;
+                        btnWirelessSearch.Visibility = Visibility.Collapsed;
                         cmbFoundDevices.Visibility = Visibility.Visible;
                         cmbFoundDevices.IsEnabled = false;
                         populatePortComboBox();
                         tsb.setDevice(TSB.device.serial);
                         break;
-                    case 1:
+                    case 1: // HM-1X
                         cmbFoundDevices.Items.Clear();
                         pvtPortSettings.Visibility = Visibility.Collapsed;
-                        btnBleSearch.Visibility = Visibility.Visible;
+                        btnWirelessSearch.Visibility = Visibility.Visible;
                         cmbFoundDevices.Visibility = Visibility.Visible;
                         cmbFoundDevices.IsEnabled = false;
+                        btnWirelessSearch.Focus(FocusState.Keyboard);
                         tsb.setDevice(TSB.device.hm1x);
+                        wirelessSearch();
+                        break;
+                    case 3: // ESP8266
+                        break;
+                    default:
                         break;
                 }                
             }
@@ -443,8 +472,8 @@ namespace bleTest3
                         {
                             cmbFoundDevices.IsEnabled = false;
                         }
-                        btnBleSearch.IsEnabled = true;
-                        btnBleSearch.Content = "Search";
+                        btnWirelessSearch.IsEnabled = true;
+                        btnWirelessSearch.Content = "Search";
                         cmbDeviceSelector.IsEnabled = true;
                     });
                     break;
@@ -523,12 +552,6 @@ namespace bleTest3
             tsb.readFlash();
         }
 
-        private async void btnTest_Click(object sender, RoutedEventArgs e)
-        {
-            byte[] blah = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60 };
-            var waitResponse = blue.writeByteArrayToBle(blah);
-        }
-
         public async Task reset()
         {
             switch (cmbDeviceSelector.SelectedIndex)
@@ -537,7 +560,7 @@ namespace bleTest3
                     await serialPorts.dtrToggle();
                     break;
                 case 1:
-                    // Write PIOB low and high.
+                    tsb.remoteReset();
                     break;
             }
         }
@@ -574,6 +597,20 @@ namespace bleTest3
                     tsb.setOTADevice(TSB.OTAType.none);
                     appendText("Problems selecting Over-the-Air device", Colors.Crimson);
                     break;
+            }
+        }
+
+        private async void btnReset_Click(object sender, RoutedEventArgs e)
+        {
+            await reset();
+            tsbcommandUpdate(TSB.statuses.bootloaderDisconnected, null);
+        }
+
+        private void cmbResetPinSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if(blue != null)
+            {
+                tsb.setResetPin(cmbResetPin.SelectedIndex);
             }
         }
     }// End MainPage

@@ -52,13 +52,13 @@
                     </ComboBox>
                     <ComboBox x:Name="cmbFoundDevices" Grid.Row="5" IsEnabled="False" Visibility="Visible" HorizontalAlignment="Center" Width="212" SelectionChanged="cmbFoundDevices_SelectionChanged">
                     </ComboBox>
-                    <Button x:Name="btnBleSearch" Grid.Row="6" Visibility="Collapsed" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Search" Click="btnBleSearch_Click" />
+                    <Button x:Name="btnWirelessSearch" Grid.Row="6" Visibility="Collapsed" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Search" Click="btnWirelessSearch_Click"  />
                     <Button Grid.Row="7" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Clear" Click="Button_Click"/>
                     <TextBlock Grid.Row="8" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="20" Width="Auto" Height="Auto" Margin="3">
             		<Run Text="TinySafeBoot"/>
                     </TextBlock>
                     <Button x:Name="btnTsbConnect" Grid.Row="9" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Conect to TSB" Click="btnTsbConnect_Click"/>
-                    <Button x:Name="btnTest" Grid.Row="10" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Test" Click="btnTest_Click"/>
+                    <Button x:Name="btnReset" Grid.Row="10" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Reset" Click="btnReset_Click"/>
                     <ProgressBar x:Name="pbSys" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="17"/>
                 </Grid>
             </StackPanel>
@@ -178,6 +178,9 @@
                                 <ComboBoxItem>HM-1X</ComboBoxItem>
                                 <ComboBoxItem>ESP-8266</ComboBoxItem>
                             </ComboBox>
+                            <ComboBox x:Name="cmbResetPin" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SelectedIndex="0" SelectionChanged="cmbResetPinSelector_SelectionChanged">
+                                <ComboBoxItem>None</ComboBoxItem>
+                            </ComboBox>
                             <TextBlock Grid.Row="0" Grid.Column="0" FontSize="20" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Padding="2" Margin="2">HM-1X</TextBlock>
                         </Grid>
                     </PivotItem>
@@ -195,7 +198,6 @@
                                 <ColumnDefinition Width="1*"/>
                                 <ColumnDefinition Width="1*"/>
                                 <ColumnDefinition Width="2*"/>
-                                
                             </Grid.ColumnDefinitions>
                             <Button Grid.Row="0" Grid.Column="0" FontSize="20" HorizontalAlignment="Stretch" VerticalAlignment="Center" Click="Button_ReadFlash" Padding="2" Margin="2">Read Flash</Button>
                             <ComboBox x:Name="cmbFlashDisplay" SelectedIndex="2" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch" SelectionChanged="displayFlashType_SelectionChanged" Margin="2" Padding="2">

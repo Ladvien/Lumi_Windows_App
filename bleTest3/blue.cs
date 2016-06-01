@@ -50,6 +50,8 @@ namespace bleTest3
         List<GattDeviceService> gattServices;
         List<GattCharacteristic> gattCharacteristics;
 
+
+
         GattCharacteristic readWriteCharacteristic;
         // Used for UI callback.
         public enum BlueEvent
@@ -71,6 +73,8 @@ namespace bleTest3
         public Dictionary<string, short> bleDevicesRSSI = new Dictionary<string, short>();
         public DispatcherTimer bleSearchTimer = new DispatcherTimer();
         public DispatcherTimer gattDelayPopulateTimer = new DispatcherTimer();
+
+
 
         // Bluetooth LE Connection
         BluetoothLEDevice bleDevice;
@@ -127,12 +131,16 @@ namespace bleTest3
 
         }
 
+
+
         public void attachSerialBuffer(SerialBuffer _serialBuffer)
         {
             serialBuffer = _serialBuffer;
             serialBuffer.RXbufferUpdated += new SerialBuffer.CallBackEventHandler(RXbufferUpdated);
             serialBuffer.TXbufferUpdated += new SerialBuffer.CallBackEventHandler(TXbufferUpdated);
         }
+
+
 
 
 
@@ -546,6 +554,7 @@ namespace bleTest3
             //Debug.Write(bytesReadByteArray[i].ToString("X2"));
             return charOrTwoCharHexString;
         }
+
 
     } // End Blue
 
