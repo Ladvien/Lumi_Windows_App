@@ -14,66 +14,91 @@
       <RootProperty Name="HorizontalAlignment" />
       <RootProperty Name="Width" />
       <RootProperty Name="Height" />
+      <RootProperty Name="ColumnDefinitions" />
       <RootProperty Name="Children" />
       <RootProperty Name="VerticalAlignment" />
       <RootProperty Name="Margin" />
       <RootProperty Name="RowDefinitions" />
-      <RootProperty Name="ColumnDefinitions" />
+      <RootMethod Name="GetColumnSpan" />
+      <RootMethod Name="SetColumnSpan" />
       <RootMethod Name="GetRow" />
       <RootMethod Name="SetRow" />
       <RootMethod Name="GetColumn" />
       <RootMethod Name="SetColumn" />
     </RootType>
     <RootType FullName="Microsoft.Xaml.DirectUI.ProxyTypes.ThemeResourceExtension" />
+    <RootType FullName="Windows.UI.Xaml.Controls.ColumnDefinition">
+      <RootProperty Name="Width" />
+    </RootType>
+    <RootType FullName="Windows.UI.Xaml.Controls.StackPanel">
+      <RootProperty Name="Children" />
+      <RootProperty Name="Background" />
+      <RootProperty Name="Height" />
+      <RootProperty Name="HorizontalAlignment" />
+      <RootProperty Name="Margin" />
+      <RootProperty Name="Width" />
+    </RootType>
     <RootType FullName="Windows.UI.Xaml.Controls.RowDefinition">
       <RootProperty Name="Height" />
       <RootProperty Name="MinHeight" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Controls.ScrollViewer">
-      <RootProperty Name="Margin" />
       <RootProperty Name="Background" />
+      <RootProperty Name="VerticalScrollMode" />
       <RootProperty Name="Content" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Controls.Pivot">
-      <RootProperty Name="Margin" />
+      <RootProperty Name="Height" />
       <RootProperty Name="Items" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Controls.PivotItem">
       <RootProperty Name="Header" />
-      <RootProperty Name="Margin" />
+      <RootProperty Name="IsEnabled" />
       <RootProperty Name="Content" />
     </RootType>
-    <RootType FullName="Windows.UI.Xaml.Controls.ColumnDefinition">
-      <RootProperty Name="Width" />
-    </RootType>
-    <RootType FullName="Windows.UI.Xaml.Controls.TextBlock">
+    <RootType FullName="Windows.UI.Xaml.Controls.Button">
       <RootProperty Name="FontSize" />
       <RootProperty Name="HorizontalAlignment" />
       <RootProperty Name="VerticalAlignment" />
-      <RootProperty Name="Inlines" />
-      <RootProperty Name="FontWeight" />
-      <RootProperty Name="Width" />
-      <RootProperty Name="Height" />
+      <RootProperty Name="Padding" />
       <RootProperty Name="Margin" />
-      <RootProperty Name="TextAlignment" />
+      <RootProperty Name="Content" />
+      <RootProperty Name="BorderBrush" />
+      <RootProperty Name="Width" />
+      <RootProperty Name="Visibility" />
+      <RootEvent Name="Click" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Controls.ComboBox">
       <RootProperty Name="SelectedIndex" />
       <RootProperty Name="HorizontalAlignment" />
       <RootProperty Name="Margin" />
-      <RootProperty Name="VerticalAlignment" />
+      <RootProperty Name="Padding" />
       <RootProperty Name="Items" />
+      <RootProperty Name="VerticalAlignment" />
+      <RootProperty Name="Width" />
+      <RootProperty Name="IsEnabled" />
+      <RootProperty Name="Visibility" />
       <RootEvent Name="SelectionChanged" />
+    </RootType>
+    <RootType FullName="Windows.UI.Xaml.Controls.TextBlock">
+      <RootProperty Name="FontSize" />
+      <RootProperty Name="HorizontalAlignment" />
+      <RootProperty Name="VerticalAlignment" />
+      <RootProperty Name="Padding" />
+      <RootProperty Name="Margin" />
+      <RootProperty Name="Inlines" />
+      <RootProperty Name="TextAlignment" />
+      <RootProperty Name="FontWeight" />
+      <RootProperty Name="Width" />
+      <RootProperty Name="Height" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Controls.ComboBoxItem">
       <RootProperty Name="Content" />
     </RootType>
-    <RootType FullName="Windows.UI.Xaml.Controls.StackPanel">
+    <RootType FullName="Windows.UI.Xaml.Controls.RichEditBox">
+      <RootProperty Name="Padding" />
       <RootProperty Name="Height" />
-      <RootProperty Name="Background" />
-      <RootProperty Name="Margin" />
-      <RootProperty Name="Children" />
-      <RootProperty Name="Width" />
+      <RootProperty Name="HorizontalAlignment" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Controls.RichTextBlock">
       <RootProperty Name="FontFamily" />
@@ -82,19 +107,12 @@
       <RootProperty Name="Blocks" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Documents.Paragraph">
+      <RootProperty Name="FontFamily" />
       <RootProperty Name="Inlines" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Documents.Run">
       <RootProperty Name="Foreground" />
       <RootProperty Name="Text" />
-    </RootType>
-    <RootType FullName="Windows.UI.Xaml.Controls.Button">
-      <RootProperty Name="HorizontalAlignment" />
-      <RootProperty Name="BorderBrush" />
-      <RootProperty Name="Width" />
-      <RootProperty Name="Margin" />
-      <RootProperty Name="Content" />
-      <RootEvent Name="Click" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Controls.ProgressBar">
       <RootProperty Name="VerticalAlignment" />
