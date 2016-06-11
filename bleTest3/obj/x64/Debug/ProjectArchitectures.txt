@@ -1,1 +1,1 @@
-C:\Users\Echo\Lumi_Windows_App\bleTest3\Lumi.csproj;x64
+C:\Users\cthom\Lumi_Windows_App\bleTest3\Lumi.csproj;x64
