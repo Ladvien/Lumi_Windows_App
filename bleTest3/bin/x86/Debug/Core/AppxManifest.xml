@@ -7,11 +7,11 @@
 
     For more information on package manifest files, see http://go.microsoft.com/fwlink/?LinkID=241727
   -->
-  <Identity Name="d43802e8-a09d-4956-9b73-8c71366b48ea" Publisher="CN=TCHC" Version="1.0.0.0" ProcessorArchitecture="x86" />
+  <Identity Name="30933LadvienLabs.LumiUploader" Publisher="CN=1CF5542F-A64C-4B58-8341-7AE0A8D0DD8B" Version="1.1.6.0" ProcessorArchitecture="x86" />
   <mp:PhoneIdentity PhoneProductId="d43802e8-a09d-4956-9b73-8c71366b48ea" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
-    <DisplayName>Lumi</DisplayName>
-    <PublisherDisplayName>TCHC</PublisherDisplayName>
+    <DisplayName>Lumi Uploader</DisplayName>
+    <PublisherDisplayName>Ladvien Labs</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
   <Dependencies>
@@ -24,9 +24,11 @@
   </Resources>
   <Applications>
     <Application Id="App" Executable="lumi.exe" EntryPoint="Lumi.App">
-      <uap:VisualElements DisplayName="Lumi" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="LUMI" BackgroundColor="transparent">
+      <uap:VisualElements DisplayName="Lumi Uploader" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="LUMI" BackgroundColor="transparent">
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" Square310x310Logo="Assets\Square310x310Logo.png" Square71x71Logo="Assets\Square71x71Logo.png">
           <uap:ShowNameOnTiles>
+            <uap:ShowOn Tile="square150x150Logo" />
+            <uap:ShowOn Tile="wide310x150Logo" />
             <uap:ShowOn Tile="square310x310Logo" />
           </uap:ShowNameOnTiles>
         </uap:DefaultTile>
@@ -46,7 +48,7 @@
   <build:Metadata>
     <build:Item Name="TargetFrameworkMoniker" Value=".NETCore,Version=v5.0" />
     <build:Item Name="VisualStudio" Version="14.0" />
-    <build:Item Name="VisualStudioEdition" Value="Microsoft Visual Studio Express 2015 for Windows 10" />
+    <build:Item Name="VisualStudioEdition" Value="Microsoft Visual Studio Community 2015" />
     <build:Item Name="OperatingSystem" Version="10.0.10586.0 (th2_release.151029-1700)" />
     <build:Item Name="Microsoft.Build.AppxPackage.dll" Version="14.0.25123.0" />
     <build:Item Name="ProjectGUID" Value="{97D2855D-F030-4327-8981-C26127B9C47A}" />

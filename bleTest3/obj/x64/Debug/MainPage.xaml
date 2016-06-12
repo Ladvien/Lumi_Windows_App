@@ -41,14 +41,14 @@
             		<Run Text="Serial Port"/>
                     </TextBlock>
                     <StackPanel x:ConnectionId='28' x:Name="connectionLabelBackGround" Grid.Row="2" Background="Red"  Margin="3" Width="212">
-                        <TextBlock x:ConnectionId='39' x:Name="labelConnectionStatus" HorizontalAlignment="Center" TextAlignment="Center" FontSize="16"  Width="212" Margin="3" >
+                        <TextBlock x:ConnectionId='40' x:Name="labelConnectionStatus" HorizontalAlignment="Center" TextAlignment="Center" FontSize="16"  Width="212" Margin="3" >
                     <Run Text="Disconnected"/>
                         </TextBlock>
                     </StackPanel>
                     <Button x:ConnectionId='29' x:Name="btnConnect" Grid.Row="3" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Connect"                         />
                     <ComboBox x:ConnectionId='30' x:Name="cmbDeviceSelector" SelectedIndex="0" Grid.Row="4" HorizontalAlignment="Center" Width="212"                                                         >
-                        <ComboBoxItem x:ConnectionId='37' x:Name="cbiSerialPort">Serial Port</ComboBoxItem>
-                        <ComboBoxItem x:ConnectionId='38' x:Name="cbiBluetooth">Bluetooth</ComboBoxItem>
+                        <ComboBoxItem x:ConnectionId='38' x:Name="cbiSerialPort">Serial Port</ComboBoxItem>
+                        <ComboBoxItem x:ConnectionId='39' x:Name="cbiBluetooth">Bluetooth</ComboBoxItem>
                     </ComboBox>
                     <ComboBox x:ConnectionId='31' x:Name="cmbFoundDevices" Grid.Row="5" IsEnabled="False" Visibility="Visible" HorizontalAlignment="Center" Width="212"                                                    >
                     </ComboBox>
@@ -60,6 +60,7 @@
                     <Button x:ConnectionId='34' x:Name="btnTsbConnect" Grid.Row="9" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Conect to TSB"                            />
                     <Button x:ConnectionId='35' x:Name="btnReset" Grid.Row="10" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Reset"                       />
                     <ProgressBar x:ConnectionId='36' x:Name="pbSys" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="17"/>
+                    <Button x:ConnectionId='37' x:Name="btnBleSearch" Grid.Row="6" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="10,5" Content="Search" Visibility="Collapsed"                           />
                 </Grid>
             </StackPanel>
             <Grid HorizontalAlignment="Left" Margin="250,0,0,0" Width="750" Height="720">

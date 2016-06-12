@@ -60,6 +60,7 @@
                     <Button x:Name="btnTsbConnect" Grid.Row="9" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Conect to TSB" Click="btnTsbConnect_Click"/>
                     <Button x:Name="btnReset" Grid.Row="10" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="3" Content="Reset" Click="btnReset_Click"/>
                     <ProgressBar x:Name="pbSys" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="17"/>
+                    <Button x:Name="btnBleSearch" Grid.Row="6" HorizontalAlignment="Center" BorderBrush="Black" Width="212" Margin="10,5" Content="Search" Visibility="Collapsed" Click="btnBleSearch_Click"/>
                 </Grid>
             </StackPanel>
             <Grid HorizontalAlignment="Left" Margin="250,0,0,0" Width="750" Height="720">

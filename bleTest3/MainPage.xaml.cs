@@ -38,11 +38,21 @@ namespace bleTest3
         private bool portOpen = false;
         private CoreDispatcher dispatcher;
 
-        
-
         DevicePicker devicePicker = new DevicePicker();
 
-        SerialBuffer serialBufffer = new SerialBuffer();
+        SerialBuffer serialBuffer = new SerialBuffer();
+
+        enum uiSetTo: int
+        {
+            none = 0,
+            Connect = 1,
+            SearchBLE = 2,
+            ConnectToTsb = 3,
+            ConnectedToTsb = 4,
+            TsbError = 5,
+            ConnectError = 6,
+
+        }
 
         public MainPage()
         {
@@ -74,15 +84,15 @@ namespace bleTest3
             serialPorts.populateComboBoxesWithPortSettings(cmbBaud, cmbDataBits, cmbStopBits, cmbParity, cmbHandshaking);
             serialPorts.init(theOneParagraph);
 
-            tsb.init(serialPorts, mainDisplayScroll, rtbMainDisplay, theOneParagraph, pbSys, serialBufffer, txbOpenFilePath);
+            tsb.init(serialPorts, mainDisplayScroll, rtbMainDisplay, theOneParagraph, pbSys, serialBuffer, txbOpenFilePath);
             // Delegate callback for TSB updates.
             tsb.TsbUpdatedCommand += new TSB.TsbUpdateCommand(tsbcommandUpdate);
             blue.init();
 
             //devicePicker.DeviceSelected += DevicePicker_DeviceSelected;
 
-            serialBufffer.RXbufferUpdated += new SerialBuffer.CallBackEventHandler(RXbufferUpdated);
-            serialBufffer.TXbufferUpdated += new SerialBuffer.CallBackEventHandler(TXbufferUpdated);
+            serialBuffer.RXbufferUpdated += new SerialBuffer.CallBackEventHandler(RXbufferUpdated);
+            serialBuffer.TXbufferUpdated += new SerialBuffer.CallBackEventHandler(TXbufferUpdated);
 
             tsb.populateResetPinCmbBox(cmbResetPin);
         }
@@ -134,8 +144,8 @@ namespace bleTest3
         {
             if(tsb.commandInProgress == TSB.commands.hello)
             {
-                byte[] data = serialBufffer.readAllBytesFromRXBuffer();
-                //appendText(serialBufffer.ReadFromRxBuffer)
+                byte[] data = serialBuffer.readAllBytesFromRXBuffer();
+                //appendText(serialBuffer.ReadFromRxBuffer)
             }
             Debug.WriteLine("main Callback for RX bufferUpdated");
         }
@@ -235,7 +245,7 @@ namespace bleTest3
                             /////////////////////////////
                             serialPorts.AlwaysListening();
                             /////////////////////////////
-                            serialPorts.attachSerialBuffer(serialBufffer);
+                            serialPorts.attachSerialBuffer(serialBuffer);
                         }
                         else
                         {
@@ -481,7 +491,10 @@ namespace bleTest3
                     ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                     {
                         btnTsbConnect.IsEnabled = true;
-                        blue.attachSerialBuffer(serialBufffer);
+                        btnConnect.IsEnabled = false;
+                        blue.attachSerialBuffer(serialBuffer);
+                        connectionLabelBackGround.Background = getColoredBrush(Colors.Yellow);
+                        labelConnectionStatus.Text = "Connected to BLE";
                     });
                     break;
             }
@@ -539,7 +552,10 @@ namespace bleTest3
 
         public void appendRunToMainDisplay(Run r)
         {
-            theOneParagraph.Inlines.Add(r);
+            if(r != null)
+            {
+                theOneParagraph.Inlines.Add(r);
+            }
         }
 
         public void clearDisplay()
@@ -612,6 +628,11 @@ namespace bleTest3
             {
                 tsb.setResetPin(cmbResetPin.SelectedIndex);
             }
+        }
+
+        private void btnBleSearch_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }// End MainPage
 } // End Namespace

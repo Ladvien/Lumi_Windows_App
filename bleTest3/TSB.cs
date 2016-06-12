@@ -596,7 +596,7 @@ namespace bleTest3
         {
             
             // 1. Try handshake ("@@@") three times; or continue if successful.
-            // 2. Check if reply seems valid(ish).
+            // 2. Check if reply seems valid(ish).  
             // 3. Chop up the reply into useful device data.
             // 4. Save the device data for later.
             // 5. If not reply, let the user know it was a fail.
@@ -1137,10 +1137,17 @@ namespace bleTest3
 
         public Run getRun(string str, Color color)
         {
-            Run r = new Run();
-            r.Foreground = getColoredBrush(color);
-            r.Text = str;
-            return r;
+            try
+            {
+                Run r = new Run();
+                r.Foreground = getColoredBrush(color);
+                r.Text = str;
+                return r;
+            } catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
+            return null;
         }
 
         private void displayMessage(string message, Color color)
