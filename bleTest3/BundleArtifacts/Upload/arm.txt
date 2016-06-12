@@ -1,5 +1,0 @@
-MainPackage=C:\Users\Echo\Lumi_Windows_App\bleTest3\bin\ARM\Release\Upload\Lumi_1.1.6.0_ARM.appx
-ResourcePack=C:\Users\Echo\Lumi_Windows_App\bleTest3\_scale-100.appx
-ResourcePack=C:\Users\Echo\Lumi_Windows_App\bleTest3\_scale-125.appx
-ResourcePack=C:\Users\Echo\Lumi_Windows_App\bleTest3\_scale-150.appx
-ResourcePack=C:\Users\Echo\Lumi_Windows_App\bleTest3\_scale-400.appx

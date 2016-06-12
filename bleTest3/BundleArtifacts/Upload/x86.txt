@@ -1,1 +1,0 @@
-MainPackage=C:\Users\Echo\Lumi_Windows_App\bleTest3\bin\x86\Release\Upload\Lumi_1.1.6.0_x86.appx
