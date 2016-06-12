@@ -45,6 +45,9 @@ namespace bleTest3
 
         #region fields
 
+        // Device Watcher
+        DeviceWatcher deviceWatcher = null;
+
         // Main UI.
         public serialPortStatuses serialPortStatus = new serialPortStatuses();
         public delegate void CallBackEventHandler(object sender, serialPortStatuses serialPortStatus);
@@ -119,6 +122,12 @@ namespace bleTest3
             theOneParagraph = theParagraph;
 
             readyToListPortsTimer.Tick += ReadyToListPortsTimer_Tick;
+
+            string aqs = SerialDevice.GetDeviceSelector();
+            deviceWatcher = DeviceInformation.CreateWatcher(aqs);
+            deviceWatcher.Added += DeviceWatcher_Added;
+            deviceWatcher.Removed += DeviceWatcher_Removed;
+            deviceWatcher.Start();
         }
 
         public void attachSerialBuffer(SerialBuffer _serialBuffer)
@@ -182,11 +191,13 @@ namespace bleTest3
             try
             {
                 string aqs = SerialDevice.GetDeviceSelector();
-                dis = await DeviceInformation.FindAllAsync(SerialDevice.GetDeviceSelectorFromUsbVidPid(0x0000, 0xFFFF));
 
+                dis = await DeviceInformation.FindAllAsync(SerialDevice.GetDeviceSelectorFromUsbVidPid(0x0000, 0xFFFF));
+                
                 SerialDevice newSerialDevice;
-                
-                
+
+                serialPortStatus = serialPortStatuses.didNotFindDevices;
+
                 for (int i = 0; i < dis.Count; i++)
                 {
                     
@@ -197,15 +208,37 @@ namespace bleTest3
                         listOfPorts.Add(newSerialDevice.PortName, newSerialDevice);
                     }
 
-                    if(listOfPorts.Count != 0) { serialPortStatus = serialPortStatuses.foundDevices; }
-                    else { serialPortStatus = serialPortStatuses.didNotFindDevices; }
-                    Callback(this, serialPortStatus);
+                    if(listOfPorts.Count > 0) { serialPortStatus = serialPortStatuses.foundDevices; }
                 }
             }
             catch (Exception ex)
             {
                 Debug.WriteLine("List ports caught: " + ex.Message);
             }
+            Callback(this, serialPortStatus);
+        }
+
+        private async void DeviceWatcher_Removed(DeviceWatcher sender, DeviceInformationUpdate args)
+        {
+            Debug.WriteLine(args.Id);
+            //if (listOfDevices.ContainsKey(args.Id))
+            //{
+                listOfDevices.Clear();
+                listOfPorts.Clear();
+                await ListAvailablePorts();
+            //}
+        }
+
+        private async void DeviceWatcher_Added(DeviceWatcher sender, DeviceInformation args)
+        {
+            Debug.WriteLine(args.Id);
+            if (!listOfDevices.ContainsKey(args.Id))
+            {
+                listOfDevices.Clear();
+                listOfPorts.Clear();
+                await ListAvailablePorts();
+            }
+            
         }
 
         public string getPortNameAtIndex(int index)
@@ -335,6 +368,7 @@ namespace bleTest3
 
             if(selectedSerialDevice != null)
             {
+                
                 selectedSerialDevice.WriteTimeout = TimeSpan.FromMilliseconds(100);
                 selectedSerialDevice.ReadTimeout = TimeSpan.FromMilliseconds(100);
                 // Create cancellation token object to close I/O operations when closing the device
@@ -487,7 +521,7 @@ namespace bleTest3
                 selectedSerialDevice.Dispose();
             }
             listOfDevices.Clear();
-            readyToListPortsTimer.Interval = new TimeSpan(0, 0, 0, 1);
+            readyToListPortsTimer.Interval = new TimeSpan(0, 0, 0, 2);
             readyToListPortsTimer.Start();
         }
 

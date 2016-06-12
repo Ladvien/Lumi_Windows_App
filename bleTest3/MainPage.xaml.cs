@@ -53,7 +53,8 @@ namespace bleTest3
             ConnectedToTsb,
             TsbError,
             ConnectError,
-            Disconnected
+            Disconnected,
+            NoDevice
         }
 
         public MainPage()
@@ -85,7 +86,7 @@ namespace bleTest3
             appendLine("Please wait while COM ports load...", Colors.White);
 
             // Start the port discovery.
-            serialPorts.ListAvailablePorts();
+            //serialPorts.ListAvailablePorts();
 
             tsb.setDevice(TSB.device.serial);
 
@@ -252,6 +253,9 @@ namespace bleTest3
                     pvtPortSettings.IsEnabled = true;
                     cmbFoundDevices.Items.Clear();
                     break;
+                case uiSetTo.NoDevice:
+                    cmbFoundDevices.IsEnabled = false;
+                    break;
             }
         }
 
@@ -260,14 +264,13 @@ namespace bleTest3
             if(tsb.commandInProgress == TSB.commands.hello)
             {
                 byte[] data = serialBuffer.readAllBytesFromRXBuffer();
-                //appendText(serialBuffer.ReadFromRxBuffer)
             }
-            Debug.WriteLine("main Callback for RX bufferUpdated");
+            //Debug.WriteLine("main Callback for RX bufferUpdated");
         }
 
         public void TXbufferUpdated(object sender, EventArgs args)
         {
-            Debug.WriteLine("main Callback for TX bufferUpdated");
+            //Debug.WriteLine("main Callback for TX bufferUpdated");
         }
 
         public void close()
@@ -278,23 +281,25 @@ namespace bleTest3
         public void serialPortCallback(object sender, serialPortsExtended.serialPortStatuses serialPortStatus)
         {
             IAsyncAction ignored;
-
             // Callback from serialPort thread.
-            if(cmbDeviceSelector.SelectedIndex == 0)
-            {
+
                 ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                 {
-                    switch (serialPortStatus)
+                    if (cmbDeviceSelector.SelectedIndex == 0)
                     {
-                        case serialPortsExtended.serialPortStatuses.foundDevices:
-                            populatePortComboBox();
-                            break;
-                        case serialPortsExtended.serialPortStatuses.didNotFindDevices:
-                            appendLine("Did not find any serial devices.\n", Colors.Crimson);
-                            break;
-                    }                    
+                        switch (serialPortStatus)
+                        {
+                            case serialPortsExtended.serialPortStatuses.foundDevices:
+                                populatePortComboBox();
+                                break;
+                            case serialPortsExtended.serialPortStatuses.didNotFindDevices:
+                                setUI(uiSetTo.NoDevice);
+                                cmbFoundDevices.Items.Clear();
+                                break;
+                        }
+                    }
                 });
-            }
+
         }
 
         public void blueCallback(object sender, blue.BlueEvent blueEvent)
@@ -341,7 +346,6 @@ namespace bleTest3
                     {
                         setUI(uiSetTo.ConnectToTsb);
                         blue.attachSerialBuffer(serialBuffer);
-
                     });
                     break;
             }
@@ -406,7 +410,6 @@ namespace bleTest3
             }   
         }
 
-
         private async void btnTsbConnect_Click(object sender, RoutedEventArgs e)
         {
             if(btnTsbConnect.Content == "Disconnect")
@@ -427,7 +430,6 @@ namespace bleTest3
                     Debug.WriteLine(ex.Message);
                 }
             }
-            
         }
 
         private async void btnWirelessSearch_Click(object sender, RoutedEventArgs e)
@@ -448,8 +450,6 @@ namespace bleTest3
                     break;
             }
         }
-
-
 
         private void cmbFoundDevices_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -546,7 +546,6 @@ namespace bleTest3
             });
         }
 
-        
         #region oldcode
 
         //public Paragraph getParagraph(string str, Color color)
