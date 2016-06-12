@@ -7,7 +7,7 @@
 
     For more information on package manifest files, see http://go.microsoft.com/fwlink/?LinkID=241727
   -->
-  <Identity Name="30933LadvienLabs.LumiUploader" Publisher="CN=1CF5542F-A64C-4B58-8341-7AE0A8D0DD8B" Version="1.1.6.0" ProcessorArchitecture="x64" />
+  <Identity Name="30933LadvienLabs.LumiUploader" Publisher="CN=1CF5542F-A64C-4B58-8341-7AE0A8D0DD8B" Version="0.5.6.0" ProcessorArchitecture="x64" />
   <mp:PhoneIdentity PhoneProductId="d43802e8-a09d-4956-9b73-8c71366b48ea" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
     <DisplayName>Lumi Uploader</DisplayName>

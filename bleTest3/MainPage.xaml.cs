@@ -59,9 +59,16 @@ namespace bleTest3
         public MainPage()
         {
             this.InitializeComponent();
+
+            string appVersion = string.Format("Version: {0}.{1}.{2}.{3}",
+                    Package.Current.Id.Version.Major,
+                    Package.Current.Id.Version.Minor,
+                    Package.Current.Id.Version.Build,
+                    Package.Current.Id.Version.Revision);
+
             dispatcher = CoreWindow.GetForCurrentThread().Dispatcher;
             ApplicationView appView = ApplicationView.GetForCurrentView();
-            appView.Title = "Lumi";
+            appView.Title = "Lumi " + appVersion;
 
             // Add the callback handlers for serialPortsExtended isntance
             serialPorts.Callback += new serialPortsExtended.CallBackEventHandler(serialPortCallback);
@@ -140,48 +147,6 @@ namespace bleTest3
                 }
             });
 
-        }
-
-        public void RXbufferUpdated(object sender, EventArgs args)
-        {
-            if(tsb.commandInProgress == TSB.commands.hello)
-            {
-                byte[] data = serialBuffer.readAllBytesFromRXBuffer();
-                //appendText(serialBuffer.ReadFromRxBuffer)
-            }
-            Debug.WriteLine("main Callback for RX bufferUpdated");
-        }
-
-        public void TXbufferUpdated(object sender, EventArgs args)
-        {
-            Debug.WriteLine("main Callback for TX bufferUpdated");
-        }
-
-        public void close()
-        {
-            blue.closeBleDevice();
-        }
-
-        public void serialPortCallback(object sender, serialPortsExtended.serialPortStatuses serialPortStatus)
-        {
-            IAsyncAction ignored;
-
-            // Callback from serialPort thread.
-            if(cmbDeviceSelector.SelectedIndex == 0)
-            {
-                ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-                {
-                    switch (serialPortStatus)
-                    {
-                        case serialPortsExtended.serialPortStatuses.foundDevices:
-                            populatePortComboBox();
-                            break;
-                        case serialPortsExtended.serialPortStatuses.didNotFindDevices:
-                            appendLine("Did not find any serial devices.\n", Colors.Crimson);
-                            break;
-                    }                    
-                });
-            }
         }
 
         public void setUI(uiSetTo uiSetTo)
@@ -290,10 +255,98 @@ namespace bleTest3
             }
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        public void RXbufferUpdated(object sender, EventArgs args)
         {
-            clearDisplay();
+            if(tsb.commandInProgress == TSB.commands.hello)
+            {
+                byte[] data = serialBuffer.readAllBytesFromRXBuffer();
+                //appendText(serialBuffer.ReadFromRxBuffer)
+            }
+            Debug.WriteLine("main Callback for RX bufferUpdated");
         }
+
+        public void TXbufferUpdated(object sender, EventArgs args)
+        {
+            Debug.WriteLine("main Callback for TX bufferUpdated");
+        }
+
+        public void close()
+        {
+            blue.closeBleDevice();
+        }
+
+        public void serialPortCallback(object sender, serialPortsExtended.serialPortStatuses serialPortStatus)
+        {
+            IAsyncAction ignored;
+
+            // Callback from serialPort thread.
+            if(cmbDeviceSelector.SelectedIndex == 0)
+            {
+                ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                {
+                    switch (serialPortStatus)
+                    {
+                        case serialPortsExtended.serialPortStatuses.foundDevices:
+                            populatePortComboBox();
+                            break;
+                        case serialPortsExtended.serialPortStatuses.didNotFindDevices:
+                            appendLine("Did not find any serial devices.\n", Colors.Crimson);
+                            break;
+                    }                    
+                });
+            }
+        }
+
+        public void blueCallback(object sender, blue.BlueEvent blueEvent)
+        {
+            IAsyncAction ignored;
+            switch (blueEvent)
+            {
+                case blue.BlueEvent.finishedConnecting:
+                    ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                    {
+                        appendLine("Finished connecting to Bluetooth", Colors.CadetBlue);
+                        labelConnectionStatus.Text = "Connected to Bluetooth LE";
+                        connectionLabelBackGround.Background = getColoredBrush(Colors.CadetBlue);
+                    });
+                    break;
+                case blue.BlueEvent.searchFinished:
+                    ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                    {
+                        if (blue.bleDeviceAddresses.Count > 0)
+                        {
+                            int deviceCount = blue.bleDeviceAddresses.Count;
+                            string[] key = new string[deviceCount];
+
+                            cmbFoundDevices.Items.Clear();
+
+                            for (int i = 0; i < deviceCount; i++)
+                            {
+                                blue.bleDeviceAddresses.Keys.CopyTo(key, 0);
+                                cmbFoundDevices.Items.Insert(i, key[i]);
+                            }
+                            setUI(uiSetTo.SearchedBLE);
+
+                        }
+                        else
+                        {
+                            cmbFoundDevices.IsEnabled = false;
+                            setUI(uiSetTo.Init);
+                        }
+                        setUI(uiSetTo.Init);
+                    });
+                    break;
+                case blue.BlueEvent.connected:
+                    ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                    {
+                        setUI(uiSetTo.ConnectToTsb);
+                        blue.attachSerialBuffer(serialBuffer);
+
+                    });
+                    break;
+            }
+        }
+
 
         public SolidColorBrush getColoredBrush(Color color)
         {
@@ -303,6 +356,12 @@ namespace bleTest3
         private void cmbPort_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             cmbFoundDevices.SelectedItem = cmbPort.SelectedItem;
+        }
+
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            clearDisplay();
         }
 
         private async void btnConnect_Click(object sender, RoutedEventArgs e)
@@ -371,11 +430,6 @@ namespace bleTest3
             
         }
 
-        public void displayText(string text, Color color)
-        {
-            appendLine(text, color);
-        }
-
         private async void btnWirelessSearch_Click(object sender, RoutedEventArgs e)
         {
             wirelessSearch();
@@ -391,11 +445,11 @@ namespace bleTest3
                 case 1:
                     setUI(uiSetTo.SearchingBLE);
                     blue.startBLEWatcher(5);
-                    //DeviceSelectorInfo bluetoothLESelectorPaired = DeviceSelectorChoices.BluetoothLEPairedOnly;
                     break;
             }
-
         }
+
+
 
         private void cmbFoundDevices_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -492,55 +546,7 @@ namespace bleTest3
             });
         }
 
-        public void blueCallback(object sender, blue.BlueEvent blueEvent)
-        {
-            IAsyncAction ignored;
-            switch (blueEvent)
-            {
-                case blue.BlueEvent.finishedConnecting:
-                    ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-                    {
-                        appendLine("Finished connecting to Bluetooth", Colors.CadetBlue);
-                        labelConnectionStatus.Text = "Connected to Bluetooth LE";
-                        connectionLabelBackGround.Background = getColoredBrush(Colors.CadetBlue);
-                    });
-                    break;
-                case blue.BlueEvent.searchFinished:
-                    ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-                    {
-                        if (blue.bleDeviceAddresses.Count > 0)
-                        {
-                            int deviceCount = blue.bleDeviceAddresses.Count;
-                            string[] key = new string[deviceCount];
-
-                            cmbFoundDevices.Items.Clear();
-
-                            for (int i = 0; i < deviceCount; i++)
-                            {
-                                blue.bleDeviceAddresses.Keys.CopyTo(key, 0);
-                                cmbFoundDevices.Items.Insert(i, key[i]);
-                            }
-                            setUI(uiSetTo.SearchedBLE);
-
-                        }
-                        else
-                        {
-                            cmbFoundDevices.IsEnabled = false;
-                            setUI(uiSetTo.Init);
-                        }
-                        setUI(uiSetTo.Init);
-                    });
-                    break;
-                case blue.BlueEvent.connected:
-                    ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-                    {
-                        setUI(uiSetTo.ConnectToTsb);
-                        blue.attachSerialBuffer(serialBuffer);
-
-                    });
-                    break;
-            }
-        }
+        
         #region oldcode
 
         //public Paragraph getParagraph(string str, Color color)
@@ -590,6 +596,11 @@ namespace bleTest3
             string sendString = "";
             rtbSendTextBlock.Document.GetText(Windows.UI.Text.TextGetOptions.NoHidden, out sendString);
             await serialPorts.write(sendString);            
+        }
+
+        public void displayText(string text, Color color)
+        {
+            appendLine(text, color);
         }
 
         public void appendText(string str, Color color)
