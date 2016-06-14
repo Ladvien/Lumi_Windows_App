@@ -50,7 +50,7 @@ namespace bleTest3
         List<GattDeviceService> gattServices;
         List<GattCharacteristic> gattCharacteristics;
 
-
+        public bool connected = false;
 
         GattCharacteristic readWriteCharacteristic;
         // Used for UI callback.
@@ -139,10 +139,6 @@ namespace bleTest3
             serialBuffer.RXbufferUpdated += new SerialBuffer.CallBackEventHandler(RXbufferUpdated);
             serialBuffer.TXbufferUpdated += new SerialBuffer.CallBackEventHandler(TXbufferUpdated);
         }
-
-
-
-
 
         private void RXbufferUpdated(object sender, EventArgs args)
         {
@@ -355,6 +351,7 @@ namespace bleTest3
             try
             {
                 await discoverChars(bleAddress);
+                connected = true;
                 gattDelayPopulateTimer.Stop();
             } catch (Exception ex)
             {
@@ -503,11 +500,14 @@ namespace bleTest3
             }
         }
 
-
-
         public void closeBleDevice()
         {
-            bleDevice.Dispose();
+            connected = false;
+            if(bleDevice != null)
+            {
+                bleDevice.Dispose();
+                serialBuffer = null;
+            }
         }
 
         public void callback()

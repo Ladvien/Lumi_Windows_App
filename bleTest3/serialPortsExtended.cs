@@ -128,6 +128,7 @@ namespace bleTest3
             deviceWatcher.Added += DeviceWatcher_Added;
             deviceWatcher.Removed += DeviceWatcher_Removed;
             deviceWatcher.Start();
+
         }
 
         public void attachSerialBuffer(SerialBuffer _serialBuffer)
@@ -450,9 +451,9 @@ namespace bleTest3
             // This allows the board to be reset by the software
             // so the TSB may find it.
             selectedSerialDevice.IsDataTerminalReadyEnabled = false;
-            await Task.Delay(TimeSpan.FromMilliseconds(50));
+            await Task.Delay(TimeSpan.FromMilliseconds(100));
             selectedSerialDevice.IsDataTerminalReadyEnabled = true;
-            await Task.Delay(TimeSpan.FromMilliseconds(50));
+            await Task.Delay(TimeSpan.FromMilliseconds(250));
         }
 
 
@@ -507,22 +508,30 @@ namespace bleTest3
 
         public void CloseDevice()
         {
-            if (selectedSerialDevice != null)
+            try
             {
-                // 1. Remove the selectedSerialDevice from portList.
-                // 2. Disconnect streams.
-                // 3. Dispose of selected COM port.
-                // 4. Wait 1 second before refreshing port list.  This assures
-                //    the recently disconnected port can be found.
+                if (selectedSerialDevice != null)
+                {
+                    // 1. Remove the selectedSerialDevice from portList.
+                    // 2. Disconnect streams.
+                    // 3. Dispose of selected COM port.
+                    // 4. Wait 1 second before refreshing port list.  This assures
+                    //    the recently disconnected port can be found.
 
-                listOfPorts.Remove(selectedSerialDevice.PortName);
-                selectedSerialDevice.OutputStream.Dispose();
-                selectedSerialDevice.InputStream.Dispose();
-                selectedSerialDevice.Dispose();
+                    listOfPorts.Remove(selectedSerialDevice.PortName);
+                    selectedSerialDevice.OutputStream.Dispose();
+                    selectedSerialDevice.InputStream.Dispose();
+                    selectedSerialDevice.Dispose();
+                }
+                listOfDevices.Clear();
+                serialBuffer = null;
+                readyToListPortsTimer.Interval = new TimeSpan(0, 0, 0, 2);
+                readyToListPortsTimer.Start();
+            } catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
             }
-            listOfDevices.Clear();
-            readyToListPortsTimer.Interval = new TimeSpan(0, 0, 0, 2);
-            readyToListPortsTimer.Start();
+
         }
 
         #endregion port use

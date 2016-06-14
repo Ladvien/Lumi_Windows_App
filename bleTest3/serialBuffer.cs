@@ -95,7 +95,11 @@ namespace lumi
                 CryptographicBuffer.CopyToByteArray(tmpBuffer, out _txBuffer);
                 TXbufferUpdated(this, null);
             }
-            private get { return _txBuffer; }
+            private get
+            {
+                if (_txBuffer != null) { return _txBuffer; }
+                else { return new byte[0]; }
+            }
 
         }
 
@@ -110,12 +114,17 @@ namespace lumi
                 IBuffer tmpBuffer = CryptographicBuffer.CreateFromByteArray(value);
                 CryptographicBuffer.CopyToByteArray(tmpBuffer, out _txBuffer);
             }
-            get { return _txBuffer; }
+            get
+            {
+                if (_txBuffer != null) { return _txBuffer; }
+                else { return new byte[0]; }
+            }
         }
 
         public int bytesInTxBuffer()
         {
-            return txBuffer.Length;
+            if(txBuffer != null) { return txBuffer.Length; }
+            else { return 0; }
         }
 
         public byte[] ReadFromTxBuffer(int numberOfBytes)

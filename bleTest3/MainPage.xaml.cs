@@ -163,7 +163,7 @@ namespace bleTest3
                             btnConnect.IsEnabled = true;
                             pvtPortSettings.IsEnabled = true;
                             cmbFoundDevices.IsEnabled = true;
-                            appendLine("Ready", Colors.LawnGreen);
+                            cmbOTADevice.SelectedIndex = 0;
                             break;
                         case 1: // HM-1X
                             btnWirelessSearch.IsEnabled = true;
@@ -192,8 +192,14 @@ namespace bleTest3
                             break;
                     }
                     break;
+                case uiSetTo.ConnectingBLE:
+                    btnConnect.IsEnabled = false;
+                    cmbDeviceSelector.IsEnabled = false;
+                    cmbFoundDevices.IsEnabled = false;
+                    btnBleSearch.IsEnabled = false;
+                    break;
                 case uiSetTo.ConnectToTsb:
-
+                    btnBleSearch.IsEnabled = false;
                     switch (cmbDeviceSelector.SelectedIndex)
                     {
                         case 0: // Serial
@@ -201,6 +207,7 @@ namespace bleTest3
                             connectionLabelBackGround.Background = getColoredBrush(Colors.Yellow);
                             labelConnectionStatus.Text = "Connected";
                             btnConnect.Content = "Disconnect";
+                            btnConnect.IsEnabled = true;
                             pvtPortSettings.IsEnabled = false;
                             cmbFoundDevices.IsEnabled = false;
                             cmbDeviceSelector.IsEnabled = false;
@@ -208,14 +215,13 @@ namespace bleTest3
                             break;
                         case 1: // HM-1X
                             btnTsbConnect.IsEnabled = true;
+                            btnConnect.IsEnabled = true;
+                            btnConnect.Content = "Disconnect";
                             connectionLabelBackGround.Background = getColoredBrush(Colors.Yellow);
                             labelConnectionStatus.Text = "Connected";
-                            btnConnect.Content = "Disconnect";
                             pvtPortSettings.IsEnabled = false;
                             cmbFoundDevices.IsEnabled = false;
                             cmbDeviceSelector.IsEnabled = false;
-                            btnTsbConnect.IsEnabled = true;
-
                             break;
                     }
                     break;
@@ -252,6 +258,16 @@ namespace bleTest3
                     cmbDeviceSelector.IsEnabled = true;
                     pvtPortSettings.IsEnabled = true;
                     cmbFoundDevices.Items.Clear();
+                    cmbFoundDevices.IsEnabled = false;
+                    switch (cmbDeviceSelector.SelectedIndex)
+                    {
+                        case 0:
+                            //populatePortComboBox();
+                            break;
+                        case 1:
+                            //wirelessSearch();
+                            break;
+                    }
                     break;
                 case uiSetTo.NoDevice:
                     cmbFoundDevices.IsEnabled = false;
@@ -299,7 +315,6 @@ namespace bleTest3
                         }
                     }
                 });
-
         }
 
         public void blueCallback(object sender, blue.BlueEvent blueEvent)
@@ -405,7 +420,19 @@ namespace bleTest3
                     }
                     break;
                 case 1: // Bluetooth LE
-                    if(cmbFoundDevices.SelectedItem != null) { var success = blue.connect(blue.bleDeviceAddresses[cmbFoundDevices.SelectedItem.ToString()]); }
+                    if(cmbFoundDevices.SelectedItem != null)
+                    {
+                        if(true != blue.connected)
+                        {
+                            setUI(uiSetTo.ConnectingBLE);
+                            var success = blue.connect(blue.bleDeviceAddresses[cmbFoundDevices.SelectedItem.ToString()]);
+                        } else
+                        {
+                            blue.closeBleDevice();
+                            setUI(uiSetTo.Disconnected);
+                        }
+                        
+                    }
                     break;
             }   
         }
@@ -414,6 +441,7 @@ namespace bleTest3
         {
             if(btnTsbConnect.Content == "Disconnect")
             {
+                setUI(uiSetTo.ConnectToTsb);
                 await reset();
                 btnTsbConnect.Content = "Connect to TSB";
             } else
@@ -475,6 +503,7 @@ namespace bleTest3
                 {
                     case 0: // Serial
                         populatePortComboBox();
+                        setUI(uiSetTo.Init);
                         tsb.setDevice(TSB.device.serial);
                         break;
                     case 1: // HM-1X
