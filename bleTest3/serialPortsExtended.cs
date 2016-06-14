@@ -138,6 +138,13 @@ namespace bleTest3
             serialBuffer.TXbufferUpdated += new SerialBuffer.CallBackEventHandler(TXbufferUpdated);
         }
 
+        public void detachSerialBuffer()
+        {
+            serialBuffer.RXbufferUpdated -= new SerialBuffer.CallBackEventHandler(RXbufferUpdated);
+            serialBuffer.TXbufferUpdated -= new SerialBuffer.CallBackEventHandler(TXbufferUpdated);
+            serialBuffer = null;
+        }
+
         public void RXbufferUpdated(object sender, EventArgs args)
         {
             Debug.WriteLine("serialPorts Callback for TX bufferUpdated");
@@ -524,7 +531,7 @@ namespace bleTest3
                     selectedSerialDevice.Dispose();
                 }
                 listOfDevices.Clear();
-                serialBuffer = null;
+                detachSerialBuffer();
                 readyToListPortsTimer.Interval = new TimeSpan(0, 0, 0, 2);
                 readyToListPortsTimer.Start();
             } catch (Exception ex)

@@ -145,6 +145,15 @@ namespace bleTest3
                         labelConnectionStatus.Text = "TSB Disconnected";
                         tabTSB.IsEnabled = false;
                         break;
+                    case TSB.statuses.wirelessReleaseSuccess:
+                        blue.closeBleDevice();
+                        tabTSB.IsEnabled = false;
+                        btnTsbConnect.Content = "Connect to TSB";
+                        btnTsbConnect.IsEnabled = true;
+                        connectionLabelBackGround.Background = getColoredBrush(Colors.Yellow);
+                        labelConnectionStatus.Text = "TSB Disconnected";
+                        tabTSB.IsEnabled = false;
+                        break;
                 }
             });
 
@@ -428,7 +437,7 @@ namespace bleTest3
                             var success = blue.connect(blue.bleDeviceAddresses[cmbFoundDevices.SelectedItem.ToString()]);
                         } else
                         {
-                            blue.closeBleDevice();
+                            tsb.remoteReset();
                             setUI(uiSetTo.Disconnected);
                         }
                         

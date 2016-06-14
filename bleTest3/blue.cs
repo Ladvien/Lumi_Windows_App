@@ -140,6 +140,13 @@ namespace bleTest3
             serialBuffer.TXbufferUpdated += new SerialBuffer.CallBackEventHandler(TXbufferUpdated);
         }
 
+        public void detachSerialBuffer()
+        {
+            serialBuffer.RXbufferUpdated -= new SerialBuffer.CallBackEventHandler(RXbufferUpdated);
+            serialBuffer.TXbufferUpdated -= new SerialBuffer.CallBackEventHandler(TXbufferUpdated);
+            serialBuffer = null;
+        }
+
         private void RXbufferUpdated(object sender, EventArgs args)
         {
             Debug.WriteLine("blue Callback for RX bufferUpdated");
@@ -506,7 +513,7 @@ namespace bleTest3
             if(bleDevice != null)
             {
                 bleDevice.Dispose();
-                serialBuffer = null;
+                detachSerialBuffer();
             }
         }
 

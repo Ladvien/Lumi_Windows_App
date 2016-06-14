@@ -123,21 +123,23 @@ namespace bleTest3
         // TSB Command Variables
         public enum commands : int
         {
-            none = 0,
-            hello = 1,
-            request = 2,
-            confirm = 3,
-            readFlash = 4,
-            writeFlash = 5,
-            readEEPROM = 6,
-            writeEEPROM = 7,
-            readUserData = 8,
-            writeUserData = 9,
-            hm1xReset = 10,
-            hm1xResetSuccess = 11,
-            bleHello = 12,
-            helloProcessing = 13,
-            error = 14
+            none,
+            hello,
+            request,
+            confirm,
+            readFlash,
+            writeFlash,
+            readEEPROM,
+            writeEEPROM,
+            readUserData,
+            writeUserData,
+            hm1xReset,
+            hm1xRelease,
+            hm1xReleaseSuccess,
+            hm1xResetSuccess,
+            bleHello,
+            helloProcessing,
+            error
         }
 
         public static string[] commandsAsStrings =
@@ -167,17 +169,18 @@ namespace bleTest3
 
         public enum statuses : int
         {
-            uknown = 0,
-            connected = 1,
-            writeFail = 2,
-            readFail = 3,
-            writeSuccessful = 4,
-            readSuccessful = 5,
-            downloadSuccessful = 6,
-            uploadSuccessful = 7,
-            displayMessage = 8,
-            bootloaderDisconnected = 9,
-            error = 10
+            uknown,
+            connected,
+            writeFail,
+            readFail,
+            writeSuccessful,
+            readSuccessful,
+            downloadSuccessful,
+            uploadSuccessful,
+            displayMessage,
+            bootloaderDisconnected,
+            wirelessReleaseSuccess,
+            error
         }
 
         
@@ -441,6 +444,12 @@ namespace bleTest3
                 case commands.hm1xReset:
                     helloRouting();
                     break;
+                case commands.hm1xRelease:
+                    checkReleaseSuccess();
+                    break;
+                case commands.hm1xReleaseSuccess:
+                    TsbUpdatedCommand(statuses.wirelessReleaseSuccess);
+                    break;
                 case commands.hm1xResetSuccess:
                     //TsbUpdateCommand(statuses.)
                     break;
@@ -580,18 +589,32 @@ namespace bleTest3
 
         public async void remoteReset()
         {
-            commandInProgress = commands.hm1xReset;
+            commandInProgress = commands.hm1xRelease;
             serialBuffer.txBuffer = GetBytes("AT+" + getResetPinAsString() + "0");
-            //resetTimer.Interval = new TimeSpan(0, 0, 0, 0, 500);
-            //resetTimer.Start();
+            resetTimer.Interval = new TimeSpan(0, 0, 0, 0, 500);
+            resetTimer.Start();
         }
 
         private void ResetTimer_Tick(object sender, object e)
         {
             resetTimer.Stop();
-            serialBuffer.txBuffer = GetBytes("AT+PIO21");
+            serialBuffer.txBuffer = GetBytes("AT+" + getResetPinAsString() + "1");
         }
 
+        public void checkReleaseSuccess()
+        {
+            byte[] rxData;
+            string str = "";
+            rxData = serialBuffer.readAllBytesFromRXBuffer();
+            str = getAsciiStringFromByteArray(rxData);
+            if (str.Contains("OK+" + getResetPinAsString() + ":0"))
+            {
+
+            } else if(str.Contains("OK+" + getResetPinAsString() + ":1"))
+            {
+
+            }
+        }
         public async Task<bool> helloProcessing()
         {
             
