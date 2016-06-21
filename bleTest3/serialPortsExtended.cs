@@ -36,10 +36,10 @@ namespace bleTest3
         #region enums
         public enum serialPortStatuses
         {
-            error = 0,
-            unknown = 1,
-            foundDevices = 2,
-            didNotFindDevices = 3
+            error,
+            unknown,
+            foundDevices,
+            didNotFindDevices
         }
         #endregion
 
@@ -202,7 +202,7 @@ namespace bleTest3
 
                 dis = await DeviceInformation.FindAllAsync(SerialDevice.GetDeviceSelectorFromUsbVidPid(0x0000, 0xFFFF));
                 
-                SerialDevice newSerialDevice;
+                //SerialDevice newSerialDevice
 
                 serialPortStatus = serialPortStatuses.didNotFindDevices;
 
@@ -211,9 +211,9 @@ namespace bleTest3
                     
                     if (!listOfDevices.ContainsKey(dis[i].Id))
                     {
-                        newSerialDevice = await SerialDevice.FromIdAsync(dis[i].Id);
+                        var newSerialDevice = await SerialDevice.FromIdAsync(dis[i].Id);
                         listOfDevices.Add(dis[i].Id, dis[i]);
-                        listOfPorts.Add(newSerialDevice.PortName, newSerialDevice);
+                        listOfPorts.Add(newSerialDevice.PortName, newSerialDevice);                   
                     }
 
                     if(listOfPorts.Count > 0) { serialPortStatus = serialPortStatuses.foundDevices; }
@@ -458,7 +458,7 @@ namespace bleTest3
             // This allows the board to be reset by the software
             // so the TSB may find it.
             selectedSerialDevice.IsDataTerminalReadyEnabled = false;
-            await Task.Delay(TimeSpan.FromMilliseconds(100));
+            await Task.Delay(TimeSpan.FromMilliseconds(250));
             selectedSerialDevice.IsDataTerminalReadyEnabled = true;
             await Task.Delay(TimeSpan.FromMilliseconds(250));
         }

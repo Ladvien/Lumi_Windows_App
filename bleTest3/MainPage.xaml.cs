@@ -437,7 +437,7 @@ namespace bleTest3
                             var success = blue.connect(blue.bleDeviceAddresses[cmbFoundDevices.SelectedItem.ToString()]);
                         } else
                         {
-                            tsb.remoteReset();
+                            tsb.remoteResetInit();
                             setUI(uiSetTo.Disconnected);
                         }
                         
@@ -682,7 +682,7 @@ namespace bleTest3
                     await serialPorts.dtrToggle();
                     break;
                 case 1:
-                    tsb.remoteReset();
+                    tsb.remoteResetInit();
                     break;
             }
         }

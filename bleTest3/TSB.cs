@@ -133,10 +133,11 @@ namespace bleTest3
             writeEEPROM,
             readUserData,
             writeUserData,
-            hm1xReset,
-            hm1xRelease,
-            hm1xReleaseSuccess,
-            hm1xResetSuccess,
+            bleReset,
+            bleResetSuccess,
+            bleRelease,
+            bleReleaseSuccess,
+            blePrepareHello,
             bleHello,
             helloProcessing,
             error
@@ -303,6 +304,8 @@ namespace bleTest3
 
         public List<byte> readFlashBfr = new List<byte>();
 
+        private int hm10ResetCounter = 0;
+
 
         public void init(serialPortsExtended serialPortMain, ScrollViewer _mainDisplayScrollView,RichTextBlock _rtbMainDisplay, Paragraph _theOneParagraph, ProgressBar mainProgressBar, SerialBuffer _serialBuffer, TextBlock _openFilePath)
         {
@@ -391,8 +394,12 @@ namespace bleTest3
         private async void RXbufferUpdated(object sender, EventArgs args)
         {
             // 1. Route to command-in-progress.
-
             IAsyncAction ignored;
+            ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+            () =>
+            {
+                writeTimer.Stop();
+            });
             switch (commandInProgress)
             {
                 case commands.error:
@@ -402,11 +409,6 @@ namespace bleTest3
                 case commands.hello:
                     bool outcome = await helloProcessing();
 
-                    ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
-                    () =>
-                    {
-                        writeTimer.Stop();
-                    });
 
 
                     if (outcome)
@@ -438,23 +440,26 @@ namespace bleTest3
 
 
                     break;
-                case commands.bleHello:
+                case commands.bleReset:
                     helloRouting();
                     break;
-                case commands.hm1xReset:
-                    helloRouting();
-                    break;
-                case commands.hm1xRelease:
+                case commands.bleRelease:
                     checkReleaseSuccess();
                     break;
-                case commands.hm1xReleaseSuccess:
-                    TsbUpdatedCommand(statuses.wirelessReleaseSuccess);
-                    break;
-                case commands.hm1xResetSuccess:
+                case commands.bleResetSuccess:
                     //TsbUpdateCommand(statuses.)
                     break;
+                case commands.bleReleaseSuccess:
+                    TsbUpdatedCommand(statuses.wirelessReleaseSuccess);
+                    break;
+                case commands.bleHello:
+                    
+                    break;
+                case commands.blePrepareHello:
+                    helloRouting();
+                    break;
                 case commands.helloProcessing:
-                    helloProcessing();
+                    await helloProcessing();
                     break;
                 default:
                     Debug.WriteLine("Defaulted in RXbuffer switch\n");
@@ -524,18 +529,14 @@ namespace bleTest3
                     helloRouting();
                     break;
                 case device.hm1x:
-                    commandInProgress = commands.bleHello;
-                    string test = "AT+" + getResetPinAsString() + "0";
-                    serialBuffer.txBuffer = GetBytes(test);
+                    commandInProgress = commands.blePrepareHello;
                     break;
             }
             
         }
 
-        public void helloRouting()
+        public async void helloRouting()
         {
-            byte[] rxData;
-            string str = "";
             switch (OTASelected)
             {
                 case OTAType.none:
@@ -544,35 +545,22 @@ namespace bleTest3
                     serialBuffer.txBuffer = getCommand(commands.hello);
                     break;
                 case OTAType.hm1x:
+                    bool success = bleResetAssert();
                     switch (commandInProgress)
                     {
-                        case commands.hm1xReset:
-                            rxData = serialBuffer.readAllBytesFromRXBuffer();
-                            str = getAsciiStringFromByteArray(rxData);
-                            if (str.Contains("OK+" + getResetPinAsString() + ":0"))
+                        case commands.bleReset:                           
+                            if (true == success)
                             {
-                                startWriteTimeoutTimer(2);
-                                serialBuffer.txBuffer = GetBytes("AT+" + getResetPinAsString() + "1");
-                            }
-                            else if (str.Contains("OK+" + getResetPinAsString() + ":1"))
-                            {
-                                startWriteTimeoutTimer(2);
-                                commandInProgress = commands.hm1xResetSuccess;
+                                commandInProgress = commands.bleResetSuccess;
+                                TsbUpdatedCommand(statuses.wirelessReleaseSuccess);
                             }
                             break;
-                        case commands.bleHello:
-                            rxData = serialBuffer.readAllBytesFromRXBuffer();
-                            str = getAsciiStringFromByteArray(rxData);
-                            if (str.Contains("OK+" + getResetPinAsString() + ":0"))
+                        case commands.blePrepareHello:
+                            if(true == success)
                             {
-                                startWriteTimeoutTimer(2);
-                                serialBuffer.txBuffer = GetBytes("AT+" + getResetPinAsString() + "1");
-                            }
-                            else if (str.Contains("OK+" + getResetPinAsString() + ":1"))
-                            {
-                                startWriteTimeoutTimer(2);
-                                serialBuffer.txBuffer = getCommand(commands.hello);
                                 commandInProgress = commands.helloProcessing;
+                                serialBuffer.txBuffer = getCommand(commands.hello);
+                                
                             }
                             break;
                     }
@@ -587,18 +575,46 @@ namespace bleTest3
 
         }
 
-        public async void remoteReset()
+        public bool bleResetAssert()
         {
-            commandInProgress = commands.hm1xRelease;
+            byte[] rxData = serialBuffer.readAllBytesFromRXBuffer();
+            string str = getAsciiStringFromByteArray(rxData);
+            if (str.Contains("OK+" + getResetPinAsString() + ":0"))
+            {
+                startWriteTimeoutTimer(2);
+                serialBuffer.txBuffer = GetBytes("AT+" + getResetPinAsString() + "1");
+                return false;
+            }
+            else if (str.Contains("OK+" + getResetPinAsString() + ":1"))
+            {
+                startWriteTimeoutTimer(2);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async void wirelessReset()
+        {
+            commandInProgress = commands.bleRelease;
+        }
+
+        public async void wirelessRelease()
+        {
+
+        }
+
+        public async void remoteResetInit()
+        {
             serialBuffer.txBuffer = GetBytes("AT+" + getResetPinAsString() + "0");
-            resetTimer.Interval = new TimeSpan(0, 0, 0, 0, 500);
+            resetTimer.Interval = new TimeSpan(0, 0, 0, 0, 300);
             resetTimer.Start();
         }
 
         private void ResetTimer_Tick(object sender, object e)
         {
             resetTimer.Stop();
-            serialBuffer.txBuffer = GetBytes("AT+" + getResetPinAsString() + "1");
+            //serialBuffer.txBuffer = GetBytes("AT+" + getResetPinAsString() + "1");
         }
 
         public void checkReleaseSuccess()
@@ -612,19 +628,23 @@ namespace bleTest3
 
             } else if(str.Contains("OK+" + getResetPinAsString() + ":1"))
             {
-
+                TsbUpdatedCommand(statuses.wirelessReleaseSuccess, null);
             }
         }
+
         public async Task<bool> helloProcessing()
         {
-            
+
             // 1. Try handshake ("@@@") three times; or continue if successful.
             // 2. Check if reply seems valid(ish).  
             // 3. Chop up the reply into useful device data.
             // 4. Save the device data for later.
             // 5. If not reply, let the user know it was a fail.
-
-            if(serialBuffer.bytesInRxBuffer() > 16)
+            byte[] rxData;
+            string str = "";
+            rxData = serialBuffer.readAllBytesFromRXBuffer();
+            str = getAsciiStringFromByteArray(rxData);
+            if (serialBuffer.bytesInRxBuffer() > 16)
             {
                 byte[] data = serialBuffer.readAllBytesFromRXBuffer();
 

@@ -316,8 +316,9 @@ namespace bleTest3
         public async Task<bool> discoverChars(ulong address)
         {
             var device = await BluetoothLEDevice.FromBluetoothAddressAsync(address);
-            bleDevices.Add(device);
+            bleDevice = device;
             var services = device.GattServices;
+            
 
             foreach (GattDeviceService service in services)
             {
@@ -333,8 +334,8 @@ namespace bleTest3
                         var status = await characteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
                         characteristic.ValueChanged += Oncharacteristic_ValueChanged;                          
                         gattCharacteristics.Add(characteristic);
-                        writeToChar("AT+PIO21");
-
+                        //writeToChar("AT+AFTC001");
+                        //byte[] none = serialBuffer.readAllBytesFromBuffer();
                         Callback(this, BlueEvent.connected);
 
                     }
@@ -512,8 +513,28 @@ namespace bleTest3
             connected = false;
             if(bleDevice != null)
             {
+                var services = bleDevice.GattServices;
+
+                foreach (GattDeviceService service in services)
+                {
+                    service.Device.ConnectionStatusChanged -= OnConnectionStatusChanged;
+                    var characteristics = service.GetAllCharacteristics();
+                    foreach (GattCharacteristic characteristic in characteristics)
+                    {
+                        try
+                        {
+                            characteristic.ValueChanged -= Oncharacteristic_ValueChanged;
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine(ex.Message);
+                        }
+                    }
+                }
+
                 bleDevice.Dispose();
                 detachSerialBuffer();
+                gattCharacteristics.Clear();
             }
         }
 
