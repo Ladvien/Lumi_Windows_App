@@ -13,8 +13,7 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Documents;
 using Windows.UI;
-using bleTest3;
-using lumi;
+using Lumi;
 using Windows.UI.Xaml;
 using System.Collections;
 using Windows.Storage;
@@ -23,7 +22,7 @@ using Windows.Storage.Pickers;
 using Windows.UI.Core;
 using Windows.Foundation;
 
-namespace bleTest3
+namespace Lumi
 {
     class TSB
     {
@@ -217,8 +216,6 @@ namespace bleTest3
 
         const int commandAttempts = 3;
 
-        private string rxBuffer = "";
-
         string filePath = @"C:\Users\cthom\Documents\myFileTest.txt";
         string fileName = "";
 
@@ -226,7 +223,6 @@ namespace bleTest3
 
         // Firmware date.
         public string firmwareDateString;
-        long firmwareDate;
 
         // Atmel device signature.
         string deviceSignature;
@@ -242,7 +238,6 @@ namespace bleTest3
 
         // Properties used for ReadFlash()
         List<byte> rxByteArray;
-        int pageIndex = 0;
 
         DEVICE_SIGNATURE deviceSignatureValue = new DEVICE_SIGNATURE();
         public commands commandInProgress = new commands();
@@ -300,33 +295,35 @@ namespace bleTest3
         public DispatcherTimer writeTimer = new DispatcherTimer();
         private DispatcherTimer resetTimer = new DispatcherTimer();
 
-        public CoreDispatcher dispatcher;
+        
 
         public List<byte> readFlashBfr = new List<byte>();
 
-        private int hm10ResetCounter = 0;
-
-
         public void init(serialPortsExtended serialPortMain, ScrollViewer _mainDisplayScrollView,RichTextBlock _rtbMainDisplay, Paragraph _theOneParagraph, ProgressBar mainProgressBar, SerialBuffer _serialBuffer, TextBlock _openFilePath)
         {
-            rxByteArray = new List<byte>();
-            intelHexFileToUpload = new List<byte>();
-            serialPorts = serialPortMain;
-            theOneParagraph = _theOneParagraph;
-            progressBar = mainProgressBar;
-            serialBuffer = _serialBuffer;
-            txbOpenFilePath = _openFilePath;
-            mainDisplay = _rtbMainDisplay;
-            mainDisplayScrollView = _mainDisplayScrollView;
+            try
+            {
+                rxByteArray = new List<byte>();
+                intelHexFileToUpload = new List<byte>();
+                serialPorts = serialPortMain;
+                theOneParagraph = _theOneParagraph;
+                progressBar = mainProgressBar;
+                serialBuffer = _serialBuffer;
+                txbOpenFilePath = _openFilePath;
+                mainDisplay = _rtbMainDisplay;
+                mainDisplayScrollView = _mainDisplayScrollView;
 
-            // Write timeout timer.
-            writeTimer.Tick += writeTimer_Tick;
+                // Write timeout timer.
+                writeTimer.Tick += writeTimer_Tick;
 
-            serialBuffer.RXbufferUpdated += new SerialBuffer.CallBackEventHandler(RXbufferUpdated);
-            serialBuffer.TXbufferUpdated += new SerialBuffer.CallBackEventHandler(TXbufferUpdated);
-            readFlashBuffer.bufferUpdated += new SerialBuffer.CallBackEventHandler(ReadFlashBuffer_bufferUpdated);
+                serialBuffer.RXbufferUpdated += new SerialBuffer.CallBackEventHandler(RXbufferUpdated);
+                serialBuffer.TXbufferUpdated += new SerialBuffer.CallBackEventHandler(TXbufferUpdated);
+                readFlashBuffer.bufferUpdated += new SerialBuffer.CallBackEventHandler(ReadFlashBuffer_bufferUpdated);
+            } catch
+            {
+                Debug.WriteLine("TSB.init() failed");
+            }
 
-            resetTimer.Tick += raiseBleResetPin;
         }
 
 
@@ -382,34 +379,55 @@ namespace bleTest3
             
         }
 
-        public async void writeToTsb(string dataToWrit)
-        {
-
-        }
-
         public void setResetPin(int _pin)
         {
-            pin = (HM1X_Pin)_pin;
-            if ((int)pin > -1)
+            try
             {
-                resetPinStr = resetPinDictionary[pin];
+                pin = (HM1X_Pin)_pin;
+                if ((int)pin > -1)
+                {
+                    resetPinStr = resetPinDictionary[pin];
+                }
+                else
+                {
+                    resetPinStr = "";
+                }
             }
-            else
+            catch
             {
-                resetPinStr = "";
+                Debug.WriteLine("TSB.setResetPin failed");
             }
+
         }
 
         public ComboBox populateResetPinCmbBox(ComboBox _comboBox)
         {
-            _comboBox.ItemsSource = resetPinDictionary.Values;
-            _comboBox.SelectedIndex = 0;
-            return _comboBox;
+            try
+            {
+                _comboBox.ItemsSource = resetPinDictionary.Values;
+                _comboBox.SelectedIndex = 0;
+                return _comboBox;
+            }
+            catch
+            {
+                Debug.WriteLine("TSB.populateResetPinCmbBox failed");
+                return null;
+            }
+
         }
 
         public string getResetPinAsString()
         {
-            return resetPinStr;
+            try
+            {
+                return resetPinStr;
+            } catch
+            {
+                Debug.WriteLine("TSB.getResetPinAsString failed");
+                return null;
+            }
+            
+
         }
 
         private async void RXbufferUpdated(object sender, EventArgs args)
@@ -424,35 +442,52 @@ namespace bleTest3
             switch (commandInProgress)
             {
                 case commands.error:
-                    byte[] rxData;
-                    string str = "";
-                    rxData = serialBuffer.readAllBytesFromRXBuffer();
-                    str = getAsciiStringFromByteArray(rxData);
-                    displayMessage("Uh-oh. Bad stuff happened.\n" + str, Colors.Crimson);
-                    TsbUpdatedCommand(statuses.error);
-                    break; 
-                case commands.hello:
-                    bool outcome = await helloProcessing();
-
-
-
-                    if (outcome)
-                    {
-                        TsbUpdatedCommand(statuses.connected);
-                        // Whatever says we are successful.
-                    } else
-                    {
-                        displayMessage("Failed to connect to TinySafeBoot", Colors.Crimson);
-                    } 
-                    break;
-                case commands.readFlash:
-                    processFlashRead();
-                    break;
-                case commands.writeFlash:
-
                     try
                     {
-                        var writeResponse = await writeDataToFlash();
+                        byte[] rxData;
+                        string str = "";
+                        rxData = serialBuffer.readAllBytesFromRXBuffer();
+                        str = getAsciiStringFromByteArray(rxData);
+                        displayMessage("Uh-oh. Bad stuff happened.\n" + str, Colors.Crimson);
+                        TsbUpdatedCommand(statuses.error);
+                    } catch
+                    {
+                        Debug.WriteLine("RXBufferUpdated, case commands.error failed");
+                    }
+                    break; 
+                case commands.hello:
+                    try
+                    {
+                        bool outcome = await helloProcessing();
+                        if (outcome)
+                        {
+                            TsbUpdatedCommand(statuses.connected);
+                            // Whatever says we are successful.
+                        }
+                        else
+                        {
+                            displayMessage("Failed to connect to TinySafeBoot", Colors.Crimson);
+                        }
+                    } catch
+                    {
+                        Debug.WriteLine("RXBufferUpdated, case commands.hello failed");
+                    }
+
+                    break;
+                case commands.readFlash:
+                    try
+                    {
+                        processFlashRead();
+                    } catch
+                    {
+                        Debug.WriteLine("RXBufferUpdated, case commands.readFlash failed");
+                    }
+                    
+                    break;
+                case commands.writeFlash:
+                    try
+                    {
+                        var writeResponse = writeDataToFlash();
                         if (writeResponse)
                         {
                             Debug.WriteLine("Yay, there's much rejoicing.");
@@ -460,31 +495,60 @@ namespace bleTest3
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine(ex.Message);
+                        Debug.WriteLine("RXBufferUpdated, case commands.readFlash failed");
                     }
-
-
                     break;
                 case commands.bleReset:
-                    helloRouting();
+                    try
+                    {
+                        helloRouting();
+                    } catch
+                    {
+                        Debug.WriteLine("RXBufferUpdated, case commands.bleReset failed");
+                    }
+                    
                     break;
                 case commands.bleRelease:
-                    checkReleaseSuccess();
+                    try
+                    {
+                        checkReleaseSuccess();
+                    } catch
+                    {
+                        Debug.WriteLine("RXBufferUpdated, case commands.bleReset failed");
+                    }
                     break;
                 case commands.bleResetSuccess:
                     //TsbUpdateCommand(statuses.)
                     break;
                 case commands.bleReleaseSuccess:
-                    TsbUpdatedCommand(statuses.wirelessReleaseSuccess);
+                    try
+                    {
+                        TsbUpdatedCommand(statuses.wirelessReleaseSuccess);
+                    } catch
+                    {
+                        Debug.WriteLine("RXBufferUpdated, case commands.bleReleaseSuccess failed");
+                    }
                     break;
                 case commands.bleHello:
                     
                     break;
                 case commands.blePrepareHello:
-                    helloRouting();
+                    try
+                    {
+                        helloRouting();
+                    } catch
+                    {
+                        Debug.WriteLine("RXBufferUpdated, case commands.bleReleaseSuccess failed");
+                    }
                     break;
                 case commands.helloProcessing:
-                    await helloProcessing();
+                    try
+                    {
+                        await helloProcessing();
+                    } catch
+                    {
+                        Debug.WriteLine("RXBufferUpdated, case commands.helloProcessing failed");
+                    }
                     break;
                 default:
                     Debug.WriteLine("Defaulted in RXbuffer switch\n");
@@ -494,56 +558,117 @@ namespace bleTest3
 
         public void setOTADevice(OTAType device)
         {
-            OTASelected = device;
+            try
+            {
+                OTASelected = device;
+            } catch
+            {
+                Debug.WriteLine("TSB.setOTADevice() failed");
+            }
+            
         }
 
         public void setDevice(device _device)
         {
-            deviceSelected = _device;
+            try
+            {
+                deviceSelected = _device;
+            } catch
+            {
+                Debug.WriteLine("TSB.setDevice() failed");
+            }
+            
         }
 
         public void scrollToBottomOfTerminal()
         {
-
-            mainDisplayScrollView.ScrollToVerticalOffset(mainDisplay.ContentEnd.Offset+50);
+            try
+            {
+                mainDisplayScrollView.ScrollToVerticalOffset(mainDisplay.ContentEnd.Offset + 50);
+            } catch
+            {
+                Debug.WriteLine("TSB.scrollToBottomOfTerminal() failed");
+            }
+            
         }
 
         public void setFilePath(string path)
         {
-            filePath = path;
+            try
+            {
+                filePath = path;
+            } catch
+            {
+                Debug.WriteLine("TSB.setFilePath() failed");
+            }
+            
         }
 
         public void setFileName(string name)
         {
-            fileName = name;
+            try
+            {
+                fileName = name;
+            } catch
+            {
+                Debug.WriteLine("TSB.setFileName() failed");
+            }
+            
         }
 
         public string commandString(commands commandNumber)
         {
-            // 1. Return the command string.
-            return commandsAsStrings[(int)commandNumber];
+            try
+            {
+                // 1. Return the command string.
+                return commandsAsStrings[(int)commandNumber];
+            } catch
+            {
+                Debug.WriteLine("TSB.commandString() failed");
+                return "";
+            }
+
         }
 
         public void updateActionInProgress(commands commandNumber)
         {
-            commandInProgress = commandNumber;
+            try
+            {
+                commandInProgress = commandNumber;
+            } catch
+            {
+                Debug.WriteLine("TSB.updateActionInProgress() failed");
+            }
+            
         }
 
         public void setFlashDisplay(displayFlash displayFlashTypeArgument)
         {
-            displayFlashType = displayFlashTypeArgument;
+            try
+            {
+                displayFlashType = displayFlashTypeArgument;
+            } catch
+            {
+                Debug.WriteLine("TSB.setFlashDisplay() failed");
+            }
+            
         }
 
         public string getAsciiStringFromByteArray(byte[] byteArray)
         {
             string str = "";
-
-            for(int i = 0; i < byteArray.Length; i++)
+            try
             {
-                str += (char)byteArray[i];
+                for (int i = 0; i < byteArray.Length; i++)
+                {
+                    str += (char)byteArray[i];
+                }
+                return str;
+            } catch
+            {
+                Debug.WriteLine("TSB.getAsciiStringFromByteArray() failed");
+                return "";
             }
-
-            return str;
         }
 
         public void hello()
@@ -551,41 +676,72 @@ namespace bleTest3
             switch (deviceSelected)
             {
                 case device.serial:
-                    helloRouting();
+                    try
+                    {
+                        helloRouting();
+                    } catch
+                    {
+                        Debug.WriteLine("TSB.hello, device.serial failed");
+                    }
                     break;
                 case device.hm1x:
-                    commandInProgress = commands.blePrepareHello;
-                    serialBuffer.txBuffer = GetBytes("AT+" + getResetPinAsString() + "0");
+                    try
+                    {
+                        commandInProgress = commands.blePrepareHello;
+                        serialBuffer.txBuffer = GetBytes("AT+" + getResetPinAsString() + "0");
+                    }
+                    catch
+                    {
+                        Debug.WriteLine("TSB.hello, device.serial failed");
+                    }
                     break;
-            }
-            
+            }            
         }
 
-        public async void helloRouting()
+        public void helloRouting()
         {
             switch (OTASelected)
             {
                 case OTAType.none:
-                    startWriteTimeoutTimer(1);
-                    commandInProgress = commands.helloProcessing;
-                    serialBuffer.txBuffer = getCommand(commands.hello);
+                    try
+                    {
+                        startWriteTimeoutTimer(1);
+                        commandInProgress = commands.helloProcessing;
+                        serialBuffer.txBuffer = getCommand(commands.hello);
+                    } catch
+                    {
+                        Debug.WriteLine("TSB.hellRouting(), OTAType.none failed");
+                    }
                     break;
                 case OTAType.hm1x:
                     bool success = bleResetAssert();
                     switch (commandInProgress)
                     {
-                        case commands.bleReset:                           
-                            if (true == success)
+                        case commands.bleReset:
+                            try
                             {
-                                commandInProgress = commands.bleResetSuccess;
-                                TsbUpdatedCommand(statuses.wirelessReleaseSuccess);
-                            }
+                                if (true == success)
+                                {
+                                    commandInProgress = commands.bleResetSuccess;
+                                    TsbUpdatedCommand(statuses.wirelessReleaseSuccess);
+                                }
+                            } catch
+                            {
+                                Debug.WriteLine("TSB.hellRouting(), OTAType.hm1x, commands.Reset failed");
+                            }                      
+
                             break;
                         case commands.blePrepareHello:
-                            if(true == success)
+                            try
                             {
-                                commandInProgress = commands.helloProcessing;
-                                serialBuffer.txBuffer = getCommand(commands.hello);
+                                if (true == success)
+                                {
+                                    commandInProgress = commands.helloProcessing;
+                                    serialBuffer.txBuffer = getCommand(commands.hello);
+                                }
+                            } catch
+                            {
+                                Debug.WriteLine("TSB.hellRouting(), OTAType.hm1x, commands.blePrepareHello failed");
                             }
                             break;
                     }
@@ -602,63 +758,86 @@ namespace bleTest3
 
         public bool bleResetAssert()
         {
-            byte[] rxData = serialBuffer.readAllBytesFromRXBuffer();
-            string str = getAsciiStringFromByteArray(rxData);
-            if (str.Contains("OK+" + getResetPinAsString() + ":0"))
+            try
             {
-                startResetTimer(0, 50);
-                return false;
-            }
-            else if (str.Contains("OK+" + getResetPinAsString() + ":1"))
+                byte[] rxData = serialBuffer.readAllBytesFromRXBuffer();
+                string str = getAsciiStringFromByteArray(rxData);
+                if (str.Contains("OK+" + getResetPinAsString() + ":0"))
+                {
+                    startResetTimer(0, 50);
+                    return false;
+                }
+                else if (str.Contains("OK+" + getResetPinAsString() + ":1"))
+                {
+                    return true;
+                }
+            } catch
             {
-                return true;
+                Debug.WriteLine("TSB.bleResetAssert() failed");
             }
-
             return false;
         }
 
-        public void raiseBleResetPin(object sender, object e)
+
+        public void wirelessReset()
         {
-            resetTimer.Stop();
-            serialBuffer.txBuffer = GetBytes("AT+" + getResetPinAsString() + "1");
+            try
+            {
+                commandInProgress = commands.bleRelease;
+            } catch
+            {
+                Debug.WriteLine("TSB.wirelessReset() failed");
+            }
         }
 
-        public async void wirelessReset()
+        public void remoteResetInit()
         {
-            commandInProgress = commands.bleRelease;
-        }
+            try
+            {
+                serialBuffer.txBuffer = GetBytes("AT+" + getResetPinAsString() + "0");
+                resetTimer.Interval = new TimeSpan(0, 0, 0, 0, 300);
+                resetTimer.Start();
+            } catch
+            {
+                Debug.WriteLine("TSB.remoteResetInit() failed");
+            }
 
-        public async void wirelessRelease()
-        {
-
-        }
-
-        public async void remoteResetInit()
-        {
-            serialBuffer.txBuffer = GetBytes("AT+" + getResetPinAsString() + "0");
-            resetTimer.Interval = new TimeSpan(0, 0, 0, 0, 300);
-            resetTimer.Start();
         }
 
         private void ResetTimer_Tick(object sender, object e)
         {
-            resetTimer.Stop();
-            //serialBuffer.txBuffer = GetBytes("AT+" + getResetPinAsString() + "1");
+            try
+            {
+                resetTimer.Stop();
+                //serialBuffer.txBuffer = GetBytes("AT+" + getResetPinAsString() + "1");
+            } catch
+            {
+                Debug.WriteLine("TSB.ResetTimer_Tick() failed");
+            }
+
         }
 
         public void checkReleaseSuccess()
         {
             byte[] rxData;
             string str = "";
-            rxData = serialBuffer.readAllBytesFromRXBuffer();
-            str = getAsciiStringFromByteArray(rxData);
-            if (str.Contains("OK+" + getResetPinAsString() + ":0"))
+            try
             {
+                rxData = serialBuffer.readAllBytesFromRXBuffer();
+                str = getAsciiStringFromByteArray(rxData);
+                if (str.Contains("OK+" + getResetPinAsString() + ":0"))
+                {
 
-            } else if(str.Contains("OK+" + getResetPinAsString() + ":1"))
+                }
+                else if (str.Contains("OK+" + getResetPinAsString() + ":1"))
+                {
+                    TsbUpdatedCommand(statuses.wirelessReleaseSuccess, null);
+                }
+            } catch
             {
-                TsbUpdatedCommand(statuses.wirelessReleaseSuccess, null);
+                Debug.WriteLine("TSB.checkReleaseSuccess() failed");
             }
+            
         }
 
         public async Task<bool> helloProcessing()
@@ -760,7 +939,7 @@ namespace bleTest3
             else
             {
                 string error = "Could not handshake with TSB. Please reset and try again.\n";
-                
+                Debug.WriteLine(error);
                 return false;
             }
             return false;
@@ -768,38 +947,56 @@ namespace bleTest3
 
         public SolidColorBrush getColoredBrush(Color color)
         {
-            return new SolidColorBrush(color);
+            try
+            {
+                return new SolidColorBrush(color);
+            } catch
+            {
+                Debug.WriteLine("TSB.getColorBrush() failed");
+                return null;
+            }
+            
         }
         
-
-        public void clearMainDisplay()
-        {
-            theOneParagraph = new Paragraph();
-        }
 
         public byte[] getCommand(commands command)
         {
-            string cmdStr = commandsAsStrings[(int)command];
-            byte[] commandAsByteArray = new byte[cmdStr.Length];
-            for(int i =0; i < cmdStr.Length; i++)
+            try
             {
-                commandAsByteArray[i] = (byte)cmdStr[i];
+                string cmdStr = commandsAsStrings[(int)command];
+                byte[] commandAsByteArray = new byte[cmdStr.Length];
+                for (int i = 0; i < cmdStr.Length; i++)
+                {
+                    commandAsByteArray[i] = (byte)cmdStr[i];
+                }
+                return commandAsByteArray;
+            } catch
+            {
+                Debug.WriteLine("TSB.getCommand failed");
+                return null;
             }
-            return commandAsByteArray;
+
         }
         
-        public async void readFlash()
+        public void readFlash()
         {
-            // 1. Set readFlash as the commandInProgress
-            // 2. Write read Flash command.
-            commandInProgress = commands.readFlash;
-            //await serialPorts.write(commandsAsStrings[(int)commands.readFlash]);
-            //await serialPorts.write(commandsAsStrings[(int)commands.confirm]);
-            serialBuffer.txBuffer = getCommand(commands.readFlash);
-            serialBuffer.txBuffer = getCommand(commands.confirm);
+            try
+            {
+                // 1. Set readFlash as the commandInProgress
+                // 2. Write read Flash command.
+                commandInProgress = commands.readFlash;
+                //await serialPorts.write(commandsAsStrings[(int)commands.readFlash]);
+                //await serialPorts.write(commandsAsStrings[(int)commands.confirm]);
+                serialBuffer.txBuffer = getCommand(commands.readFlash);
+                serialBuffer.txBuffer = getCommand(commands.confirm);
+            } catch
+            {
+                Debug.WriteLine("TSB.readFlash() failed");
+            }
+
         }
 
-        public async void processFlashRead() {
+        public void processFlashRead() {
 
             // 1. Read RX buffer into a temporary buffer.
             // 2. If the temporary buffer is smaller than a page, exit method.
@@ -810,46 +1007,60 @@ namespace bleTest3
             // 7. If not, request another page.
             // 8. Clear the temporary buffer.
 
-            IAsyncAction ignored;
-
-            readFlashBfr.AddRange(serialBuffer.readAllBytesFromRXBuffer());
-            if(readFlashBfr.Count < pageSize) { return; }
-
-            var currentProgressBarValue = 1000*((float)rxByteArray.Count / (float)flashSize);
-            ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
-            () =>
+            try
             {
-                progressBar.Value = currentProgressBarValue;
-            });
+                IAsyncAction ignored;
 
-            rxByteArray.AddRange(readFlashBfr.ToArray());
-            if (dogEarCheck(readFlashBfr.ToArray())){
+                readFlashBfr.AddRange(serialBuffer.readAllBytesFromRXBuffer());
+                if (readFlashBfr.Count < pageSize) { return; }
+
+                var currentProgressBarValue = 1000 * ((float)rxByteArray.Count / (float)flashSize);
                 ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
                 () =>
                 {
-                    parseAndPrintRawRead(rxByteArray);
-                    progressBar.Value = 100;
+                    progressBar.Value = currentProgressBarValue;
                 });
-                return;
-            }
-            else if (readFlashBfr.Count >= pageSize)
+
+                rxByteArray.AddRange(readFlashBfr.ToArray());
+                if (dogEarCheck(readFlashBfr.ToArray()))
+                {
+                    ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+                    () =>
+                    {
+                        parseAndPrintRawRead(rxByteArray);
+                        progressBar.Value = 100;
+                    });
+                    return;
+                }
+                else if (readFlashBfr.Count >= pageSize)
+                {
+                    serialBuffer.txBuffer = getCommand(commands.confirm);
+                }
+                readFlashBfr.Clear();
+            } catch
             {
-                serialBuffer.txBuffer = getCommand(commands.confirm);
+                Debug.WriteLine("TSB.processReadFlash() failed");
             }
-            readFlashBfr.Clear();
+
         }
 
         private bool dogEarCheck(byte[] byteArray)
         {
             // 1. If null, return false.
             // 2. Check the last two bytes in a page to see if they are blank (0xFF).
-            if(byteArray == null) { return false;}
-            // Check to see what the if the page is dogeared.
-            if(byteArray[byteArray.Length - 1] == 0xFF && byteArray[byteArray.Length - 2] == 0xFF)
-            {return true;}
-            else
-            {return false;}
-
+            try
+            {
+                if (byteArray == null) { return false; }
+                // Check to see what the if the page is dogeared.
+                if (byteArray[byteArray.Length - 1] == 0xFF && byteArray[byteArray.Length - 2] == 0xFF)
+                { return true; }
+                else
+                { return false; }
+            } catch
+            {
+                Debug.WriteLine("TSB.dogEarCheck() failed");
+                return false;
+            }
         }
 
         public void parseAndPrintRawRead(List<byte> rawFlashRead)
@@ -869,35 +1080,42 @@ namespace bleTest3
             //string mydocpath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             //System.IO.StreamWriter outputFile = new System.IO.StreamWriter(mydocpath + @"\Flash_Read_Output.hex");
 
-            int numberOfPagesRead = (rawFlashRead.Count / pageSize);
-            int pageDepth = (pageSize / 16);
-            const int pageWidth = 16;
-            string lineBuffer = "";
-
-            byte[] byteArray = rawFlashRead.ToArray();
-
-            displayMessage("\nFlash readout for " + deviceSignatureValue + "\n\n", Colors.White);
-
-            for (int i = 0; i < numberOfPagesRead; i++)
+            try
             {
-                if (displayFlashType != displayFlash.none)
-                { displayMessage("\n\t Page #:" + i + "\n", Colors.Yellow); }
-                for (int j = 0; j < pageDepth; j++)
+                int numberOfPagesRead = (rawFlashRead.Count / pageSize);
+                int pageDepth = (pageSize / 16);
+                const int pageWidth = 16;
+                string lineBuffer = "";
+
+                byte[] byteArray = rawFlashRead.ToArray();
+
+                displayMessage("\nFlash readout for " + deviceSignatureValue + "\n\n", Colors.White);
+
+                for (int i = 0; i < numberOfPagesRead; i++)
                 {
-                    int location = ((i * pageSize) + (j * pageWidth));
-                    for (int k = 0; k < pageWidth; k++)
+                    if (displayFlashType != displayFlash.none)
+                    { displayMessage("\n\t Page #:" + i + "\n", Colors.Yellow); }
+                    for (int j = 0; j < pageDepth; j++)
                     {
-                        lineBuffer += byteArray[location + k].ToString("X2");
+                        int location = ((i * pageSize) + (j * pageWidth));
+                        for (int k = 0; k < pageWidth; k++)
+                        {
+                            lineBuffer += byteArray[location + k].ToString("X2");
+                        }
+                        getIntelFileHexString(location.ToString("X4"), lineBuffer.ToString());
+                        lineBuffer = "";
                     }
-                    getIntelFileHexString(location.ToString("X4"), lineBuffer.ToString());
-                    lineBuffer = "";
+                    var currentProgressBarValue = 100 * ((float)i + 1 / (float)numberOfPagesRead);
+                    //progressBar.Value = map(currentProgressBarValue, 0, 100, 50, 100);
                 }
-                var currentProgressBarValue = 100 * ((float)i+1 / (float)numberOfPagesRead);
-                //progressBar.Value = map(currentProgressBarValue, 0, 100, 50, 100);
+
+                scrollToBottomOfTerminal();
+                //outputFile.Close();
+            } catch
+            {
+                Debug.WriteLine("TSB.parseAndPrintRawRead() failed");
             }
 
-            scrollToBottomOfTerminal();
-            //outputFile.Close();
         }
 
         public string getIntelFileHexString(string address, string data)
@@ -911,43 +1129,52 @@ namespace bleTest3
             // 7. Add newline at end.
             // 8. Return completed Intel HEX file line as string.
 
-            string startCode = ":";
-            string byteCount = (data.Length / 2).ToString("X2");
-            // Address passed in.
-            string recordType = "00"; // 00 = Data, 01 = EOF, 02 = Ext. Segment. Addr., 03 = Start Lin. Addr, 04 = Ext. Linear Addr., 05 = Start Linear Addr.
-                                      // Checksum passed in
-
-            string intelHexFileLine = startCode + byteCount + address + recordType + data;
-            int checkSum = getCheckSumFromLine(intelHexFileLine);
-            string checkSumString = checkSum.ToString("X2");
-            intelHexFileLine += checkSumString;
-
-            switch (displayFlashType)
+            try
             {
-                case displayFlash.none:
-                    // No display.
-                    break;
-                case displayFlash.dataOnly:
-                    displayMessage(data + "\n", Colors.LawnGreen);
-                    break;
-                case displayFlash.addressAndData:
-                    displayMessage(address + ": ", Colors.Yellow);
-                    displayMessage(data + "\n", Colors.LawnGreen);
-                    break;
-                case displayFlash.asIntelHexFile:
-                    displayMessage(":", Colors.Yellow);                  // Start code
-                    displayMessage(byteCount, Colors.Green);             // Byte count
-                    displayMessage(address, Colors.Purple);              // Address
-                    displayMessage(recordType, Colors.Pink);             // Record type.
-                    displayMessage(data, Colors.CadetBlue);              // Data
-                    displayMessage(checkSumString + "\n", Colors.Gray);  // Checksum
-                    break;
-                default:
-                    displayMessage(data + "\n", Colors.LawnGreen);
-                    break;
+                string startCode = ":";
+                string byteCount = (data.Length / 2).ToString("X2");
+                // Address passed in.
+                string recordType = "00"; // 00 = Data, 01 = EOF, 02 = Ext. Segment. Addr., 03 = Start Lin. Addr, 04 = Ext. Linear Addr., 05 = Start Linear Addr.
+                                          // Checksum passed in
+
+                string intelHexFileLine = startCode + byteCount + address + recordType + data;
+                int checkSum = getCheckSumFromLine(intelHexFileLine);
+                string checkSumString = checkSum.ToString("X2");
+                intelHexFileLine += checkSumString;
+
+                switch (displayFlashType)
+                {
+                    case displayFlash.none:
+                        // No display.
+                        break;
+                    case displayFlash.dataOnly:
+                        displayMessage(data + "\n", Colors.LawnGreen);
+                        break;
+                    case displayFlash.addressAndData:
+                        displayMessage(address + ": ", Colors.Yellow);
+                        displayMessage(data + "\n", Colors.LawnGreen);
+                        break;
+                    case displayFlash.asIntelHexFile:
+                        displayMessage(":", Colors.Yellow);                  // Start code
+                        displayMessage(byteCount, Colors.Green);             // Byte count
+                        displayMessage(address, Colors.Purple);              // Address
+                        displayMessage(recordType, Colors.Pink);             // Record type.
+                        displayMessage(data, Colors.CadetBlue);              // Data
+                        displayMessage(checkSumString + "\n", Colors.Gray);  // Checksum
+                        break;
+                    default:
+                        displayMessage(data + "\n", Colors.LawnGreen);
+                        break;
+                }
+                scrollToBottomOfTerminal();
+                return intelHexFileLine;
+            } catch
+            {
+                Debug.WriteLine("TSB.getIntelFileHexString() failed");
+                return "";
             }
-            scrollToBottomOfTerminal();
-            return intelHexFileLine;
+
+            
         }
 
         public async void writeHexFile(byte[] line)
@@ -962,14 +1189,22 @@ namespace bleTest3
 
         private string getStringFromByteList(List<byte> byteList)
         {
-            string str = "";
-            byte[] byteArray = byteList.ToArray();
-            for(int i = 0; i < byteArray.Length; i++)
+            try
             {
-                str += byteArray[i].ToString("X4");
+                string str = "";
+                byte[] byteArray = byteList.ToArray();
+                for (int i = 0; i < byteArray.Length; i++)
+                {
+                    str += byteArray[i].ToString("X4");
+                }
+
+                return str;
+            } catch
+            {
+                Debug.WriteLine("TSB.getStringFromByteList failed");
+                return "";
             }
 
-            return str;
         }
 
         public int getCheckSumFromLine(string line)
@@ -981,23 +1216,31 @@ namespace bleTest3
             // 5. Take the two's complement.
             // 6. Return checksum.
 
-            byte checkSum = 0;
-            int halfLength = (line.Length / 2);
-            int[] returnBuffer = new int[halfLength];
-            string[] splitByTwoData = new string[halfLength];
-
-            line = line.Replace(":", "");
-            for (int i = 0; i < halfLength; i++)
+            try
             {
-                splitByTwoData[i] = line.Substring((i * 2), 2);
-            }
-            for (int i = 0; i < halfLength; i++)
-            {
-                checkSum += (byte)Convert.ToInt32(splitByTwoData[i], 16);
-            }
-            checkSum = (byte)(~checkSum + 1);
+                byte checkSum = 0;
+                int halfLength = (line.Length / 2);
+                int[] returnBuffer = new int[halfLength];
+                string[] splitByTwoData = new string[halfLength];
 
-            return checkSum;
+                line = line.Replace(":", "");
+                for (int i = 0; i < halfLength; i++)
+                {
+                    splitByTwoData[i] = line.Substring((i * 2), 2);
+                }
+                for (int i = 0; i < halfLength; i++)
+                {
+                    checkSum += (byte)Convert.ToInt32(splitByTwoData[i], 16);
+                }
+                checkSum = (byte)(~checkSum + 1);
+
+                return checkSum;
+            } catch
+            {
+                Debug.WriteLine("TSB.getCheckSumFromLine() failed");
+                return 0;
+            }
+
         }
 
         public async void openFileForWritingToFlash()
@@ -1007,44 +1250,65 @@ namespace bleTest3
             // 3. Print out the data.
             // 4. Write data to flash.
 
-            //byte[] bytesFromFile = intelHexFileHandler.intelHexFileToArray(filePath, pageSize);
-
-            //int[] intsFromFile = new int[intelHexFileToUpload.Length];
-            //for (int i = 0; i < intelHexFileToUpload.Length; i++)
-            //{
-            //    intelHexFileToUpload[i] = intelHexFileToUpload[i];
-            //}
-            byte[] fileToUpload = await readHexFile();
-            if(fileToUpload != null)
+            try
             {
-                intelHexFileToUpload.AddRange(fileToUpload);
-                parseAndPrintRawRead(intelHexFileToUpload);
-                //writeDataToFlash(intsFromFile);
+                //byte[] bytesFromFile = intelHexFileHandler.intelHexFileToArray(filePath, pageSize);
+
+                //int[] intsFromFile = new int[intelHexFileToUpload.Length];
+                //for (int i = 0; i < intelHexFileToUpload.Length; i++)
+                //{
+                //    intelHexFileToUpload[i] = intelHexFileToUpload[i];
+                //}
+                byte[] fileToUpload = await readHexFile();
+                if (fileToUpload != null)
+                {
+                    intelHexFileToUpload.AddRange(fileToUpload);
+                    parseAndPrintRawRead(intelHexFileToUpload);
+                    //writeDataToFlash(intsFromFile);
+                }
+            } catch
+            {
+                Debug.WriteLine("TSB.openFileForWRitingToFlash() failed");
             }
+
+
         }
 
         public void writeToFlash()
         {
-            prepareToWriteToFlash();
+            try
+            {
+                prepareToWriteToFlash();
+            } catch
+            {
+                Debug.WriteLine("TSB.writeToFlash() failed");
+            }
         }
 
-        private async void prepareToWriteToFlash()
+        private void prepareToWriteToFlash()
         {
-            if(intelHexFileToUpload.Count != 0)
+            try
             {
-                serialBuffer.txBuffer = getCommand(commands.writeFlash);
-                commandInProgress = commands.writeFlash;
-                displayMessage("\n\n\nWrite in progress: \nPlease do not disconnect device or exit the application.\n", Colors.Yellow);
-                scrollToBottomOfTerminal();
-            }
-            else
+                if (intelHexFileToUpload.Count != 0)
+                {
+                    serialBuffer.txBuffer = getCommand(commands.writeFlash);
+                    commandInProgress = commands.writeFlash;
+                    displayMessage("\n\n\nWrite in progress: \nPlease do not disconnect device or exit the application.\n", Colors.Yellow);
+                    scrollToBottomOfTerminal();
+                }
+                else
+                {
+                    displayMessage("No file to write.\n", Colors.Crimson);
+                }
+            } catch
             {
-                displayMessage("No file to write.\n", Colors.Crimson);
+                Debug.WriteLine("TSB.prepareToWriteToFlash() failed");
             }
+
 
         }
 
-        private async Task<bool> writeDataToFlash()
+        private bool writeDataToFlash()
         {
             // 1. Send Flash write character.
             // 2. Get response and check for RQ ('?').
@@ -1055,106 +1319,146 @@ namespace bleTest3
             // 7. Wait and check for CF ('!').
             // 8. Return true if process successful.
 
-            IAsyncAction ignored;
-
-            int pagesToWrite = intelHexFileToUpload.Count / pageSize;
-
-            byte[] rxByteArray = serialBuffer.readAllBytesFromRXBuffer();
-
-            if (rxByteArray[0] == 0x3F) // ?
+            try
             {
-                if (uploadPageIndex < pagesToWrite)
+                IAsyncAction ignored;
+
+                int pagesToWrite = intelHexFileToUpload.Count / pageSize;
+
+                byte[] rxByteArray = serialBuffer.readAllBytesFromRXBuffer();
+
+                if (rxByteArray[0] == 0x3F) // ?
                 {
-                    // From byte array to string 
-                    byte[] bytesToWrite = intelHexFileToUpload.Skip(uploadPageIndex * pageSize).Take(pageSize).ToArray();
+                    if (uploadPageIndex < pagesToWrite)
+                    {
+                        // From byte array to string 
+                        byte[] bytesToWrite = intelHexFileToUpload.Skip(uploadPageIndex * pageSize).Take(pageSize).ToArray();
 
-                    serialBuffer.txBuffer = getCommand(commands.confirm);
-                    serialBuffer.txBuffer = bytesToWrite;
+                        serialBuffer.txBuffer = getCommand(commands.confirm);
+                        serialBuffer.txBuffer = bytesToWrite;
 
-                    //byte[] tmpRxByteArray = serialBuffer.readAllBytesFromRXBuffer();
+                        //byte[] tmpRxByteArray = serialBuffer.readAllBytesFromRXBuffer();
+
+                        ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+                        () =>
+                        {
+                            displayMessage("Page #" + uploadPageIndex + " ", Colors.Yellow);
+                            displayMessage("OK.\n", Colors.LawnGreen);
+                            scrollToBottomOfTerminal();
+                            var currentProgressBarValue = 100 * ((float)(uploadPageIndex + 1) / (float)pagesToWrite);
+                            progressBar.Value = map(currentProgressBarValue, 0, 100, 0, 100);
+                        });
+                        uploadPageIndex++;
+                    }
+                    else
+                    {
+                        serialBuffer.txBuffer = getCommand(commands.request);
+                        //await serialPorts.write(commandsAsStrings[(int)commands.request]);
+                    }
+                    return true;
+                }
+                else if (rxByteArray[0] == 0x21) // !
+                {
 
                     ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
                     () =>
                     {
-                        displayMessage("Page #" + uploadPageIndex + " ", Colors.Yellow);
-                        displayMessage("OK.\n", Colors.LawnGreen);
+
                         scrollToBottomOfTerminal();
-                        var currentProgressBarValue = 100 * ((float)(uploadPageIndex + 1) / (float)pagesToWrite);
-                        progressBar.Value = map(currentProgressBarValue, 0, 100, 0, 100);
+                        displayMessage("\nThe file ", Colors.LawnGreen);
+                        displayMessage(hexFileToRead.Name, Colors.Yellow);
+                        displayMessage(" was written succesfully!", Colors.LawnGreen);
+                        scrollToBottomOfTerminal();
                     });
-                    uploadPageIndex++;
-                } else
-                {
-                    serialBuffer.txBuffer = getCommand(commands.request);
-                    //await serialPorts.write(commandsAsStrings[(int)commands.request]);
+                    TsbUpdatedCommand(statuses.uploadSuccessful);
+                    return true;
                 }
-                return true;
-            }
-            else if (rxByteArray[0] == 0x21) // !
-            {
-
-                ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
-                () =>
+                else
                 {
+                    // Error writing to flash.
 
-                    scrollToBottomOfTerminal();
-                    displayMessage("\nThe file ", Colors.LawnGreen);
-                    displayMessage(hexFileToRead.Name, Colors.Yellow);
-                    displayMessage(" was written succesfully!", Colors.LawnGreen);
-                    scrollToBottomOfTerminal();
-                });
-                TsbUpdatedCommand(statuses.uploadSuccessful);
-                return true;
-            } else
+                    ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+                    () =>
+                    {
+                        displayMessage("ERROR writing Page #" + uploadPageIndex + "\n", Colors.Crimson);
+                    });
+                    return false;
+                }
+            } catch
             {
-                // Error writing to flash.
-
-                ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
-                () =>
-                {
-                    displayMessage("ERROR writing Page #" + uploadPageIndex + "\n", Colors.Crimson);
-                });
+                Debug.WriteLine("TSB.writeDataToFlash() failed");
                 return false;
             }
-            return false;
+
+
         }
 
         public string getStringFromBytes(byte[] bytes)
         {
-            string str = "";
-
-            for(int i = 0; i < bytes.Length; i++)
+            try
             {
-                str += bytes[i].ToString("X2");
+                string str = "";
+
+                for (int i = 0; i < bytes.Length; i++)
+                {
+                    str += bytes[i].ToString("X2");
+                }
+                return str;
+            } catch
+            {
+                Debug.WriteLine("TSB.getStringFromBytes() failed");
+                return null;
             }
-            return str;
+ 
         }
 
         public string getStringFromIntBytes(int[] bytes)
         {
-
-            string str = "";
-            for (int i = 0; i < bytes.Length; i++)
+            try
             {
-                str += Convert.ToChar(bytes[i]);
+                string str = "";
+                for (int i = 0; i < bytes.Length; i++)
+                {
+                    str += Convert.ToChar(bytes[i]);
+                }
+                return str;
+            } catch
+            {
+                Debug.WriteLine("TSB.getStringFromIntBytes() failed");
+                return "";
             }
-
-            return str;
+ 
         }
 
         static byte[] GetBytes(string str)
         {
-            byte[] bytes = new byte[str.Length];
-            for (int i = 0; i < str.Length; i++)
+            try
             {
-                bytes[i] = (byte)str[i];
+                byte[] bytes = new byte[str.Length];
+                for (int i = 0; i < str.Length; i++)
+                {
+                    bytes[i] = (byte)str[i];
+                }
+                return bytes;
+            } catch
+            {
+                Debug.WriteLine("TSB.GetBytes() failed");
+                return null;
             }
-            return bytes;
+
         }
 
         double map(double x, double in_min, double in_max, double out_min, double out_max)
         {
-            return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+            try
+            {
+                return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+            } catch
+            {
+                Debug.WriteLine("TSB.map() failed");
+                return 0;
+            }
+            
         }
 
         public async Task selectFileToRead()
@@ -1188,22 +1492,30 @@ namespace bleTest3
 
         public async Task<byte[]> readHexFile()
         {
-            if (hexFileToRead == null)
+            try
             {
-                displayMessage("No HEX File selected.\n", Colors.Crimson);
-            }
-            else
-            {
-                // Code borrowed from SO: 
-                // http://stackoverflow.com/questions/34583303/how-to-read-a-text-file-in-windows-universal-app
-                using (var inputStream = await hexFileToRead.OpenReadAsync())
-                using (var classicStream = inputStream.AsStreamForRead())
+                if (hexFileToRead == null)
                 {
-                    byte[] intelHexFileAsByteArray = intelHexFileHandler.intelHexFileToArray(classicStream, pageSize);
-                    return intelHexFileAsByteArray;
+                    displayMessage("No HEX File selected.\n", Colors.Crimson);
                 }
+                else
+                {
+                    // Code borrowed from SO: 
+                    // http://stackoverflow.com/questions/34583303/how-to-read-a-text-file-in-windows-universal-app
+                    using (var inputStream = await hexFileToRead.OpenReadAsync())
+                    using (var classicStream = inputStream.AsStreamForRead())
+                    {
+                        byte[] intelHexFileAsByteArray = intelHexFileHandler.intelHexFileToArray(classicStream, pageSize);
+                        return intelHexFileAsByteArray;
+                    }
+                }
+                return null;
+            } catch
+            {
+                Debug.WriteLine("TSB.readHexFile failed");
+                return null;
             }
-            return null;
+
         }
 
         public Run getRun(string str, Color color)
@@ -1251,57 +1563,66 @@ namespace bleTest3
             // 14. If page is not filled, fill with 0xFF.
             // 15. Return the byte array filled with extracted data.
 
-            // Peek.
-            Stream fullReadStream = fileName;
-            StreamReader fileToGetNumberOfLines = new StreamReader(fileName);
-            Tuple<int, int> numberOfBytesAndLines = linesInFile(fileToGetNumberOfLines);
-            int numberOfBytesInFile = numberOfBytesAndLines.Item1;
-            int numberOfLinesInFile = numberOfBytesAndLines.Item2;
-            fileToGetNumberOfLines.BaseStream.Seek(0, SeekOrigin.Begin);
-
-            // Buffer.
-            int neededPages = getNeededPagePadding(numberOfBytesInFile, pageSize);
-            byte[] dataFromFile = new byte[neededPages * pageSize];
-
-            // Read.
-            StreamReader fileStream = new StreamReader(fullReadStream);
-            byte[] bytesThisLine = new byte[16];
-            Tuple<byte[], Int16> lineOfDataAndAddress = new Tuple<byte[], Int16>(null, 0);
-            int indexOfLastDataLine = 0;
-
-            int numberOfBytesUpToThisLine = 0;
-
-
-            // Iterate
-            for (int lineIndex = 0; lineIndex < numberOfLinesInFile; lineIndex++)
+            try
             {
-                lineOfDataAndAddress = readLineFromHexFile(fileStream);
-                if (lineOfDataAndAddress.Item1 != null)
+                // Peek.
+                Stream fullReadStream = fileName;
+                StreamReader fileToGetNumberOfLines = new StreamReader(fileName);
+                Tuple<int, int> numberOfBytesAndLines = linesInFile(fileToGetNumberOfLines);
+                int numberOfBytesInFile = numberOfBytesAndLines.Item1;
+                int numberOfLinesInFile = numberOfBytesAndLines.Item2;
+                fileToGetNumberOfLines.BaseStream.Seek(0, SeekOrigin.Begin);
+
+                // Buffer.
+                int neededPages = getNeededPagePadding(numberOfBytesInFile, pageSize);
+                byte[] dataFromFile = new byte[neededPages * pageSize];
+
+                // Read.
+                StreamReader fileStream = new StreamReader(fullReadStream);
+                byte[] bytesThisLine = new byte[16];
+                Tuple<byte[], Int16> lineOfDataAndAddress = new Tuple<byte[], Int16>(null, 0);
+                int indexOfLastDataLine = 0;
+
+                int numberOfBytesUpToThisLine = 0;
+
+
+                // Iterate
+                for (int lineIndex = 0; lineIndex < numberOfLinesInFile; lineIndex++)
                 {
-                    Int16 startAddressOfLine = lineOfDataAndAddress.Item2;
-                    for (int byteIndex = 0; byteIndex < lineOfDataAndAddress.Item1.Length; byteIndex++)
+                    lineOfDataAndAddress = readLineFromHexFile(fileStream);
+                    if (lineOfDataAndAddress.Item1 != null)
                     {
-                        if ((byteIndex + numberOfBytesUpToThisLine) < numberOfBytesInFile)
-                        { dataFromFile[byteIndex + startAddressOfLine] = lineOfDataAndAddress.Item1[byteIndex];
-                            indexOfLastDataLine = (byteIndex + startAddressOfLine);
-                        }
-                        else
+                        Int16 startAddressOfLine = lineOfDataAndAddress.Item2;
+                        for (int byteIndex = 0; byteIndex < lineOfDataAndAddress.Item1.Length; byteIndex++)
                         {
-                            dataFromFile[byteIndex + startAddressOfLine] = 0xFF;
-                            indexOfLastDataLine = (byteIndex + startAddressOfLine);
+                            if ((byteIndex + numberOfBytesUpToThisLine) < numberOfBytesInFile)
+                            {
+                                dataFromFile[byteIndex + startAddressOfLine] = lineOfDataAndAddress.Item1[byteIndex];
+                                indexOfLastDataLine = (byteIndex + startAddressOfLine);
+                            }
+                            else
+                            {
+                                dataFromFile[byteIndex + startAddressOfLine] = 0xFF;
+                                indexOfLastDataLine = (byteIndex + startAddressOfLine);
+                            }
                         }
                     }
+                    numberOfBytesUpToThisLine += lineOfDataAndAddress.Item1.Length;
                 }
-                numberOfBytesUpToThisLine += lineOfDataAndAddress.Item1.Length;
-            }
 
-            // Pad page.
-            int blankBytesToFill = (neededPages * pageSize) - indexOfLastDataLine;
-            for (int i = 0; i < blankBytesToFill; i++)
+                // Pad page.
+                int blankBytesToFill = (neededPages * pageSize) - indexOfLastDataLine;
+                for (int i = 0; i < blankBytesToFill; i++)
+                {
+                    dataFromFile[i + indexOfLastDataLine] = 0xFF;
+                }
+                return dataFromFile;
+            } catch
             {
-                dataFromFile[i + indexOfLastDataLine] = 0xFF;
+                Debug.WriteLine("IntelHexFile.IntelHexFileToArray() failed");
+                return null;
             }
-            return dataFromFile;
+           
         }
 
         public Tuple<byte[], Int16> readLineFromHexFile(StreamReader fileStream)
@@ -1314,78 +1635,86 @@ namespace bleTest3
             // 6. Loop through the data extracting a line of bytes.
             //    UNIMP: Checksum
             // 7. Return line of bytes and Int16 address a tuple.
-
-            int parseLineIndex = 0;
-
-            //To hold file hex values.
-            int dataByteCount = 0;
-            byte data_address1 = 0x00;
-            byte data_address2 = 0x00;
-            UInt16 fullDataAddress = 0x00;
-            Int16 fullAddressAsInt = 0;
-            byte data_record_type = 0x00;
-            byte data_check_sum = 0x00;
-
-            string line = "";
-            line = fileStream.ReadLine();
-
-            // Skip start code.
-            parseLineIndex++;
-
-            // Get byte count and convert to int.
-            string byteCountStrBfr = line.Substring(parseLineIndex, 2);
-            dataByteCount = getByteFrom2HexChar(byteCountStrBfr);
-            parseLineIndex += 2;
-
-            // Create the byte array for the read about to be read.
-            byte[] bytesFromLine = new byte[dataByteCount];
-
-            // Get data address and convert to memory address.
-            string byteDataAddressStrBfr = line.Substring(parseLineIndex, 2);
-            data_address1 = getByteFrom2HexChar(byteDataAddressStrBfr);
-            parseLineIndex += 2;
-
-            byteDataAddressStrBfr = line.Substring(parseLineIndex, 2);
-            data_address2 = getByteFrom2HexChar(byteDataAddressStrBfr);
-            parseLineIndex += 2;
-
-            fullDataAddress = (UInt16)((data_address1 << 8) | data_address2);
-            fullAddressAsInt = (Int16)fullDataAddress;
-
-            // Data type.
-            string dataRecordTypeStrBfr = line.Substring(parseLineIndex, 2);
-            data_record_type = getByteFrom2HexChar(dataRecordTypeStrBfr);
-            parseLineIndex += 2;
-
-            // If not data, don't bother and return false.
-            if (data_record_type != 0x00) { return new Tuple<byte[], Int16>(null, 0); }
-
-            // Get the data.
-            int dataIndex = 0;
-            string dataStrBfr = "";
-            while (dataIndex < dataByteCount)
+            
+            try
             {
-                dataStrBfr = line.Substring(parseLineIndex, 2);
-                parseLineIndex += 2;
-                bytesFromLine[dataIndex] = getByteFrom2HexChar(dataStrBfr);
-                dataIndex++;
-            }
+                int parseLineIndex = 0;
 
-            // Get checksum
-            // IF CHECKSUM NEEDED, GET LATER.
-            /*
-            Debug.Write(
-               "\nByte Count: " + dataByteCount.ToString("X2") +
-               "  Full address: "+ fullAddressAsInt.ToString("X4") +
-               "  Record type: " + data_record_type.ToString("X2") +
-               "  Data: "
-               );
-               for (int i = 0; i < bytesFromLine.Length; i++)
-               {
-                   Debug.Write(bytesFromLine[i].ToString("X2"));
-               }
-               */
-            return new Tuple<byte[], Int16>(bytesFromLine, fullAddressAsInt);
+                //To hold file hex values.
+                int dataByteCount = 0;
+                byte data_address1 = 0x00;
+                byte data_address2 = 0x00;
+                UInt16 fullDataAddress = 0x00;
+                Int16 fullAddressAsInt = 0;
+                byte data_record_type = 0x00;
+                byte data_check_sum = 0x00;
+
+                string line = "";
+                line = fileStream.ReadLine();
+
+                // Skip start code.
+                parseLineIndex++;
+
+                // Get byte count and convert to int.
+                string byteCountStrBfr = line.Substring(parseLineIndex, 2);
+                dataByteCount = getByteFrom2HexChar(byteCountStrBfr);
+                parseLineIndex += 2;
+
+                // Create the byte array for the read about to be read.
+                byte[] bytesFromLine = new byte[dataByteCount];
+
+                // Get data address and convert to memory address.
+                string byteDataAddressStrBfr = line.Substring(parseLineIndex, 2);
+                data_address1 = getByteFrom2HexChar(byteDataAddressStrBfr);
+                parseLineIndex += 2;
+
+                byteDataAddressStrBfr = line.Substring(parseLineIndex, 2);
+                data_address2 = getByteFrom2HexChar(byteDataAddressStrBfr);
+                parseLineIndex += 2;
+
+                fullDataAddress = (UInt16)((data_address1 << 8) | data_address2);
+                fullAddressAsInt = (Int16)fullDataAddress;
+
+                // Data type.
+                string dataRecordTypeStrBfr = line.Substring(parseLineIndex, 2);
+                data_record_type = getByteFrom2HexChar(dataRecordTypeStrBfr);
+                parseLineIndex += 2;
+
+                // If not data, don't bother and return false.
+                if (data_record_type != 0x00) { return new Tuple<byte[], Int16>(null, 0); }
+
+                // Get the data.
+                int dataIndex = 0;
+                string dataStrBfr = "";
+                while (dataIndex < dataByteCount)
+                {
+                    dataStrBfr = line.Substring(parseLineIndex, 2);
+                    parseLineIndex += 2;
+                    bytesFromLine[dataIndex] = getByteFrom2HexChar(dataStrBfr);
+                    dataIndex++;
+                }
+
+                // Get checksum
+                // IF CHECKSUM NEEDED, GET LATER.
+                /*
+                Debug.Write(
+                   "\nByte Count: " + dataByteCount.ToString("X2") +
+                   "  Full address: "+ fullAddressAsInt.ToString("X4") +
+                   "  Record type: " + data_record_type.ToString("X2") +
+                   "  Data: "
+                   );
+                   for (int i = 0; i < bytesFromLine.Length; i++)
+                   {
+                       Debug.Write(bytesFromLine[i].ToString("X2"));
+                   }
+                   */
+                return new Tuple<byte[], Int16>(bytesFromLine, fullAddressAsInt);
+            } catch
+            {
+                Debug.WriteLine("IntelHexFile.readLineFromHexFile() failed");
+                return null;
+            }
+            
         }
 
         private Tuple<int, int> linesInFile(StreamReader file)
@@ -1400,26 +1729,42 @@ namespace bleTest3
             // 8. Continue until EOF.
             // 9. Return bytes of data and number of lines in file.
 
-            string line = "";
-            int lineCount = 0;
-            int dataBytes = 0;
-
-            line = file.ReadLine();
-            while (line != null)
+            try
             {
-                if (line.Substring(7, 2) == "00")
-                {
-                    dataBytes += getByteFrom2HexChar(line.Substring(1, 2));
-                    lineCount++;
-                }
+                string line = "";
+                int lineCount = 0;
+                int dataBytes = 0;
+
                 line = file.ReadLine();
+                while (line != null)
+                {
+                    if (line.Substring(7, 2) == "00")
+                    {
+                        dataBytes += getByteFrom2HexChar(line.Substring(1, 2));
+                        lineCount++;
+                    }
+                    line = file.ReadLine();
+                }
+                return new Tuple<int, int>(dataBytes, lineCount);
+            } catch
+            {
+                Debug.WriteLine("IntelHexFile.linesInFile() failed");
+                return null;
             }
-            return new Tuple<int, int>(dataBytes, lineCount);
+            
         }
 
         public byte getByteFrom2HexChar(string twoHexChars)
         {
-            return (byte)Convert.ToInt32(twoHexChars, 16);
+            try
+            {
+                return (byte)Convert.ToInt32(twoHexChars, 16);
+            } catch
+            {
+                Debug.WriteLine("IntelHexFile.geyByteFrom2HexChar() failed");
+                return 0x00;
+            }
+            
         }
 
         public int getNeededPagePadding(int byteCount, int pageSize)
@@ -1430,15 +1775,22 @@ namespace bleTest3
             // 4. Find number of padding bytes needed.
             // 5. Return how many padding bytes are required to make the last page full.
 
-            if (byteCount % pageSize == 0)
+            try
             {
-                return ((int)(byteCount / pageSize) + 1);
-            }
-            else
+                if (byteCount % pageSize == 0)
+                {
+                    return ((int)(byteCount / pageSize) + 1);
+                }
+                else
+                {
+                    return ((int)Math.Floor((float)byteCount / (float)pageSize) + 1);
+                }
+            } catch
             {
-                return ((int)Math.Floor((float)byteCount / (float)pageSize) + 1);
+                Debug.WriteLine("IntelHexFile.getNeededPagePadding() failed");
+                return 0;
             }
-            return 0;
+
         }
 
 

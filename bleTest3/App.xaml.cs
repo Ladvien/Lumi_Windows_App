@@ -12,7 +12,7 @@ using System.Threading;
 using System.Diagnostics;
 
 
-namespace bleTest3
+namespace Lumi
 {
     /// Provides application-specific behavior to supplement the default Application class.
     /// </summary>

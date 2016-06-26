@@ -197,9 +197,6 @@ C:\Users\Echo\Lumi_Windows_App\bleTest3\obj\x64\Debug\ProjectArchitectures.txt
 C:\Users\cthom\Lumi_Windows_App\bleTest3\bin\x64\Debug\ApplicationInsights.config
 C:\Users\cthom\Lumi_Windows_App\bleTest3\bin\x64\Debug\App.xbf
 C:\Users\cthom\Lumi_Windows_App\bleTest3\bin\x64\Debug\MainPage.xbf
-C:\Users\cthom\Lumi_Windows_App\bleTest3\bin\x64\Debug\lumi.xr.xml
-C:\Users\cthom\Lumi_Windows_App\bleTest3\bin\x64\Debug\lumi.exe
-C:\Users\cthom\Lumi_Windows_App\bleTest3\bin\x64\Debug\lumi.pdb
 C:\Users\cthom\Lumi_Windows_App\bleTest3\bin\x64\Debug\resources.pri
 C:\Users\cthom\Lumi_Windows_App\bleTest3\bin\x64\Debug\AppxManifest.xml
 C:\Users\cthom\Lumi_Windows_App\bleTest3\bin\x64\Debug\Core\AppxManifest.xml
@@ -321,8 +318,6 @@ C:\Users\cthom\Lumi_Windows_App\bleTest3\obj\x64\Debug\MainPage.xaml
 C:\Users\cthom\Lumi_Windows_App\bleTest3\obj\x64\Debug\App.xbf
 C:\Users\cthom\Lumi_Windows_App\bleTest3\obj\x64\Debug\MainPage.xbf
 C:\Users\cthom\Lumi_Windows_App\bleTest3\obj\x64\Debug\XamlSaveStateFile.xml
-C:\Users\cthom\Lumi_Windows_App\bleTest3\obj\x64\Debug\lumi.exe
-C:\Users\cthom\Lumi_Windows_App\bleTest3\obj\x64\Debug\lumi.pdb
 C:\Users\cthom\Lumi_Windows_App\bleTest3\obj\x64\Debug\ResourceHandlingTask.state
 C:\Users\cthom\Lumi_Windows_App\bleTest3\obj\x64\Debug\FxResources.Microsoft.CSharp.SR.resw
 C:\Users\cthom\Lumi_Windows_App\bleTest3\obj\x64\Debug\FxResources.Microsoft.VisualBasic.SR.resw
@@ -390,3 +385,11 @@ C:\Users\cthom\Lumi_Windows_App\bleTest3\obj\x64\Debug\qualifiers.txt.intermedia
 C:\Users\cthom\Lumi_Windows_App\bleTest3\obj\x64\Debug\MultipleQualifiersPerDimensionFound.txt
 C:\Users\cthom\Lumi_Windows_App\bleTest3\obj\x64\Debug\ProjectArchitectures.txt
 C:\Users\cthom\Lumi_Windows_App\bleTest3\obj\x64\Debug\Lumi.csprojResolveAssemblyReference.cache
+C:\Users\cthom\Lumi_Windows_App\bleTest3\bin\x64\Debug\Core\bleTest3.exe
+C:\Users\cthom\Lumi_Windows_App\bleTest3\bin\x64\Debug\Lumi.xr.xml
+C:\Users\cthom\Lumi_Windows_App\bleTest3\bin\x64\Debug\Lumi.exe
+C:\Users\cthom\Lumi_Windows_App\bleTest3\bin\x64\Debug\Lumi.pdb
+C:\Users\cthom\Lumi_Windows_App\bleTest3\obj\x64\Debug\Lumi.exe
+C:\Users\cthom\Lumi_Windows_App\bleTest3\obj\x64\Debug\Lumi.pdb
+C:\Users\cthom\Lumi_Windows_App\bleTest3\bin\x64\Debug\Lumi.exe.CodeAnalysisLog.xml
+C:\Users\cthom\Lumi_Windows_App\bleTest3\bin\x64\Debug\Lumi.exe.lastcodeanalysissucceeded

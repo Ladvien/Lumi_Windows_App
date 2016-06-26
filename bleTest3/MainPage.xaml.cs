@@ -12,11 +12,10 @@ using Windows.UI;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Windows.UI.ViewManagement;
-using bleTest3;
+using Lumi;
 using Windows.ApplicationModel;
 using Windows.UI.Core;
 using Windows.Foundation;
-using lumi;
 using Windows.Storage.Pickers;
 using Windows.Storage;
 using System.Windows;
@@ -25,7 +24,7 @@ using System.Windows;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
-namespace bleTest3
+namespace Lumi
 {
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
@@ -392,7 +391,7 @@ namespace bleTest3
             clearDisplay();
         }
 
-        private async void btnConnect_Click(object sender, RoutedEventArgs e)
+        private void btnConnect_Click(object sender, RoutedEventArgs e)
         {
             switch (cmbDeviceSelector.SelectedIndex)
             {
@@ -469,7 +468,7 @@ namespace bleTest3
             }
         }
 
-        private async void btnWirelessSearch_Click(object sender, RoutedEventArgs e)
+        private void btnWirelessSearch_Click(object sender, RoutedEventArgs e)
         {
             wirelessSearch();
         }
@@ -628,7 +627,7 @@ namespace bleTest3
         //}
         #endregion oldcode
 
-        private async void btnSendText_Click(object sender, RoutedEventArgs e)
+        private void btnSendText_Click(object sender, RoutedEventArgs e)
         {
             string sendString = "";
             rtbSendTextBlock.Document.GetText(Windows.UI.Text.TextGetOptions.NoHidden, out sendString);

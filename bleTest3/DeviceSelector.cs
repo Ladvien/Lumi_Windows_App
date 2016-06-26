@@ -19,7 +19,7 @@ using Windows.Media.DialProtocol;
 using Windows.Devices.Sensors;
 using Windows.Devices.PointOfService;
 
-namespace lumi
+namespace Lumi
 {
     public class DeviceSelectorInfo
     {

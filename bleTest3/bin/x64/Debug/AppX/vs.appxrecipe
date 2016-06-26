@@ -10,7 +10,7 @@
     <PackageArchitecture>x64</PackageArchitecture>
     <PackageIdentityName>d43802e8-a09d-4956-9b73-8c71366b48ea</PackageIdentityName>
     <IntermediateOutputPath>C:\Users\cthom\Lumi_Windows_App\bleTest3\obj\x64\Debug\</IntermediateOutputPath>
-    <RegisteredManifestChecksum>957A3419090E17640FAEF7CB92BAFA6790C26B7476A95CFC6CE3F247A9AE64CB</RegisteredManifestChecksum>
+    <RegisteredManifestChecksum>9CC272766EB342A945BEEA1DD11F86B6D1A4ACFB28BA9C0224ED85D951F54A30</RegisteredManifestChecksum>
     <RegisteredPackageMoniker>30933LadvienLabs.LumiUploader_0.5.6.0_x64__ap77jpxg1hh34</RegisteredPackageMoniker>
     <RegisteredUserModeAppID>30933LadvienLabs.LumiUploader_ap77jpxg1hh34!App</RegisteredUserModeAppID>
     <RegisteredPackageID>30933LadvienLabs.LumiUploader</RegisteredPackageID>
@@ -22,13 +22,13 @@
     <AppXManifest Include="C:\Users\cthom\Lumi_Windows_App\bleTest3\bin\x64\Debug\Core\AppxManifest.xml">
       <PackagePath>AppxManifest.xml</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
-      <Modified>2016-06-25T22:12:05.564</Modified>
+      <Modified>2016-06-26T02:15:08.882</Modified>
     </AppXManifest>
   </ItemGroup>
   <ItemGroup>
-    <AppxPackagedFile Include="C:\Users\cthom\Lumi_Windows_App\bleTest3\bin\x64\Debug\lumi.exe">
-      <PackagePath>entrypoint\lumi.exe</PackagePath>
-      <Modified>2016-06-25T22:12:05.213</Modified>
+    <AppxPackagedFile Include="C:\Users\cthom\Lumi_Windows_App\bleTest3\bin\x64\Debug\Lumi.exe">
+      <PackagePath>entrypoint\Lumi.exe</PackagePath>
+      <Modified>2016-06-26T02:15:02.701</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\cthom\.nuget\packages\Microsoft.ApplicationInsights\1.0.0\lib\portable-win81+wpa81\Microsoft.ApplicationInsights.dll">
       <PackagePath>Microsoft.ApplicationInsights.dll</PackagePath>
@@ -681,9 +681,9 @@
       <PackagePath>Properties\Default.rd.xml</PackagePath>
       <Modified>2016-05-02T21:08:45.682</Modified>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\cthom\Lumi_Windows_App\bleTest3\bin\x64\Debug\lumi.xr.xml">
-      <PackagePath>lumi.xr.xml</PackagePath>
-      <Modified>2016-06-11T12:58:08.552</Modified>
+    <AppxPackagedFile Include="C:\Users\cthom\Lumi_Windows_App\bleTest3\bin\x64\Debug\Lumi.xr.xml">
+      <PackagePath>Lumi.xr.xml</PackagePath>
+      <Modified>2016-06-26T01:14:59.913</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Program Files %28x86%29\Windows Kits\10\UnionMetadata\Windows.winmd">
       <PackagePath>WinMetadata\Windows.winmd</PackagePath>
@@ -691,11 +691,11 @@
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\cthom\Lumi_Windows_App\bleTest3\bin\x64\Debug\resources.pri">
       <PackagePath>resources.pri</PackagePath>
-      <Modified>2016-06-25T20:34:31.536</Modified>
+      <Modified>2016-06-26T01:15:06.387</Modified>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\cthom\Lumi_Windows_App\bleTest3\bin\x64\Debug\Core\lumi.exe">
-      <PackagePath>lumi.exe</PackagePath>
-      <Modified>2016-06-25T22:12:05.560</Modified>
+    <AppxPackagedFile Include="C:\Users\cthom\Lumi_Windows_App\bleTest3\bin\x64\Debug\Core\Lumi.exe">
+      <PackagePath>Lumi.exe</PackagePath>
+      <Modified>2016-06-26T02:15:08.878</Modified>
     </AppxPackagedFile>
   </ItemGroup>
   <ItemGroup>

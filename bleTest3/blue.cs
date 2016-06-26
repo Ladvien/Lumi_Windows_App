@@ -22,9 +22,9 @@ using Windows.Devices.Bluetooth;
 using Windows.UI.Xaml;
 using Windows.ApplicationModel.Core;
 using Windows.UI.Core;
-using lumi;
+using Lumi;
 
-namespace bleTest3
+namespace Lumi
 {
     public class blue
     {
@@ -263,7 +263,7 @@ namespace bleTest3
         }
 
 
-        private async void OnAdvertisementReceived(BluetoothLEAdvertisementWatcher watcher, BluetoothLEAdvertisementReceivedEventArgs eventArgs)
+        private void OnAdvertisementReceived(BluetoothLEAdvertisementWatcher watcher, BluetoothLEAdvertisementReceivedEventArgs eventArgs)
         {
             // 1. Clear discovered devices
             // 2. If no device name, make one.
@@ -300,7 +300,7 @@ namespace bleTest3
 
         }
 
-        private async void BleSearchTimer_Tick(object sender, object e)
+        private void BleSearchTimer_Tick(object sender, object e)
         {
             // 1. Stop the BLE watcher, stop the search timer.
             // 2. Set the command in  process.
@@ -314,7 +314,7 @@ namespace bleTest3
         #endregion BLEadvertisementWatcher
 
         #region BLEdevice
-        private async void BleDevice_ConnectionStatusChanged(BluetoothLEDevice sender, object args)
+        private void BleDevice_ConnectionStatusChanged(BluetoothLEDevice sender, object args)
         {
             Debug.WriteLine("Conn. Changed: " + sender.ConnectionStatus);
 

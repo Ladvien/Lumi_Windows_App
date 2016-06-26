@@ -14,10 +14,10 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Documents;
 using Windows.UI;
 using Windows.Security.Cryptography;
-using lumi;
+using Lumi;
 using Windows.UI.Xaml;
 
-namespace bleTest3
+namespace Lumi
 {
     #region credits
     // A lot of the async serial handling code was pulled from MS-IoT samples.  

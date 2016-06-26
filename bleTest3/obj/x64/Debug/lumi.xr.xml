@@ -118,6 +118,6 @@
       <RootProperty Name="VerticalAlignment" />
       <RootProperty Name="HorizontalAlignment" />
     </RootType>
-    <RootType FullName="bleTest3.MainPage" />
+    <RootType FullName="Lumi.MainPage" />
   </Roots.RootTypes>
 </Roots>

@@ -8,7 +8,7 @@ using Windows.Security.Cryptography;
 using Windows.Storage.Streams;
 using Windows.UI.Xaml;
 
-namespace lumi
+namespace Lumi
 {
     public class SerialBuffer
     {
