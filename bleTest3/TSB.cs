@@ -326,7 +326,7 @@ namespace bleTest3
             serialBuffer.TXbufferUpdated += new SerialBuffer.CallBackEventHandler(TXbufferUpdated);
             readFlashBuffer.bufferUpdated += new SerialBuffer.CallBackEventHandler(ReadFlashBuffer_bufferUpdated);
 
-            resetTimer.Tick += ResetTimer_Tick;
+            resetTimer.Tick += raiseBleResetPin;
         }
 
 
@@ -339,21 +339,42 @@ namespace bleTest3
         public void startWriteTimeoutTimer(int seconds)
         {
 
-            var ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
-            () =>
-            {
-                writeTimer.Interval = new TimeSpan(0, 0, 0, seconds);
-                writeTimer.Start();
-            });
+            //var ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+            //() =>
+            //{
+            //    writeTimer.Interval = new TimeSpan(0, 0, 0, seconds);
+            //    writeTimer.Start();
+            //});
+        }
 
+        public void writeTimerStop()
+        {
+            //IAsyncAction ignored;
+            //ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,() =>
+            //{
+            //    writeTimerStop();
+            //});
+
+        }
+
+
+        public void startResetTimer(int seconds, int milliseconds)
+        {
+
+            //var ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+            //() =>
+            //{
+            //    resetTimer.Interval = new TimeSpan(0, 0, 0, seconds, milliseconds);
+            //    resetTimer.Start();
+            //});
 
         }
 
         private void writeTimer_Tick(object sender, object e)
         {
-            commandInProgress = commands.error;
-            RXbufferUpdated(this, null);
-            writeTimer.Stop();
+            //commandInProgress = commands.error;
+            //RXbufferUpdated(this, null);
+            //writeTimerStop();
         }
 
         private void TXbufferUpdated(object sender, EventArgs args)
@@ -394,16 +415,20 @@ namespace bleTest3
         private async void RXbufferUpdated(object sender, EventArgs args)
         {
             // 1. Route to command-in-progress.
-            IAsyncAction ignored;
-            ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
-            () =>
-            {
-                writeTimer.Stop();
-            });
+            //IAsyncAction ignored;
+            //ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+            //() =>
+            //{
+            //    writeTimerStop();
+            //});
             switch (commandInProgress)
             {
                 case commands.error:
-                    displayMessage("Uh-oh. Bad stuff happened.\n", Colors.Crimson);
+                    byte[] rxData;
+                    string str = "";
+                    rxData = serialBuffer.readAllBytesFromRXBuffer();
+                    str = getAsciiStringFromByteArray(rxData);
+                    displayMessage("Uh-oh. Bad stuff happened.\n" + str, Colors.Crimson);
                     TsbUpdatedCommand(statuses.error);
                     break; 
                 case commands.hello:
@@ -530,6 +555,7 @@ namespace bleTest3
                     break;
                 case device.hm1x:
                     commandInProgress = commands.blePrepareHello;
+                    serialBuffer.txBuffer = GetBytes("AT+" + getResetPinAsString() + "0");
                     break;
             }
             
@@ -560,7 +586,6 @@ namespace bleTest3
                             {
                                 commandInProgress = commands.helloProcessing;
                                 serialBuffer.txBuffer = getCommand(commands.hello);
-                                
                             }
                             break;
                     }
@@ -581,17 +606,21 @@ namespace bleTest3
             string str = getAsciiStringFromByteArray(rxData);
             if (str.Contains("OK+" + getResetPinAsString() + ":0"))
             {
-                startWriteTimeoutTimer(2);
-                serialBuffer.txBuffer = GetBytes("AT+" + getResetPinAsString() + "1");
+                startResetTimer(0, 50);
                 return false;
             }
             else if (str.Contains("OK+" + getResetPinAsString() + ":1"))
             {
-                startWriteTimeoutTimer(2);
                 return true;
             }
 
             return false;
+        }
+
+        public void raiseBleResetPin(object sender, object e)
+        {
+            resetTimer.Stop();
+            serialBuffer.txBuffer = GetBytes("AT+" + getResetPinAsString() + "1");
         }
 
         public async void wirelessReset()
@@ -719,7 +748,7 @@ namespace bleTest3
                     () =>
                     {
                         //displayMessage(tsbHanshakeInfo, Colors.White);
-                        writeTimer.Stop();
+                        writeTimerStop();
                         TsbUpdatedCommand(statuses.connected, (getRun(tsbHanshakeInfo, Colors.White)));
                     });
 
@@ -1042,7 +1071,7 @@ namespace bleTest3
                     serialBuffer.txBuffer = getCommand(commands.confirm);
                     serialBuffer.txBuffer = bytesToWrite;
 
-                    byte[] tmpRxByteArray = serialBuffer.readAllBytesFromRXBuffer();
+                    //byte[] tmpRxByteArray = serialBuffer.readAllBytesFromRXBuffer();
 
                     ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
                     () =>
@@ -1053,7 +1082,6 @@ namespace bleTest3
                         var currentProgressBarValue = 100 * ((float)(uploadPageIndex + 1) / (float)pagesToWrite);
                         progressBar.Value = map(currentProgressBarValue, 0, 100, 0, 100);
                     });
-
                     uploadPageIndex++;
                 } else
                 {

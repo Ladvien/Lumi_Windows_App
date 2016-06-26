@@ -154,8 +154,15 @@ namespace bleTest3
 
         public async void TXbufferUpdated(object sender, EventArgs args)
         {
-            int numberOfBytes = serialBuffer.bytesInTxBuffer();
-            await writeByteArrayToBle(serialBuffer.ReadFromTxBuffer(numberOfBytes));
+            try
+            {
+                int numberOfBytes = serialBuffer.bytesInTxBuffer();
+                await writeByteArrayToBle(serialBuffer.ReadFromTxBuffer(numberOfBytes));
+            } catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
+
         }
         #region devicewatcher
 
@@ -450,20 +457,21 @@ namespace bleTest3
         public async Task<bool> writeByteArrayToBle(byte[] sendPacket)
         {
             writeBleBuffer.AddRange(sendPacket);
+            //if(writeBleBuffer.Contains(0x21)){ Debug.WriteLine("Contains Confirm"); }
 
             foreach (GattCharacteristic gattCharacteristic in gattCharacteristics)
             {
                 while(writeBleBuffer.Count > 0)
                 {
                     writer = new DataWriter();
-                    byte[] data = writeBleBuffer.Take(19).ToArray();
+                    byte[] data = writeBleBuffer.Take(20).ToArray();
                     writer.WriteBytes(data);
                     try
                     {
                         var pairStatus = await gattCharacteristic.WriteValueAsync(writer.DetachBuffer(), GattWriteOption.WriteWithoutResponse);
-                        if(writeBleBuffer.Count > 19)
+                        if(writeBleBuffer.Count > 20)
                         {
-                            writeBleBuffer.RemoveRange(0, 19);
+                            writeBleBuffer.RemoveRange(0, 20);
                         } else
                         {
                             writeBleBuffer.RemoveRange(0, writeBleBuffer.Count);
@@ -546,7 +554,7 @@ namespace bleTest3
 
         #endregion BLEdevice
 
-        static byte[] GetBytes(string str)
+        public static byte[] GetBytes(string str)
         {
             byte[] bytes = new byte[str.Length];
             for(int i = 0; i < str.Length; i++)

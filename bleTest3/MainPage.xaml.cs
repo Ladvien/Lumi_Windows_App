@@ -632,7 +632,7 @@ namespace bleTest3
         {
             string sendString = "";
             rtbSendTextBlock.Document.GetText(Windows.UI.Text.TextGetOptions.NoHidden, out sendString);
-            await serialPorts.write(sendString);            
+            serialBuffer.txBuffer = blue.GetBytes(sendString);
         }
 
         public void displayText(string text, Color color)
