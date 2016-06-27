@@ -74,11 +74,8 @@ namespace Lumi
         public DispatcherTimer bleSearchTimer = new DispatcherTimer();
         public DispatcherTimer gattDelayPopulateTimer = new DispatcherTimer();
 
-
-
         // Bluetooth LE Connection
         BluetoothLEDevice bleDevice;
-
 
         DataWriter writer = new DataWriter();
 
@@ -99,52 +96,67 @@ namespace Lumi
 
         public void init()
         {
+            try
+            {
+                rxBuffer = new List<byte>();
 
-            rxBuffer = new List<byte>();
+                bleDevices = new List<BluetoothLEDevice>();
+                gattServices = new List<GattDeviceService>();
+                gattCharacteristics = new List<GattCharacteristic>();
 
-            bleDevices = new List<BluetoothLEDevice>();
-            gattServices = new List<GattDeviceService>();
-            gattCharacteristics = new List<GattCharacteristic>();
+                // Create and initialize a new watcher instance.
+                bleAdvertWatcher = new BluetoothLEAdvertisementWatcher();
 
-            // Create and initialize a new watcher instance.
-            bleAdvertWatcher = new BluetoothLEAdvertisementWatcher();
+                // Watcher created for determination of enumeration of connected BLE.  This is needed
+                // for the workaround to Microsoft's crappy BLE API.
+                deviceWatcher = DeviceInformation.CreateWatcher();
+                deviceWatcher.EnumerationCompleted += DeviceWatcher_EnumerationCompleted;
+                deviceWatcher.Added += DeviceWatcher_Added;
+                deviceWatcher.Removed += DeviceWatcher_Removed;
+                deviceWatcher.Updated += DeviceWatcher_Updated;
+                deviceWatcher.Start();
 
-            // Watcher created for determination of enumeration of connected BLE.  This is needed
-            // for the workaround to Microsoft's crappy BLE API.
-            deviceWatcher = DeviceInformation.CreateWatcher();
-            deviceWatcher.EnumerationCompleted += DeviceWatcher_EnumerationCompleted;
-            deviceWatcher.Added += DeviceWatcher_Added;
-            deviceWatcher.Removed += DeviceWatcher_Removed;
-            deviceWatcher.Updated += DeviceWatcher_Updated;
-            deviceWatcher.Start();
+                bleAdvertWatcher.Received += OnAdvertisementReceived;
+                bleAdvertWatcher.Stopped += OnAdvertisementWatcherStopped;
 
-            bleAdvertWatcher.Received += OnAdvertisementReceived;
-            bleAdvertWatcher.Stopped += OnAdvertisementWatcherStopped;
+                bleAdvertWatcher.ScanningMode = BluetoothLEScanningMode.Active;
 
-            bleAdvertWatcher.ScanningMode = BluetoothLEScanningMode.Active;
+                bleAdvertWatcher.Start();
 
-            bleAdvertWatcher.Start();
-
-            bleSearchTimer.Tick += BleSearchTimer_Tick;
-            gattDelayPopulateTimer.Tick += GattDelayPopulateTimer_Tick;
-
-
+                bleSearchTimer.Tick += BleSearchTimer_Tick;
+                gattDelayPopulateTimer.Tick += GattDelayPopulateTimer_Tick;
+            } catch
+            {
+                Debug.WriteLine("blue.init() failed");
+            }
         }
-
-
 
         public void attachSerialBuffer(SerialBuffer _serialBuffer)
         {
-            serialBuffer = _serialBuffer;
-            serialBuffer.RXbufferUpdated += new SerialBuffer.CallBackEventHandler(RXbufferUpdated);
-            serialBuffer.TXbufferUpdated += new SerialBuffer.CallBackEventHandler(TXbufferUpdated);
+            try
+            {
+                serialBuffer = _serialBuffer;
+                serialBuffer.RXbufferUpdated += new SerialBuffer.CallBackEventHandler(RXbufferUpdated);
+                serialBuffer.TXbufferUpdated += new SerialBuffer.CallBackEventHandler(TXbufferUpdated);
+            } catch
+            {
+                Debug.WriteLine("blue.attachSerialBuffer() failed");
+            }
+
         }
 
         public void detachSerialBuffer()
         {
-            serialBuffer.RXbufferUpdated -= new SerialBuffer.CallBackEventHandler(RXbufferUpdated);
-            serialBuffer.TXbufferUpdated -= new SerialBuffer.CallBackEventHandler(TXbufferUpdated);
-            serialBuffer = null;
+            try
+            {
+                serialBuffer.RXbufferUpdated -= new SerialBuffer.CallBackEventHandler(RXbufferUpdated);
+                serialBuffer.TXbufferUpdated -= new SerialBuffer.CallBackEventHandler(TXbufferUpdated);
+                serialBuffer = null;
+            } catch
+            {
+                Debug.WriteLine("blue.detachSerialBuffer() failed");
+            }
+
         }
 
         private void RXbufferUpdated(object sender, EventArgs args)
@@ -162,7 +174,6 @@ namespace Lumi
             {
                 Debug.WriteLine(ex.Message);
             }
-
         }
         #region devicewatcher
 
@@ -314,51 +325,65 @@ namespace Lumi
         #endregion BLEadvertisementWatcher
 
         #region BLEdevice
+
         private void BleDevice_ConnectionStatusChanged(BluetoothLEDevice sender, object args)
         {
             Debug.WriteLine("Conn. Changed: " + sender.ConnectionStatus);
-
         }
 
         public async Task<bool> discoverChars(ulong address)
         {
-            var device = await BluetoothLEDevice.FromBluetoothAddressAsync(address);
-            bleDevice = device;
-            var services = device.GattServices;
-            
-
-            foreach (GattDeviceService service in services)
+            try
             {
-                service.Device.ConnectionStatusChanged += OnConnectionStatusChanged;
-                gattServices.Add(service);
-                var characteristics = service.GetAllCharacteristics();
-                foreach (GattCharacteristic characteristic in characteristics)
-                {
-                    try
-                    {
-                        Debug.WriteLine(characteristic.CharacteristicProperties);
-                        Debug.WriteLine(characteristic.ProtectionLevel);
-                        var status = await characteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
-                        characteristic.ValueChanged += Oncharacteristic_ValueChanged;                          
-                        gattCharacteristics.Add(characteristic);
-                        //writeToChar("AT+AFTC001");
-                        //byte[] none = serialBuffer.readAllBytesFromBuffer();
-                        Callback(this, BlueEvent.connected);
+                var device = await BluetoothLEDevice.FromBluetoothAddressAsync(address);
+                bleDevice = device;
+                var services = device.GattServices;
 
-                    }
-                    catch (Exception ex)
+
+                foreach (GattDeviceService service in services)
+                {
+                    service.Device.ConnectionStatusChanged += OnConnectionStatusChanged;
+                    gattServices.Add(service);
+                    var characteristics = service.GetAllCharacteristics();
+                    foreach (GattCharacteristic characteristic in characteristics)
                     {
-                        Debug.WriteLine(ex.Message);
+                        try
+                        {
+                            Debug.WriteLine(characteristic.CharacteristicProperties);
+                            Debug.WriteLine(characteristic.ProtectionLevel);
+                            var status = await characteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
+                            characteristic.ValueChanged += Oncharacteristic_ValueChanged;
+                            gattCharacteristics.Add(characteristic);
+                            //writeToChar("AT+AFTC001");
+                            //byte[] none = serialBuffer.readAllBytesFromBuffer();
+                            Callback(this, BlueEvent.connected);
+
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine(ex.Message);
+                        }
                     }
                 }
+                return true;
+            } catch
+            {
+                Debug.WriteLine("blue.discoverChars() failed");
+                return false;
             }
-            return true;
+
         }
 
         public async void writeToChar(string str)
         {
-            byte[] tmpBfr = GetBytes(str);
-            await writeByteArrayToBle(tmpBfr);    
+            try
+            {
+                byte[] tmpBfr = GetBytes(str);
+                await writeByteArrayToBle(tmpBfr);
+            } catch
+            {
+                Debug.WriteLine("blue.writeToChar() failed");
+            }
         }
 
         private async void GattDelayPopulateTimer_Tick(object sender, object e)
@@ -382,8 +407,17 @@ namespace Lumi
             // 1. Pair the device
             // 2. Add event handlers
             // 3. Returned the pairing status.
-            var connectedBleDevice = await device.Pairing.PairAsync(DevicePairingProtectionLevel.None);
-            return bleDevice.DeviceInformation.Pairing.IsPaired;
+
+            try
+            {
+                var connectedBleDevice = await device.Pairing.PairAsync(DevicePairingProtectionLevel.None);
+                return bleDevice.DeviceInformation.Pairing.IsPaired;
+            } catch
+            {
+                Debug.WriteLine("blue.connectToBLEDevice() failed");
+                return false;
+            }
+
         }
 
         public async Task connect(ulong bluetoothAddress)
@@ -392,20 +426,27 @@ namespace Lumi
             // 2. If device is not paired, pair it.
             // 3. Enumerate Gatt services.
 
-            // Get a BLE device from address.
-            bleDevice = await BluetoothLEDevice.FromBluetoothAddressAsync(bluetoothAddress);
-
-            bleAddress = bluetoothAddress;
-            DeviceInformation bleDeviceInfo = bleDevice.DeviceInformation;
-
-            // Assert existing connection.
-            if (bleDevice.DeviceInformation.Pairing.IsPaired == false)
+            try
             {
-                // Attempt to pair the BLE device
-                await connectToBLEDevice(bleDeviceInfo);
-                gattDelayPopulateTimer.Interval = new TimeSpan(0, 0, 5);
-                gattDelayPopulateTimer.Start();
+                // Get a BLE device from address.
+                bleDevice = await BluetoothLEDevice.FromBluetoothAddressAsync(bluetoothAddress);
+
+                bleAddress = bluetoothAddress;
+                DeviceInformation bleDeviceInfo = bleDevice.DeviceInformation;
+
+                // Assert existing connection.
+                if (bleDevice.DeviceInformation.Pairing.IsPaired == false)
+                {
+                    // Attempt to pair the BLE device
+                    await connectToBLEDevice(bleDeviceInfo);
+                    gattDelayPopulateTimer.Interval = new TimeSpan(0, 0, 5);
+                    gattDelayPopulateTimer.Start();
+                }
+            } catch
+            {
+                Debug.WriteLine("blue.connect() failed");
             }
+
 
         }
         
@@ -436,65 +477,25 @@ namespace Lumi
 
         public async void writeStringToBle(string sendStr)
         {
-            writer = new DataWriter();
-
-            byte[] sendPacket = GetBytes(sendStr);
-            writer.WriteBytes(sendPacket);
-
             try
             {
-                foreach(GattCharacteristic gattCharacteristic in gattCharacteristics)
+                writer = new DataWriter();
+
+                byte[] sendPacket = GetBytes(sendStr);
+                writer.WriteBytes(sendPacket);
+
+                foreach (GattCharacteristic gattCharacteristic in gattCharacteristics)
                 {
                     var pairStatus = await gattCharacteristic.WriteValueAsync(writer.DetachBuffer(), GattWriteOption.WriteWithoutResponse);
                 }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex.Message);
+                Debug.WriteLine("blue.writeStringToBle() failed");
             }
         }
 
         public async Task<bool> writeByteArrayToBle(byte[] sendPacket)
-        {
-            writeBleBuffer.AddRange(sendPacket);
-            //if(writeBleBuffer.Contains(0x21)){ Debug.WriteLine("Contains Confirm"); }
-
-            foreach (GattCharacteristic gattCharacteristic in gattCharacteristics)
-            {
-                while(writeBleBuffer.Count > 0)
-                {
-                    writer = new DataWriter();
-                    byte[] data = writeBleBuffer.Take(20).ToArray();
-                    writer.WriteBytes(data);
-                    try
-                    {
-                        var pairStatus = await gattCharacteristic.WriteValueAsync(writer.DetachBuffer(), GattWriteOption.WriteWithoutResponse);
-                        if(writeBleBuffer.Count > 20)
-                        {
-                            writeBleBuffer.RemoveRange(0, 20);
-                        } else
-                        {
-                            writeBleBuffer.RemoveRange(0, writeBleBuffer.Count);
-                        }
-                        //return true;
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine(ex.Message);
-                    }
-                }
-                return true;           
-            }
-            return false;
-        }
-
-
-        private void BleDevice_GattServicesChanged(BluetoothLEDevice sender, object args)
-        {
-            Debug.WriteLine("Gatt Services Changed");
-        }
-
-        public void writeToBle(string message)
         {
             // 1. Convert string to bytes.
             // 2. Determine if bytes than CC254X buffer (20 bytes).
@@ -503,52 +504,92 @@ namespace Lumi
             // 5. Loop through await send until txBuffer is empty.
             // 6. Return true if all bytes are written successfully.
 
-            byte[] txBuffer = GetBytes(message);
-            while (txBuffer.Length > 20)
+            try
             {
-                byte[] messageAsByteArray = txBuffer.Skip(20).ToArray();
-                messageAsByteArray = messageAsByteArray.Take(20).ToArray();
+                writeBleBuffer.AddRange(sendPacket);
+                //if(writeBleBuffer.Contains(0x21)){ Debug.WriteLine("Contains Confirm"); }
 
-            }
-            if (txBuffer.Length > 0)
-            {
-
-            }
-        }
-
-        public void closeBleDevice()
-        {
-            connected = false;
-            if(bleDevice != null)
-            {
-                var services = bleDevice.GattServices;
-
-                foreach (GattDeviceService service in services)
+                foreach (GattCharacteristic gattCharacteristic in gattCharacteristics)
                 {
-                    service.Device.ConnectionStatusChanged -= OnConnectionStatusChanged;
-                    var characteristics = service.GetAllCharacteristics();
-                    foreach (GattCharacteristic characteristic in characteristics)
+                    while (writeBleBuffer.Count > 0)
                     {
+                        writer = new DataWriter();
+                        byte[] data = writeBleBuffer.Take(20).ToArray();
+                        writer.WriteBytes(data);
                         try
                         {
-                            characteristic.ValueChanged -= Oncharacteristic_ValueChanged;
+                            var pairStatus = await gattCharacteristic.WriteValueAsync(writer.DetachBuffer(), GattWriteOption.WriteWithoutResponse);
+                            if (writeBleBuffer.Count > 20)
+                            {
+                                writeBleBuffer.RemoveRange(0, 20);
+                            }
+                            else
+                            {
+                                writeBleBuffer.RemoveRange(0, writeBleBuffer.Count);
+                            }
+                            //return true;
                         }
                         catch (Exception ex)
                         {
                             Debug.WriteLine(ex.Message);
                         }
                     }
+                    return true;
                 }
-
-                bleDevice.Dispose();
-                detachSerialBuffer();
-                gattCharacteristics.Clear();
+                return false;
+            } catch
+            {
+                Debug.WriteLine("blue.writeByteArrayToBle");
+                return false;
             }
+
+        }
+
+
+        private void BleDevice_GattServicesChanged(BluetoothLEDevice sender, object args)
+        {
+            Debug.WriteLine("Gatt Services Changed");
+        }
+
+        public void closeBleDevice()
+        {
+            try
+            {
+                connected = false;
+                if (bleDevice != null)
+                {
+                    var services = bleDevice.GattServices;
+
+                    foreach (GattDeviceService service in services)
+                    {
+                        service.Device.ConnectionStatusChanged -= OnConnectionStatusChanged;
+                        var characteristics = service.GetAllCharacteristics();
+                        foreach (GattCharacteristic characteristic in characteristics)
+                        {
+                            try
+                            {
+                                characteristic.ValueChanged -= Oncharacteristic_ValueChanged;
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine(ex.Message);
+                            }
+                        }
+                    }
+
+                    bleDevice.Dispose();
+                    detachSerialBuffer();
+                    gattCharacteristics.Clear();
+                }
+            } catch
+            {
+                Debug.WriteLine("blue.closeBleDevice() failed");
+            }
+
         }
 
         public void callback()
         {
-
             Callback(this, blueEvent);
         }
 
@@ -556,39 +597,62 @@ namespace Lumi
 
         public static byte[] GetBytes(string str)
         {
-            byte[] bytes = new byte[str.Length];
-            for(int i = 0; i < str.Length; i++)
+            try
             {
-                bytes[i] = (byte)str[i];
+                byte[] bytes = new byte[str.Length];
+                for (int i = 0; i < str.Length; i++)
+                {
+                    bytes[i] = (byte)str[i];
+                }
+                return bytes;
+            } catch
+            {
+                Debug.WriteLine("blue.GetBytes() failed");
+                return null;
             }
-            return bytes;
         }
 
         static string GetString(byte[] bytes)
         {
-            char[] chars = new char[bytes.Length / sizeof(uint)];
-            System.Buffer.BlockCopy(bytes, 0, chars, 0, bytes.Length);
-            return new string(chars);
+            try
+            {
+                char[] chars = new char[bytes.Length / sizeof(uint)];
+                System.Buffer.BlockCopy(bytes, 0, chars, 0, bytes.Length);
+                return new string(chars);
+            } catch
+            {
+                Debug.WriteLine("blue.GetString() failed");
+                return "";
+            }
+
         }
 
         public string byteArrayToReadableString(byte[] byteArray)
         {
-            string charOrTwoCharHexString = "";
-
-            for (int i = 0; i < byteArray.Length; i++)
+            try
             {
-                //if ((int)byteArray[i] < 127)
-                //{
-                //    charOrTwoCharHexString += (char)byteArray[i];
-                //}
-                //else
-                //{
+                string charOrTwoCharHexString = "";
+
+                for (int i = 0; i < byteArray.Length; i++)
+                {
+                    //if ((int)byteArray[i] < 127)
+                    //{
+                    //    charOrTwoCharHexString += (char)byteArray[i];
+                    //}
+                    //else
+                    //{
                     charOrTwoCharHexString += " " + byteArray[i].ToString("X2");
-                //}
+                    //}
+                }
+
+                //Debug.Write(bytesReadByteArray[i].ToString("X2"));
+                return charOrTwoCharHexString;
+            } catch
+            {
+                Debug.WriteLine("blue.byteArrayToReadableString() failed");
+                return "";
             }
 
-            //Debug.Write(bytesReadByteArray[i].ToString("X2"));
-            return charOrTwoCharHexString;
         }
 
 

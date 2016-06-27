@@ -24,7 +24,7 @@ using Windows.Foundation;
 
 namespace Lumi
 {
-    class TSB
+    public class TSB
     {
         #region devices
         enum DEVICE_SIGNATURE
@@ -1541,7 +1541,7 @@ namespace Lumi
 
     } // End TSB Class
 
-    class IntelHexFile
+    public class IntelHexFile
     {
 
         public byte[] intelHexFileToArray(Stream fileName, int pageSize)
