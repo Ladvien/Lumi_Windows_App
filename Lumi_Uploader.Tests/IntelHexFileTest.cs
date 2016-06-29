@@ -15,20 +15,29 @@ namespace UnitTestProject1
         [TestMethod]
         public async Task shouldReadIntelHexFileIntoArray()
         {
-            var s = await Package.Current.InstalledLocation.GetFileAsync("IntelHexFileTest1.hex");
-            Stream stream = await s.OpenStreamForReadAsync();
 
-            var l = stream.Length;
+            try
+            {
+                var s = await Package.Current.InstalledLocation.GetFileAsync("IntelHexFileTest1.hex");
+                Stream stream = await s.OpenStreamForReadAsync();
+            } catch
+            {
+                Debug.WriteLine(Package.Current.InstalledLocation.Path);
+            }
 
-            Debug.WriteLine(l);
-            Assert.AreEqual(l, l);
+
+
+//            var l = stream.Length;
+            
+            Debug.WriteLine("Here" + 1);
+            Assert.AreEqual(0, 1);
             return;
         }
-        [TestMethod]
-        public async void tester()
+        public async Task tester()
         {
             var a = 1 + 2;
             Assert.AreEqual(a, 3);
+            return;
         }
     }
 }

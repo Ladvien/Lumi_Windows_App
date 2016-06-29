@@ -22,17 +22,17 @@
     <AppXManifest Include="C:\Users\cthom\Lumi_Windows_App\Lumi_Uploader.Tests\bin\x64\Debug\Core\AppxManifest.xml">
       <PackagePath>AppxManifest.xml</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
-      <Modified>2016-06-29T01:40:05.630</Modified>
+      <Modified>2016-06-29T12:48:44.723</Modified>
     </AppXManifest>
   </ItemGroup>
   <ItemGroup>
     <AppxPackagedFile Include="C:\Users\cthom\Lumi_Windows_App\Lumi_Uploader.Tests\bin\x64\Debug\UnitTestProject1.exe">
       <PackagePath>entrypoint\UnitTestProject1.exe</PackagePath>
-      <Modified>2016-06-29T01:40:04.913</Modified>
+      <Modified>2016-06-29T12:48:44.012</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\cthom\Lumi_Windows_App\bleTest3\bin\x64\Debug\Lumi.exe">
       <PackagePath>Lumi.exe</PackagePath>
-      <Modified>2016-06-29T01:22:04.693</Modified>
+      <Modified>2016-06-29T12:47:31.067</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Program Files %28x86%29\Microsoft SDKs\Windows Kits\10\ExtensionSDKs\TestPlatform.Universal\14.0\References\CommonConfiguration\neutral\Microsoft.VisualStudio.TestPlatform.TestExecutor.Core.dll">
       <PackagePath>Microsoft.VisualStudio.TestPlatform.TestExecutor.Core.dll</PackagePath>
@@ -765,11 +765,11 @@
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\cthom\Lumi_Windows_App\Lumi_Uploader.Tests\bin\x64\Debug\resources.pri">
       <PackagePath>resources.pri</PackagePath>
-      <Modified>2016-06-29T01:22:14.182</Modified>
+      <Modified>2016-06-29T12:48:02.211</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\cthom\Lumi_Windows_App\Lumi_Uploader.Tests\bin\x64\Debug\Core\UnitTestProject1.exe">
       <PackagePath>UnitTestProject1.exe</PackagePath>
-      <Modified>2016-06-29T01:40:05.625</Modified>
+      <Modified>2016-06-29T12:48:44.718</Modified>
     </AppxPackagedFile>
   </ItemGroup>
   <ItemGroup>
