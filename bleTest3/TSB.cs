@@ -154,9 +154,6 @@ namespace Lumi
             "E",          // 7
             "c",          // 8
             "C",          // 9
-            "AT+PIO20",   // 10
-            "AT+PIO21",   // 11
-
         };
 
         public enum displayFlash
@@ -764,7 +761,8 @@ namespace Lumi
                 string str = getAsciiStringFromByteArray(rxData);
                 if (str.Contains("OK+" + getResetPinAsString() + ":0"))
                 {
-                    startResetTimer(0, 50);
+                    //startResetTimer(0, 50);
+                    serialBuffer.txBuffer = GetBytes("AT+" + getResetPinAsString() + "1");
                     return false;
                 }
                 else if (str.Contains("OK+" + getResetPinAsString() + ":1"))
@@ -1291,8 +1289,9 @@ namespace Lumi
             {
                 if (intelHexFileToUpload.Count != 0)
                 {
-                    serialBuffer.txBuffer = getCommand(commands.writeFlash);
+                    
                     commandInProgress = commands.writeFlash;
+                    serialBuffer.txBuffer = getCommand(commands.writeFlash);
                     displayMessage("\n\n\nWrite in progress: \nPlease do not disconnect device or exit the application.\n", Colors.Yellow);
                     scrollToBottomOfTerminal();
                 }

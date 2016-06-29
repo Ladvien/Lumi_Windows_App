@@ -5,12 +5,12 @@ VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lumi", "bleTest3\Lumi.csproj", "{97D2855D-F030-4327-8981-C26127B9C47A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LumiUploaderTests", "UnitTestProject1\LumiUploaderTests.csproj", "{77AF30DC-97BB-4065-B184-0C8AE627A153}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4BAC1FCD-A954-4BC0-8716-E1E73CAA9AFA}"
 	ProjectSection(SolutionItems) = preProject
-		LumiUploaderTests.testsettings = LumiUploaderTests.testsettings
+		TestSettings1.testsettings = TestSettings1.testsettings
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lumi_Uploader.Tests", "Lumi_Uploader.Tests\Lumi_Uploader.Tests.csproj", "{C6F97549-71C4-4809-A00B-E76091DA8997}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -44,26 +44,26 @@ Global
 		{97D2855D-F030-4327-8981-C26127B9C47A}.Release|x86.ActiveCfg = Release|x86
 		{97D2855D-F030-4327-8981-C26127B9C47A}.Release|x86.Build.0 = Release|x86
 		{97D2855D-F030-4327-8981-C26127B9C47A}.Release|x86.Deploy.0 = Release|x86
-		{77AF30DC-97BB-4065-B184-0C8AE627A153}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{77AF30DC-97BB-4065-B184-0C8AE627A153}.Debug|ARM.ActiveCfg = Debug|ARM
-		{77AF30DC-97BB-4065-B184-0C8AE627A153}.Debug|ARM.Build.0 = Debug|ARM
-		{77AF30DC-97BB-4065-B184-0C8AE627A153}.Debug|ARM.Deploy.0 = Debug|ARM
-		{77AF30DC-97BB-4065-B184-0C8AE627A153}.Debug|x64.ActiveCfg = Debug|x64
-		{77AF30DC-97BB-4065-B184-0C8AE627A153}.Debug|x64.Build.0 = Debug|x64
-		{77AF30DC-97BB-4065-B184-0C8AE627A153}.Debug|x64.Deploy.0 = Debug|x64
-		{77AF30DC-97BB-4065-B184-0C8AE627A153}.Debug|x86.ActiveCfg = Debug|x86
-		{77AF30DC-97BB-4065-B184-0C8AE627A153}.Debug|x86.Build.0 = Debug|x86
-		{77AF30DC-97BB-4065-B184-0C8AE627A153}.Debug|x86.Deploy.0 = Debug|x86
-		{77AF30DC-97BB-4065-B184-0C8AE627A153}.Release|Any CPU.ActiveCfg = Release|x86
-		{77AF30DC-97BB-4065-B184-0C8AE627A153}.Release|ARM.ActiveCfg = Release|ARM
-		{77AF30DC-97BB-4065-B184-0C8AE627A153}.Release|ARM.Build.0 = Release|ARM
-		{77AF30DC-97BB-4065-B184-0C8AE627A153}.Release|ARM.Deploy.0 = Release|ARM
-		{77AF30DC-97BB-4065-B184-0C8AE627A153}.Release|x64.ActiveCfg = Release|x64
-		{77AF30DC-97BB-4065-B184-0C8AE627A153}.Release|x64.Build.0 = Release|x64
-		{77AF30DC-97BB-4065-B184-0C8AE627A153}.Release|x64.Deploy.0 = Release|x64
-		{77AF30DC-97BB-4065-B184-0C8AE627A153}.Release|x86.ActiveCfg = Release|x86
-		{77AF30DC-97BB-4065-B184-0C8AE627A153}.Release|x86.Build.0 = Release|x86
-		{77AF30DC-97BB-4065-B184-0C8AE627A153}.Release|x86.Deploy.0 = Release|x86
+		{C6F97549-71C4-4809-A00B-E76091DA8997}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{C6F97549-71C4-4809-A00B-E76091DA8997}.Debug|ARM.ActiveCfg = Debug|ARM
+		{C6F97549-71C4-4809-A00B-E76091DA8997}.Debug|ARM.Build.0 = Debug|ARM
+		{C6F97549-71C4-4809-A00B-E76091DA8997}.Debug|ARM.Deploy.0 = Debug|ARM
+		{C6F97549-71C4-4809-A00B-E76091DA8997}.Debug|x64.ActiveCfg = Debug|x64
+		{C6F97549-71C4-4809-A00B-E76091DA8997}.Debug|x64.Build.0 = Debug|x64
+		{C6F97549-71C4-4809-A00B-E76091DA8997}.Debug|x64.Deploy.0 = Debug|x64
+		{C6F97549-71C4-4809-A00B-E76091DA8997}.Debug|x86.ActiveCfg = Debug|x86
+		{C6F97549-71C4-4809-A00B-E76091DA8997}.Debug|x86.Build.0 = Debug|x86
+		{C6F97549-71C4-4809-A00B-E76091DA8997}.Debug|x86.Deploy.0 = Debug|x86
+		{C6F97549-71C4-4809-A00B-E76091DA8997}.Release|Any CPU.ActiveCfg = Release|x86
+		{C6F97549-71C4-4809-A00B-E76091DA8997}.Release|ARM.ActiveCfg = Release|ARM
+		{C6F97549-71C4-4809-A00B-E76091DA8997}.Release|ARM.Build.0 = Release|ARM
+		{C6F97549-71C4-4809-A00B-E76091DA8997}.Release|ARM.Deploy.0 = Release|ARM
+		{C6F97549-71C4-4809-A00B-E76091DA8997}.Release|x64.ActiveCfg = Release|x64
+		{C6F97549-71C4-4809-A00B-E76091DA8997}.Release|x64.Build.0 = Release|x64
+		{C6F97549-71C4-4809-A00B-E76091DA8997}.Release|x64.Deploy.0 = Release|x64
+		{C6F97549-71C4-4809-A00B-E76091DA8997}.Release|x86.ActiveCfg = Release|x86
+		{C6F97549-71C4-4809-A00B-E76091DA8997}.Release|x86.Build.0 = Release|x86
+		{C6F97549-71C4-4809-A00B-E76091DA8997}.Release|x86.Deploy.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

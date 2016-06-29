@@ -169,8 +169,21 @@ namespace Lumi
             try
             {
                 int numberOfBytes = serialBuffer.bytesInTxBuffer();
-                await writeByteArrayToBle(serialBuffer.ReadFromTxBuffer(numberOfBytes));
-            } catch (Exception ex)
+                var bytesToWrite = serialBuffer.ReadFromTxBuffer(numberOfBytes);
+                List<byte> listBA = new List<byte>();
+                listBA.AddRange(bytesToWrite);
+                if (listBA.Contains(0x21)) { Debug.WriteLine("Contains Confirm");
+
+                }
+                foreach (var i in listBA)
+                {
+                    Debug.Write(i.ToString("X2"));
+                }
+                Debug.WriteLine("");
+                await writeByteArrayToBle(bytesToWrite);
+
+            }
+            catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message);
             }
@@ -354,7 +367,7 @@ namespace Lumi
                             var status = await characteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
                             characteristic.ValueChanged += Oncharacteristic_ValueChanged;
                             gattCharacteristics.Add(characteristic);
-                            //writeToChar("AT+AFTC001");
+                            writeToChar("AT+AFTC200");
                             //byte[] none = serialBuffer.readAllBytesFromBuffer();
                             Callback(this, BlueEvent.connected);
 
@@ -511,6 +524,7 @@ namespace Lumi
 
                 foreach (GattCharacteristic gattCharacteristic in gattCharacteristics)
                 {
+                    Debug.WriteLine(gattCharacteristic.AttributeHandle);
                     while (writeBleBuffer.Count > 0)
                     {
                         writer = new DataWriter();
@@ -534,6 +548,7 @@ namespace Lumi
                             Debug.WriteLine(ex.Message);
                         }
                     }
+                    Debug.WriteLine("BLE leftover bytes: " + writeBleBuffer.Count);
                     return true;
                 }
                 return false;
