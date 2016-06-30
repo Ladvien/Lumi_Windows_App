@@ -111,9 +111,9 @@
     <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
-    <EmbeddedResource Include="TestFiles\IntelHexFileTest1.hex">
+    <Content Include="IntelHexFileTest1.hex">
       <Generator>intelHexFileTest1</Generator>
-    </EmbeddedResource>
+    </Content>
     <None Include="UnitTestProject1_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
@@ -127,6 +127,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Assets\" />
+    <Folder Include="TestFiles\" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />

@@ -5,6 +5,7 @@ using System.IO;
 using Windows.ApplicationModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Windows.Storage;
 
 namespace UnitTestProject1
 {
@@ -18,17 +19,14 @@ namespace UnitTestProject1
 
             try
             {
-                var s = await Package.Current.InstalledLocation.GetFileAsync("IntelHexFileTest1.hex");
-                Stream stream = await s.OpenStreamForReadAsync();
+                var file = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///IntelHexFileTest1.hex"));
+                Stream stream = await file.OpenStreamForReadAsync();
+                Debug.WriteLine(stream.ReadByte());
             } catch
             {
                 Debug.WriteLine(Package.Current.InstalledLocation.Path);
             }
 
-
-
-//            var l = stream.Length;
-            
             Debug.WriteLine("Here" + 1);
             Assert.AreEqual(0, 1);
             return;

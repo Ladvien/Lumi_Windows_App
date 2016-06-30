@@ -22,13 +22,13 @@
     <AppXManifest Include="C:\Users\cthom\Lumi_Windows_App\Lumi_Uploader.Tests\bin\x64\Debug\Core\AppxManifest.xml">
       <PackagePath>AppxManifest.xml</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
-      <Modified>2016-06-29T12:48:44.723</Modified>
+      <Modified>2016-06-30T03:06:07.708</Modified>
     </AppXManifest>
   </ItemGroup>
   <ItemGroup>
     <AppxPackagedFile Include="C:\Users\cthom\Lumi_Windows_App\Lumi_Uploader.Tests\bin\x64\Debug\UnitTestProject1.exe">
       <PackagePath>entrypoint\UnitTestProject1.exe</PackagePath>
-      <Modified>2016-06-29T12:48:44.012</Modified>
+      <Modified>2016-06-30T03:06:06.939</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\cthom\Lumi_Windows_App\bleTest3\bin\x64\Debug\Lumi.exe">
       <PackagePath>Lumi.exe</PackagePath>
@@ -530,6 +530,10 @@
       <PackagePath>vstest_executionengine_platformbridge.winmd</PackagePath>
       <Modified>2016-04-07T21:34:40.000</Modified>
     </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\cthom\Lumi_Windows_App\Lumi_Uploader.Tests\IntelHexFileTest1.hex">
+      <PackagePath>IntelHexFileTest1.hex</PackagePath>
+      <Modified>2016-06-29T00:29:32.254</Modified>
+    </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\cthom\Lumi_Windows_App\Lumi_Uploader.Tests\Properties\UnitTestApp.rd.xml">
       <PackagePath>Properties\UnitTestApp.rd.xml</PackagePath>
       <Modified>2016-06-29T00:10:58.808</Modified>
@@ -765,11 +769,11 @@
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\cthom\Lumi_Windows_App\Lumi_Uploader.Tests\bin\x64\Debug\resources.pri">
       <PackagePath>resources.pri</PackagePath>
-      <Modified>2016-06-29T12:48:02.211</Modified>
+      <Modified>2016-06-30T02:49:33.100</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\cthom\Lumi_Windows_App\Lumi_Uploader.Tests\bin\x64\Debug\Core\UnitTestProject1.exe">
       <PackagePath>UnitTestProject1.exe</PackagePath>
-      <Modified>2016-06-29T12:48:44.718</Modified>
+      <Modified>2016-06-30T03:06:07.703</Modified>
     </AppxPackagedFile>
   </ItemGroup>
   <ItemGroup>
