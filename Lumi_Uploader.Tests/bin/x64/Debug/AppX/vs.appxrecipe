@@ -22,17 +22,17 @@
     <AppXManifest Include="C:\Users\cthom\Lumi_Windows_App\Lumi_Uploader.Tests\bin\x64\Debug\Core\AppxManifest.xml">
       <PackagePath>AppxManifest.xml</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
-      <Modified>2016-06-30T03:06:07.708</Modified>
+      <Modified>2016-07-03T23:02:54.779</Modified>
     </AppXManifest>
   </ItemGroup>
   <ItemGroup>
     <AppxPackagedFile Include="C:\Users\cthom\Lumi_Windows_App\Lumi_Uploader.Tests\bin\x64\Debug\UnitTestProject1.exe">
       <PackagePath>entrypoint\UnitTestProject1.exe</PackagePath>
-      <Modified>2016-06-30T03:06:06.939</Modified>
+      <Modified>2016-07-03T22:59:38.800</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\cthom\Lumi_Windows_App\bleTest3\bin\x64\Debug\Lumi.exe">
       <PackagePath>Lumi.exe</PackagePath>
-      <Modified>2016-06-29T12:47:31.067</Modified>
+      <Modified>2016-07-03T22:59:31.223</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Program Files %28x86%29\Microsoft SDKs\Windows Kits\10\ExtensionSDKs\TestPlatform.Universal\14.0\References\CommonConfiguration\neutral\Microsoft.VisualStudio.TestPlatform.TestExecutor.Core.dll">
       <PackagePath>Microsoft.VisualStudio.TestPlatform.TestExecutor.Core.dll</PackagePath>
@@ -532,7 +532,7 @@
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\cthom\Lumi_Windows_App\Lumi_Uploader.Tests\IntelHexFileTest1.hex">
       <PackagePath>IntelHexFileTest1.hex</PackagePath>
-      <Modified>2016-06-29T00:29:32.254</Modified>
+      <Modified>2016-07-03T23:02:44.268</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\cthom\Lumi_Windows_App\Lumi_Uploader.Tests\Properties\UnitTestApp.rd.xml">
       <PackagePath>Properties\UnitTestApp.rd.xml</PackagePath>
@@ -773,7 +773,7 @@
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\cthom\Lumi_Windows_App\Lumi_Uploader.Tests\bin\x64\Debug\Core\UnitTestProject1.exe">
       <PackagePath>UnitTestProject1.exe</PackagePath>
-      <Modified>2016-06-30T03:06:07.703</Modified>
+      <Modified>2016-07-03T23:02:54.774</Modified>
     </AppxPackagedFile>
   </ItemGroup>
   <ItemGroup>

@@ -391,3 +391,4 @@ C:\Users\cthom\Lumi_Windows_App\bleTest3\obj\x64\Debug\qualifiers.txt
 C:\Users\cthom\Lumi_Windows_App\bleTest3\obj\x64\Debug\qualifiers.txt.intermediate
 C:\Users\cthom\Lumi_Windows_App\bleTest3\obj\x64\Debug\MultipleQualifiersPerDimensionFound.txt
 C:\Users\cthom\Lumi_Windows_App\bleTest3\obj\x64\Debug\ProjectArchitectures.txt
+C:\Users\cthom\Lumi_Windows_App\bleTest3\obj\x64\Debug\Lumi.csprojResolveAssemblyReference.cache

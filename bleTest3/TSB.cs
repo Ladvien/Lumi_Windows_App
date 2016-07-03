@@ -1597,12 +1597,12 @@ namespace Lumi
                             if ((byteIndex + numberOfBytesUpToThisLine) < numberOfBytesInFile)
                             {
                                 dataFromFile[byteIndex + startAddressOfLine] = lineOfDataAndAddress.Item1[byteIndex];
-                                indexOfLastDataLine = (byteIndex + startAddressOfLine);
+                                indexOfLastDataLine = (byteIndex + startAddressOfLine) + 1;
                             }
                             else
                             {
                                 dataFromFile[byteIndex + startAddressOfLine] = 0xFF;
-                                indexOfLastDataLine = (byteIndex + startAddressOfLine);
+                                indexOfLastDataLine = (byteIndex + startAddressOfLine) + 1;
                             }
                         }
                     }

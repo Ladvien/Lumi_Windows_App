@@ -389,7 +389,7 @@ namespace Lumi
         public async Task<uint> write(string data)
         {
             // Note: Adapted from Microsoft sample.
-            // 1. Assert dataWriteObject is using selectedSerialDevice.
+            // 1. Assert data;WriteObject is using selectedSerialDevice.
             // 2. Create the WriteString operation.
             // 3. Create the async Write task.
             // 4. Execute the write operation; await how many bytes are written.
