@@ -1,6 +1,5 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-using System.Reflection;
 using System.IO;
 using Windows.ApplicationModel;
 using System.Diagnostics;
@@ -8,7 +7,6 @@ using System.Threading.Tasks;
 using Windows.Storage;
 using Lumi;
 using System.Collections;
-using System.Collections.Generic;
 
 namespace LumiUploaderTests
 {
@@ -16,7 +14,9 @@ namespace LumiUploaderTests
     public class IntelHexFileTestClass
     {
 
+        IntelHexFile intelHexFile = new IntelHexFile();
         StorageFolder storageFolder = ApplicationData.Current.LocalFolder;
+
 
         [TestMethod]
         public async Task shouldReadLineFromHexFile()
@@ -27,7 +27,7 @@ namespace LumiUploaderTests
             byte[] testLine = { 0x03, 0xC0, 0xFE, 0x01, 0xF6, 0xDF, 0x22, 0x96, 0xC2, 0x35, 0xD1, 0x07, 0xD1, 0xF7, 0xF8, 0x94 };
             // The address should be 0x0880
             Int16 testAddress = 0x0880;
-            IntelHexFile intelHexFile = new IntelHexFile();
+
             Stream stream = null;
             StreamReader streamReader = null;
             try
@@ -40,7 +40,6 @@ namespace LumiUploaderTests
             {
                 Debug.WriteLine(Package.Current.InstalledLocation.Path);
             }
-
             Tuple<byte[], short> lineOfHexData;
                 
 
@@ -57,11 +56,11 @@ namespace LumiUploaderTests
                 }
                 Debug.WriteLine("");
                 Debug.WriteLine("Item 2: " + lineOfHexData.Item2);
+                */
 
                 ICollection shouldBeLine = testLine;
                 ICollection dataLine = lineOfHexData.Item1;
-                */
-
+                
                 CollectionAssert.AreEqual(shouldBeLine, dataLine);
                 Assert.AreEqual(testAddress, lineOfHexData.Item2);
                 return;
@@ -69,6 +68,30 @@ namespace LumiUploaderTests
 
 
             return;
+        }
+
+        [TestMethod]
+        public void shouldConvertTwoCharToByte()
+        {
+            // Arrange
+            string testChars = "A0";
+            string tooLargeTestString = "123";
+            string tooSmallTestString = "3";
+            string outOfRangeCharsTestString = "GH";
+            byte testByte = 0xA0;
+            byte badTestByte = 0x00;
+
+            // Act
+            byte gotByte = intelHexFile.getByteFrom2HexChar(testChars);
+            byte gotTooLargeBytes = intelHexFile.getByteFrom2HexChar(tooLargeTestString);
+            byte gotTooSmallBytes = intelHexFile.getByteFrom2HexChar(tooSmallTestString);
+            byte gotOutOfRangeBytes = intelHexFile.getByteFrom2HexChar(outOfRangeCharsTestString);
+
+            // Assert
+            Assert.AreEqual(testByte, gotByte);
+            Assert.AreEqual(badTestByte, gotTooLargeBytes);
+            Assert.AreEqual(badTestByte, gotTooSmallBytes);
+            Assert.AreEqual(badTestByte, gotOutOfRangeBytes);
         }
 
         [TestMethod]
@@ -162,7 +185,6 @@ namespace LumiUploaderTests
                 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
                 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 
-            IntelHexFile intelHexFile = new IntelHexFile();
             Stream stream = null;
             try
             {

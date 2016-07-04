@@ -1757,13 +1757,33 @@ namespace Lumi
         {
             try
             {
-                return (byte)Convert.ToInt32(twoHexChars, 16);
+                if(checkValidByteInString(twoHexChars))                    
+                {
+                    return (byte)Convert.ToInt32(twoHexChars, 16);
+                } else
+                {
+                    return 0x00;
+                }
+                
             } catch
             {
                 Debug.WriteLine("IntelHexFile.geyByteFrom2HexChar() failed");
                 return 0x00;
             }
             
+        }
+
+        private bool checkValidByteInString(string twoChars)
+        {
+            if(twoChars.Length != 2) { return false; }
+            if (twoChars[0] > 70) { return false; }                         // Greater than F
+            if (twoChars[1] > 70) { return false; }
+            if (twoChars[0] < 48) { return false; }                         // Less than 0
+            if (twoChars[1] < 48) { return false; }
+            if (twoChars[0] > 57 && twoChars[0] < 65) { return false; }     // Greater than 9 but less than A
+            if (twoChars[1] > 57 && twoChars[1] < 65) { return false; }
+
+            return true;
         }
 
         public int getNeededPagePadding(int byteCount, int pageSize)
