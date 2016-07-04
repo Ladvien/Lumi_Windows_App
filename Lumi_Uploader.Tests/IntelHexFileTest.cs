@@ -10,7 +10,7 @@ using Lumi;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace UnitTestProject1
+namespace LumiUploaderTests
 {
     [TestClass]
     public class IntelHexFileTestClass
@@ -18,6 +18,58 @@ namespace UnitTestProject1
 
         StorageFolder storageFolder = ApplicationData.Current.LocalFolder;
 
+        [TestMethod]
+        public async Task shouldReadLineFromHexFile()
+        {
+            // Arrange
+            
+            // First line of data in IntelHexFileTest1.hex
+            byte[] testLine = { 0x03, 0xC0, 0xFE, 0x01, 0xF6, 0xDF, 0x22, 0x96, 0xC2, 0x35, 0xD1, 0x07, 0xD1, 0xF7, 0xF8, 0x94 };
+            // The address should be 0x0880
+            Int16 testAddress = 0x0880;
+            IntelHexFile intelHexFile = new IntelHexFile();
+            Stream stream = null;
+            StreamReader streamReader = null;
+            try
+            {
+                var file = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///IntelHexFileTest1.hex"));
+                stream = await file.OpenStreamForReadAsync();
+                streamReader = new StreamReader(stream);
+            }
+            catch
+            {
+                Debug.WriteLine(Package.Current.InstalledLocation.Path);
+            }
+
+            Tuple<byte[], short> lineOfHexData;
+                
+
+            //Act
+            if(streamReader != null)
+            {
+                lineOfHexData = intelHexFile.readLineFromHexFile(streamReader);
+                
+                /*
+                Debug.WriteLine("Item 1: ");
+                for (int i = 0; i < lineOfHexData.Item1.Length; i++)
+                {
+                    Debug.Write(lineOfHexData.Item1[i].ToString("X2"));
+                }
+                Debug.WriteLine("");
+                Debug.WriteLine("Item 2: " + lineOfHexData.Item2);
+
+                ICollection shouldBeLine = testLine;
+                ICollection dataLine = lineOfHexData.Item1;
+                */
+
+                CollectionAssert.AreEqual(shouldBeLine, dataLine);
+                Assert.AreEqual(testAddress, lineOfHexData.Item2);
+                return;
+            }
+
+
+            return;
+        }
 
         [TestMethod]
         public async Task shouldReadIntelHexFileIntoArray()
@@ -110,10 +162,6 @@ namespace UnitTestProject1
                 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
                 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 
-
-            
-
-
             IntelHexFile intelHexFile = new IntelHexFile();
             Stream stream = null;
             try
@@ -121,7 +169,6 @@ namespace UnitTestProject1
                 var file = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///IntelHexFileTest1.hex"));
                 
                 stream = await file.OpenStreamForReadAsync();
-                //Debug.WriteLine(stream.ReadByte());
             } catch
             {
                 Debug.WriteLine(Package.Current.InstalledLocation.Path);
@@ -194,12 +241,6 @@ namespace UnitTestProject1
             ICollection data = intelHexFileArray;
 
             CollectionAssert.AreEqual(shouldBeData, data);
-            return;
-        }
-        public async Task tester()
-        {
-            var a = 1 + 2;
-            Assert.AreEqual(a, 3);
             return;
         }
     }
