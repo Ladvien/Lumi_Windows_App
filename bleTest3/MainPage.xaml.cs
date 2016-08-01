@@ -60,15 +60,18 @@ namespace Lumi
         {
             this.InitializeComponent();
 
+            // Add version information to main view.
             string appVersion = string.Format("Version: {0}.{1}.{2}.{3}",
                     Package.Current.Id.Version.Major,
                     Package.Current.Id.Version.Minor,
                     Package.Current.Id.Version.Build,
                     Package.Current.Id.Version.Revision);
 
-            dispatcher = CoreWindow.GetForCurrentThread().Dispatcher;
             ApplicationView appView = ApplicationView.GetForCurrentView();
             appView.Title = "Lumi " + appVersion;
+
+            // Setup a thread dispatcher, used to set thread during IO callbacks.
+            dispatcher = CoreWindow.GetForCurrentThread().Dispatcher;
 
             // Add the callback handlers for serialPortsExtended isntance
             serialPorts.Callback += new serialPortsExtended.CallBackEventHandler(serialPortCallback);
@@ -84,40 +87,42 @@ namespace Lumi
             clearDisplay();
             appendLine("Please wait while COM ports load...", Colors.White);
 
-            // Start the port discovery.
-            //serialPorts.ListAvailablePorts();
-
+            // Default view to serial devices.    
             tsb.setDevice(TSB.device.serial);
+            tsb.populateResetPinCmbBox(cmbResetPin);
 
             // Have the serialPortsExtended object populate the combo boxes.
             serialPorts.populateComboBoxesWithPortSettings(cmbBaud, cmbDataBits, cmbStopBits, cmbParity, cmbHandshaking);
             serialPorts.init(theOneParagraph);
 
+            // Initialize the TSB object.  This is necessary to start SerialDeviceWatcher.
             tsb.init(serialPorts, mainDisplayScroll, rtbMainDisplay, theOneParagraph, pbSys, serialBuffer, txbOpenFilePath);
+            
             // Delegate callback for TSB updates.
             tsb.TsbUpdatedCommand += new TSB.TsbUpdateCommand(tsbcommandUpdate);
+
+            // Get BluetoothLE up and going.
             blue.init();
 
-            //devicePicker.DeviceSelected += DevicePicker_DeviceSelected;
-
             serialBuffer.RXbufferUpdated += new SerialBuffer.CallBackEventHandler(RXbufferUpdated);
-            serialBuffer.TXbufferUpdated += new SerialBuffer.CallBackEventHandler(TXbufferUpdated);
-
-            tsb.populateResetPinCmbBox(cmbResetPin);
+            serialBuffer.TXbufferUpdated += new SerialBuffer.CallBackEventHandler(TXbufferUpdated);            
         }
 
         private void tsbcommandUpdate(TSB.statuses tsbConnectionStatus, Run message)
         {
-            //Debug.WriteLine("Insert command updates here");
-            Debug.Write(tsbConnectionStatus);
+            // This method is called when the TSB object sends a UI update.
+            //
+            // 1. Change to the UI thread.
+            // 2. Switch on the status passed by the TSB object.
+
             var ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => {
                 switch (tsbConnectionStatus)
                 {
                     case TSB.statuses.connected:
-                        btnTsbConnect.Content = "Disconnect";
-                        connectionLabelBackGround.Background = getColoredBrush(Colors.LawnGreen);
-                        labelConnectionStatus.Text = "Connected to TSB";
-                        mainPivotTable.SelectedIndex = 2;
+                        btnTsbConnect.Content = "Disconnect";                                       // Connect button switches to Disconnect.
+                        connectionLabelBackGround.Background = getColoredBrush(Colors.LawnGreen);   // Change to green background for connection label
+                        labelConnectionStatus.Text = "Connected to TSB";                            // 
+                        mainPivotTable.SelectedIndex = 2;                                           
                         tabTSB.IsEnabled = true;
                         appendRunToMainDisplay(message);
                         mainPivotTable.SelectedIndex = 3;
