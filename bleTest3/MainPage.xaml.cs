@@ -330,7 +330,7 @@ namespace Lumi
                 });
         }
 
-        public void blueCallback(object sender, blue.BlueEvent blueEvent)
+        public void blueCallback(object sender, blue.BlueEvent blueEvent, string message)
         {
             IAsyncAction ignored;
             switch (blueEvent)
@@ -375,6 +375,9 @@ namespace Lumi
                         setUI(uiSetTo.ConnectToTsb);
                         blue.attachSerialBuffer(serialBuffer);
                     });
+                    break;
+                case blue.BlueEvent.updateMessage:
+                    appendText(message, Colors.CornflowerBlue);
                     break;
             }
         }
