@@ -1,0 +1,10 @@
+/out:"C:\Users\Echo\Lumi_Windows_App\bleTest3\obj\x64\Release\ilc\intermediate\SgGenerated\\"
+/int:"C:\Users\Echo\Lumi_Windows_App\bleTest3\obj\x64\Release\ilc\intermediate\\"
+/ref:"C:\Users\Echo\Lumi_Windows_App\bleTest3\obj\x64\Release\ilc\intermediate\PreMergeILTransformed\\"
+/ref:"C:\Users\Echo\Lumi_Windows_App\bleTest3\obj\x64\Release\ilc\intermediate\TransformedSRWR\\"
+/ref:"C:\Users\Echo\Lumi_Windows_App\bleTest3\obj\x64\Release\ilc\in\\"
+/ref:"C:\Users\Echo\Lumi_Windows_App\bleTest3\obj\x64\Release\ilc\in\\"
+/ref:"C:\Users\Echo\Lumi_Windows_App\bleTest3\obj\x64\Release\ilc\in\\"
+/ref:"C:\Program Files (x86)\MSBuild\Microsoft\.NetNative\x64\ilc\lib\Private\\"
+/ref:"C:\Users\Echo\Lumi_Windows_App\bleTest3\obj\x64\Release\ilc\in\WinMetadata\\"
+/ca:System.Private.CoreLib
