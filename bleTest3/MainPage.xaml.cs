@@ -48,12 +48,14 @@ namespace Lumi
             SearchingBLE,
             SearchedBLE,
             ConnectingBLE,
-            ConnectToTsb,
+            SerialConnectToTsb,
+            BleConnectToTsb,
             ConnectedToTsb,
             TsbError,
             ConnectError,
             Disconnected,
-            NoDevice
+            NoDevice,
+            Paired
         }
 
         public MainPage()
@@ -211,32 +213,17 @@ namespace Lumi
                     cmbFoundDevices.IsEnabled = false;
                     btnBleSearch.IsEnabled = false;
                     break;
-                case uiSetTo.ConnectToTsb:
+                case uiSetTo.SerialConnectToTsb:
                     btnBleSearch.IsEnabled = false;
-                    switch (cmbDeviceSelector.SelectedIndex)
-                    {
-                        case 0: // Serial
-                            btnTsbConnect.IsEnabled = true;
-                            connectionLabelBackGround.Background = getColoredBrush(Colors.Yellow);
-                            labelConnectionStatus.Text = "Connected";
-                            btnConnect.Content = "Disconnect";
-                            btnConnect.IsEnabled = true;
-                            pvtPortSettings.IsEnabled = false;
-                            cmbFoundDevices.IsEnabled = false;
-                            cmbDeviceSelector.IsEnabled = false;
-                            btnTsbConnect.IsEnabled = true;
-                            break;
-                        case 1: // HM-1X
-                            btnTsbConnect.IsEnabled = true;
-                            btnConnect.IsEnabled = true;
-                            btnConnect.Content = "Disconnect";
-                            connectionLabelBackGround.Background = getColoredBrush(Colors.Yellow);
-                            labelConnectionStatus.Text = "Connected";
-                            pvtPortSettings.IsEnabled = false;
-                            cmbFoundDevices.IsEnabled = false;
-                            cmbDeviceSelector.IsEnabled = false;
-                            break;
-                    }
+                    btnTsbConnect.IsEnabled = true;
+                    connectionLabelBackGround.Background = getColoredBrush(Colors.Yellow);
+                    labelConnectionStatus.Text = "Connected";
+                    btnConnect.Content = "Disconnect";
+                    btnConnect.IsEnabled = true;
+                    pvtPortSettings.IsEnabled = false;
+                    cmbFoundDevices.IsEnabled = false;
+                    cmbDeviceSelector.IsEnabled = false;
+                    btnTsbConnect.IsEnabled = true;
                     break;
                 case uiSetTo.ConnectedToTsb:
                     break;
@@ -282,9 +269,24 @@ namespace Lumi
                             break;
                     }
                     break;
+                case uiSetTo.Paired:
+                    connectionLabelBackGround.Background = getColoredBrush(Colors.CornflowerBlue);
+                    labelConnectionStatus.Text = "Paired";
+                    break;
+                case uiSetTo.BleConnectToTsb:
+                    btnTsbConnect.IsEnabled = true;
+                    btnConnect.IsEnabled = true;
+                    btnConnect.Content = "Disconnect";
+                    connectionLabelBackGround.Background = getColoredBrush(Colors.Yellow);
+                    labelConnectionStatus.Text = "Connected";
+                    pvtPortSettings.IsEnabled = false;
+                    cmbFoundDevices.IsEnabled = false;
+                    cmbDeviceSelector.IsEnabled = false;
+                    break;
                 case uiSetTo.NoDevice:
                     cmbFoundDevices.IsEnabled = false;
                     break;
+                
             }
         }
 
@@ -369,16 +371,21 @@ namespace Lumi
                         setUI(uiSetTo.Init);
                     });
                     break;
+                case blue.BlueEvent.paired:
+                    setUI(uiSetTo.Paired);
+                    break;
                 case blue.BlueEvent.connected:
                     ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                     {
-                        setUI(uiSetTo.ConnectToTsb);
+                        setUI(uiSetTo.BleConnectToTsb);
                         blue.attachSerialBuffer(serialBuffer);
                     });
                     break;
                 case blue.BlueEvent.updateMessage:
                     appendText(message, Colors.CornflowerBlue);
                     break;
+
+
             }
         }
 
@@ -409,7 +416,7 @@ namespace Lumi
                         assignCOMPort();                       
                         if (serialPorts.openPort())
                         {
-                            setUI(uiSetTo.ConnectToTsb);
+                            setUI(uiSetTo.SerialConnectToTsb);
                             portOpen = true;
                             /////////////////////////////
                             serialPorts.AlwaysListening();
@@ -457,7 +464,7 @@ namespace Lumi
         {
             if(btnTsbConnect.Content == "Disconnect")
             {
-                setUI(uiSetTo.ConnectToTsb);
+                setUI(uiSetTo.SerialConnectToTsb);
                 await reset();
                 btnTsbConnect.Content = "Connect to TSB";
             } else
