@@ -108,6 +108,7 @@ namespace Lumi
 
                 // Create and initialize a new watcher instance.
                 bleAdvertWatcher = new BluetoothLEAdvertisementWatcher();
+                
 
                 // Watcher created for determination of enumeration of connected BLE.  This is needed
                 // for the workaround to Microsoft's crappy BLE API.
@@ -256,7 +257,7 @@ namespace Lumi
 
         #region BLEadvertisementWatcher
 
-        public async void startBLEWatcher(int seconds)
+        public async Task startBLEWatcher(int seconds)
         {
             // 1. Setup search timer
             // 2. Loop through all paired devices and unpair them (BLAST YOU MS!)

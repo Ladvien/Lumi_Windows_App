@@ -265,5 +265,40 @@ namespace LumiUploaderTests
             CollectionAssert.AreEqual(shouldBeData, data);
             return;
         }
+
+    }
+
+    [TestClass]
+    public class blueTestClass
+    {
+        blue blueTestObject = new blue();
+        SerialBuffer serialBufferTestObject = new SerialBuffer();
+
+        [TestMethod]
+        public bool shouldInit()
+        {
+
+            return true;
+        }
+
+        [TestMethod]
+        public async Task<bool> shouldStartBLEWatcher()
+        {
+            // Arrange
+            blueTestObject.init();
+            await blueTestObject.startBLEWatcher(8);
+
+
+            return true;
+        }
+
+        [TestMethod]
+        public bool shouldAttachSerialBuffer()
+        {
+
+            return true;
+        }
+
+
     }
 }

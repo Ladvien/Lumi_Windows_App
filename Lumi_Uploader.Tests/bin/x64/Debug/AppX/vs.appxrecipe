@@ -28,29 +28,29 @@
     <AppXManifest Include="C:\Users\Echo\Lumi_Windows_App\Lumi_Uploader.Tests\bin\x64\Debug\Core\AppxManifest.xml">
       <PackagePath>AppxManifest.xml</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
-      <Modified>2016-07-30T19:23:31.638</Modified>
+      <Modified>2016-08-16T12:47:53.773</Modified>
     </AppXManifest>
   </ItemGroup>
   <ItemGroup>
     <AppxPackagedFile Include="C:\Users\Echo\Lumi_Windows_App\Lumi_Uploader.Tests\bin\x64\Debug\UnitTestProject1.exe">
       <PackagePath>entrypoint\UnitTestProject1.exe</PackagePath>
-      <Modified>2016-07-30T19:23:20.832</Modified>
+      <Modified>2016-08-16T12:47:51.824</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Echo\Lumi_Windows_App\bleTest3\bin\x64\Debug\Lumi.exe">
       <PackagePath>Lumi.exe</PackagePath>
-      <Modified>2016-07-30T19:22:48.674</Modified>
+      <Modified>2016-08-16T12:44:33.238</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Program Files %28x86%29\Microsoft SDKs\Windows Kits\10\ExtensionSDKs\TestPlatform.Universal\14.0\References\CommonConfiguration\neutral\Microsoft.VisualStudio.TestPlatform.TestExecutor.Core.dll">
       <PackagePath>Microsoft.VisualStudio.TestPlatform.TestExecutor.Core.dll</PackagePath>
-      <Modified>2016-06-20T19:45:20.000</Modified>
+      <Modified>2016-07-27T04:22:38.000</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Program Files %28x86%29\Microsoft SDKs\Windows Kits\10\ExtensionSDKs\MSTestFramework.Universal\14.0\References\CommonConfiguration\neutral\Microsoft.VisualStudio.TestPlatform.UnitTestFramework.AppContainer.dll">
       <PackagePath>Microsoft.VisualStudio.TestPlatform.UnitTestFramework.AppContainer.dll</PackagePath>
-      <Modified>2016-06-20T19:45:20.000</Modified>
+      <Modified>2016-07-27T04:22:38.000</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Program Files %28x86%29\Microsoft SDKs\Windows Kits\10\ExtensionSDKs\MSTestFramework.Universal\14.0\References\CommonConfiguration\neutral\Microsoft.VisualStudio.TestPlatform.UnitTestFramework.dll">
       <PackagePath>Microsoft.VisualStudio.TestPlatform.UnitTestFramework.dll</PackagePath>
-      <Modified>2016-06-20T19:45:20.000</Modified>
+      <Modified>2016-07-27T04:22:38.000</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Echo\.nuget\packages\Microsoft.ApplicationInsights\1.0.0\lib\portable-win81+wpa81\Microsoft.ApplicationInsights.dll">
       <PackagePath>Microsoft.ApplicationInsights.dll</PackagePath>
@@ -476,33 +476,65 @@
       <PackagePath>System.Xml.XmlSerializer.dll</PackagePath>
       <Modified>2015-07-23T05:11:12.000</Modified>
     </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Echo\.nuget\packages\Microsoft.NETCore.Runtime.CoreCLR-x64\1.0.0\runtimes\win7-x64\native\clretwrc.dll">
+      <PackagePath>clretwrc.dll</PackagePath>
+      <Modified>2015-07-23T04:48:56.000</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Echo\.nuget\packages\Microsoft.NETCore.Runtime.CoreCLR-x64\1.0.0\runtimes\win7-x64\native\coreclr.dll">
+      <PackagePath>coreclr.dll</PackagePath>
+      <Modified>2015-07-23T04:48:58.000</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Echo\.nuget\packages\Microsoft.NETCore.Runtime.CoreCLR-x64\1.0.0\runtimes\win7-x64\native\dbgshim.dll">
+      <PackagePath>dbgshim.dll</PackagePath>
+      <Modified>2015-07-23T04:48:58.000</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Echo\.nuget\packages\Microsoft.NETCore.Runtime.CoreCLR-x64\1.0.0\runtimes\win7-x64\native\mscordaccore.dll">
+      <PackagePath>mscordaccore.dll</PackagePath>
+      <Modified>2015-07-23T04:48:58.000</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Echo\.nuget\packages\Microsoft.NETCore.Runtime.CoreCLR-x64\1.0.0\runtimes\win7-x64\native\mscordbi.dll">
+      <PackagePath>mscordbi.dll</PackagePath>
+      <Modified>2015-07-23T04:48:58.000</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Echo\.nuget\packages\Microsoft.NETCore.Runtime.CoreCLR-x64\1.0.0\runtimes\win7-x64\native\mscorrc.debug.dll">
+      <PackagePath>mscorrc.debug.dll</PackagePath>
+      <Modified>2015-07-23T04:48:58.000</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Echo\.nuget\packages\Microsoft.NETCore.Runtime.CoreCLR-x64\1.0.0\runtimes\win7-x64\native\mscorrc.dll">
+      <PackagePath>mscorrc.dll</PackagePath>
+      <Modified>2015-07-23T04:48:58.000</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Echo\.nuget\packages\Microsoft.NETCore.Runtime.CoreCLR-x64\1.0.0\runtimes\win7-x64\lib\dotnet\mscorlib.ni.dll">
+      <PackagePath>mscorlib.ni.dll</PackagePath>
+      <Modified>2015-07-23T04:49:00.000</Modified>
+    </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Program Files %28x86%29\Microsoft SDKs\Windows Kits\10\ExtensionSDKs\TestPlatform.Universal\14.0\Redist\CommonConfiguration\neutral\Microsoft.VisualStudio.TestPlatform.Common.dll">
       <PackagePath>Microsoft.VisualStudio.TestPlatform.Common.dll</PackagePath>
-      <Modified>2016-06-20T19:45:20.000</Modified>
+      <Modified>2016-07-27T04:22:38.000</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Program Files %28x86%29\Microsoft SDKs\Windows Kits\10\ExtensionSDKs\TestPlatform.Universal\14.0\Redist\CommonConfiguration\neutral\Microsoft.VisualStudio.TestPlatform.Core.dll">
       <PackagePath>Microsoft.VisualStudio.TestPlatform.Core.dll</PackagePath>
-      <Modified>2016-06-20T19:45:20.000</Modified>
+      <Modified>2016-07-27T04:22:38.000</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Program Files %28x86%29\Microsoft SDKs\Windows Kits\10\ExtensionSDKs\MSTestFramework.Universal\14.0\Redist\CommonConfiguration\neutral\Microsoft.VisualStudio.TestPlatform.Extensions.MSAppContainerAdapter.dll">
       <PackagePath>Microsoft.VisualStudio.TestPlatform.Extensions.MSAppContainerAdapter.dll</PackagePath>
-      <Modified>2016-06-20T19:45:20.000</Modified>
+      <Modified>2016-07-27T04:22:38.000</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Program Files %28x86%29\Microsoft SDKs\Windows Kits\10\ExtensionSDKs\TestPlatform.Universal\14.0\Redist\CommonConfiguration\neutral\Microsoft.VisualStudio.TestPlatform.ObjectModel.dll">
       <PackagePath>Microsoft.VisualStudio.TestPlatform.ObjectModel.dll</PackagePath>
-      <Modified>2016-06-20T19:45:20.000</Modified>
+      <Modified>2016-07-27T04:22:38.000</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Program Files %28x86%29\Microsoft SDKs\Windows Kits\10\ExtensionSDKs\TestPlatform.Universal\14.0\Redist\CommonConfiguration\x64\vstest.executionengine.WindowsPhone.dll">
       <PackagePath>vstest.executionengine.WindowsPhone.dll</PackagePath>
-      <Modified>2016-06-20T19:45:20.000</Modified>
+      <Modified>2016-07-27T04:22:38.000</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Program Files %28x86%29\Microsoft SDKs\Windows Kits\10\ExtensionSDKs\TestPlatform.Universal\14.0\Redist\CommonConfiguration\x64\vstest_executionengine_platformbridge.dll">
       <PackagePath>vstest_executionengine_platformbridge.dll</PackagePath>
-      <Modified>2016-06-20T19:45:20.000</Modified>
+      <Modified>2016-07-27T04:22:38.000</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Program Files %28x86%29\Microsoft SDKs\Windows Kits\10\ExtensionSDKs\TestPlatform.Universal\14.0\Redist\CommonConfiguration\neutral\vstest_executionengine_platformbridge.winmd">
       <PackagePath>vstest_executionengine_platformbridge.winmd</PackagePath>
-      <Modified>2016-06-20T19:45:20.000</Modified>
+      <Modified>2016-07-27T04:22:38.000</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Echo\Lumi_Windows_App\Lumi_Uploader.Tests\IntelHexFileTest1.hex">
       <PackagePath>IntelHexFileTest1.hex</PackagePath>
@@ -739,15 +771,15 @@
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Program Files %28x86%29\Windows Kits\10\UnionMetadata\Windows.winmd">
       <PackagePath>WinMetadata\Windows.winmd</PackagePath>
-      <Modified>2016-04-15T13:43:07.897</Modified>
+      <Modified>2016-08-14T14:39:18.497</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Echo\Lumi_Windows_App\Lumi_Uploader.Tests\bin\x64\Debug\resources.pri">
       <PackagePath>resources.pri</PackagePath>
-      <Modified>2016-07-30T19:23:25.859</Modified>
+      <Modified>2016-08-16T12:44:50.399</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Echo\Lumi_Windows_App\Lumi_Uploader.Tests\bin\x64\Debug\Core\UnitTestProject1.exe">
       <PackagePath>UnitTestProject1.exe</PackagePath>
-      <Modified>2016-07-30T19:23:31.630</Modified>
+      <Modified>2016-08-16T12:47:53.769</Modified>
     </AppxPackagedFile>
   </ItemGroup>
   <ItemGroup>
