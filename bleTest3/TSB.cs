@@ -1345,13 +1345,14 @@ namespace Lumi
                         ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
                         () =>
                         {
-                            displayMessage("Page #" + uploadPageIndex + " ", Colors.Yellow);
+                            displayMessage("HEY Page #" + uploadPageIndex + " ", Colors.Yellow);
                             displayMessage("OK.\n", Colors.LawnGreen);
                             scrollToBottomOfTerminal();
                             var currentProgressBarValue = 100 * ((float)(uploadPageIndex + 1) / (float)pagesToWrite);
                             progressBar.Value = map(currentProgressBarValue, 0, 100, 0, 100);
+                            uploadPageIndex++;
                         });
-                        uploadPageIndex++;
+
                     }
                     else
                     {
@@ -1367,7 +1368,7 @@ namespace Lumi
                         scrollToBottomOfTerminal();
                         displayMessage("\nThe file ", Colors.LawnGreen);
                         displayMessage(hexFileToRead.Name, Colors.Yellow);
-                        displayMessage(" written.!", Colors.LawnGreen);
+                        displayMessage(" written!\n", Colors.LawnGreen);
                         scrollToBottomOfTerminal();
                     });
                     TsbUpdatedCommand(statuses.uploadSuccessful);
@@ -1380,7 +1381,7 @@ namespace Lumi
                     ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
                     () =>
                     {
-                        displayMessage("ERROR writing Page #" + uploadPageIndex + "\n", Colors.Crimson);
+                        displayMessage("ERROR writing Page #" + uploadPageIndex + "\n" + "RX: " + rxByteArray[0] + "\n", Colors.Crimson);
                     });
                     return false;
                 }

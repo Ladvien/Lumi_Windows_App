@@ -1,28 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
-using Windows.Devices.SerialCommunication;
 using Windows.Storage.Streams;
-using System.Collections.ObjectModel;
-using System.Threading;
 using System.Diagnostics;
-using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Documents;
-using Windows.UI;
 using Windows.Security.Cryptography;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using Windows.Devices.Bluetooth.Advertisement;
 using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
 using Windows.Devices.Bluetooth;
 using Windows.UI.Xaml;
-using Windows.ApplicationModel.Core;
-using Windows.UI.Core;
-using Lumi;
+using System;
 
 namespace Lumi
 {
