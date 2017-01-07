@@ -28,13 +28,13 @@
     <AppXManifest Include="C:\Users\Thomas Brittain\Documents\GitHub\Lumi_Windows_App\bleTest3\bin\x64\Debug\Core\AppxManifest.xml">
       <PackagePath>AppxManifest.xml</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
-      <Modified>2017-01-07T15:13:37.708</Modified>
+      <Modified>2017-01-07T15:40:45.523</Modified>
     </AppXManifest>
   </ItemGroup>
   <ItemGroup>
     <AppxPackagedFile Include="C:\Users\Thomas Brittain\Documents\GitHub\Lumi_Windows_App\bleTest3\bin\x64\Debug\Lumi.exe">
       <PackagePath>entrypoint\Lumi.exe</PackagePath>
-      <Modified>2017-01-07T15:13:30.856</Modified>
+      <Modified>2017-01-07T15:40:39.759</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Thomas Brittain\.nuget\packages\Microsoft.ApplicationInsights\1.0.0\lib\portable-win81+wpa81\Microsoft.ApplicationInsights.dll">
       <PackagePath>Microsoft.ApplicationInsights.dll</PackagePath>
@@ -702,7 +702,7 @@
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Thomas Brittain\Documents\GitHub\Lumi_Windows_App\bleTest3\bin\x64\Debug\Core\Lumi.exe">
       <PackagePath>Lumi.exe</PackagePath>
-      <Modified>2017-01-07T15:13:37.695</Modified>
+      <Modified>2017-01-07T15:40:45.515</Modified>
     </AppxPackagedFile>
   </ItemGroup>
   <ItemGroup>

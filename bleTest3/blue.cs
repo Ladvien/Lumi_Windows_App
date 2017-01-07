@@ -168,7 +168,7 @@ namespace Lumi
                 }
                 foreach (var i in listBA)
                 {
-                    Debug.Write(i.ToString("X2"));
+                    //Debug.Write(i.ToString("X2"));
                 }
                 Debug.WriteLine("");
                 await writeByteArrayToBle(bytesToWrite);

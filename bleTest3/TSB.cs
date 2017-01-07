@@ -1345,7 +1345,7 @@ namespace Lumi
                         ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
                         () =>
                         {
-                            displayMessage("HEY Page #" + uploadPageIndex + " ", Colors.Yellow);
+                            displayMessage("Page #" + uploadPageIndex + " ", Colors.Yellow);
                             displayMessage("OK.\n", Colors.LawnGreen);
                             scrollToBottomOfTerminal();
                             var currentProgressBarValue = 100 * ((float)(uploadPageIndex + 1) / (float)pagesToWrite);
@@ -1362,6 +1362,8 @@ namespace Lumi
                 }
                 else if (rxByteArray[0] == 0x21) // !
                 {
+                    TsbUpdatedCommand(statuses.uploadSuccessful);
+                    updateActionInProgress(commands.none);
                     ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
                     () =>
                     {
@@ -1370,14 +1372,13 @@ namespace Lumi
                         displayMessage(hexFileToRead.Name, Colors.Yellow);
                         displayMessage(" written!\n", Colors.LawnGreen);
                         scrollToBottomOfTerminal();
+                        
                     });
-                    TsbUpdatedCommand(statuses.uploadSuccessful);
                     return true;
                 }
                 else
                 {
                     // Error writing to flash.
-
                     ignored = Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
                     () =>
                     {
