@@ -19,6 +19,7 @@ using Windows.Foundation;
 using Windows.Storage.Pickers;
 using Windows.Storage;
 using System.Windows;
+using Windows.Security.Cryptography;
 
 
 
@@ -101,7 +102,7 @@ namespace Lumi
             tsb.init(serialPorts, mainDisplayScroll, rtbMainDisplay, theOneParagraph, pbSys, serialBuffer, txbOpenFilePath);
             
             // Delegate callback for TSB updates.
-            tsb.TsbUpdatedCommand += new TSB.TsbUpdateCommand(tsbcommandUpdate);
+            tsb.TsbUpdatedCommand += new TSB.TsbUpdateCommand(tsbStatusUpdate);
 
             // Get BluetoothLE up and going.
             blue.init();
@@ -110,21 +111,22 @@ namespace Lumi
             serialBuffer.TXbufferUpdated += new SerialBuffer.CallBackEventHandler(TXbufferUpdated);            
         }
 
-        private void tsbcommandUpdate(TSB.statuses tsbConnectionStatus, Run message)
+        private void tsbStatusUpdate(TSB.statuses tsbConnectionStatus, Run message)
         {
             // This method is called when the TSB object sends a UI update.
             //
             // 1. Change to the UI thread.
             // 2. Switch on the status passed by the TSB object.
 
-            var ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => {
+            var ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
+            {
                 switch (tsbConnectionStatus)
                 {
                     case TSB.statuses.connected:
                         btnTsbConnect.Content = "Disconnect";                                       // Connect button switches to Disconnect.
                         connectionLabelBackGround.Background = getColoredBrush(Colors.LawnGreen);   // Change to green background for connection label
                         labelConnectionStatus.Text = "Connected to TSB";                            // 
-                        mainPivotTable.SelectedIndex = 2;                                           
+                        mainPivotTable.SelectedIndex = 2;
                         tabTSB.IsEnabled = true;
                         appendRunToMainDisplay(message);
                         mainPivotTable.SelectedIndex = 3;
@@ -135,10 +137,9 @@ namespace Lumi
                         btnTsbConnect.IsEnabled = true;
                         connectionLabelBackGround.Background = getColoredBrush(Colors.Crimson);
                         labelConnectionStatus.Text = "Error";
-                        tabTSB.IsEnabled = false;
                         break;
                     case TSB.statuses.uploadSuccessful:
-                        reset();
+                        await reset();
                         break;
                     case TSB.statuses.displayMessage:
                         appendRunToMainDisplay(message);
@@ -149,7 +150,6 @@ namespace Lumi
                         btnTsbConnect.IsEnabled = true;
                         connectionLabelBackGround.Background = getColoredBrush(Colors.Yellow);
                         labelConnectionStatus.Text = "TSB Disconnected";
-                        tabTSB.IsEnabled = false;
                         break;
                     case TSB.statuses.wirelessReleaseSuccess:
                         blue.closeBleDevice();
@@ -158,7 +158,6 @@ namespace Lumi
                         btnTsbConnect.IsEnabled = true;
                         connectionLabelBackGround.Background = getColoredBrush(Colors.Yellow);
                         labelConnectionStatus.Text = "TSB Disconnected";
-                        tabTSB.IsEnabled = false;
                         break;
                 }
             });
@@ -296,6 +295,27 @@ namespace Lumi
             {
                 byte[] data = serialBuffer.readAllBytesFromRXBuffer();
             }
+
+            if(tsb.commandInProgress == TSB.commands.none)
+            {
+                byte[] data = serialBuffer.readAllBytesFromRXBuffer();
+
+                IAsyncAction ignored;
+                // Callback from serialPort thread.
+
+                ignored = dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                {
+                    try
+                    {
+                        string dataStr = tsb.getAsciiStringFromByteArray(data);
+                        appendText(dataStr, Colors.LimeGreen);
+                    }
+                    catch (Exception ex)
+                    {
+                        appendText("\nBad data recieved\n", Colors.Crimson);
+                    }
+                });
+            }
             //Debug.WriteLine("main Callback for RX bufferUpdated");
         }
 
@@ -384,8 +404,6 @@ namespace Lumi
                 case blue.BlueEvent.updateMessage:
                     appendText(message, Colors.CornflowerBlue);
                     break;
-
-
             }
         }
 
@@ -399,7 +417,6 @@ namespace Lumi
         {
             cmbFoundDevices.SelectedItem = cmbPort.SelectedItem;
         }
-
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
@@ -497,7 +514,7 @@ namespace Lumi
                     break;
                 case 1:
                     setUI(uiSetTo.SearchingBLE);
-                    blue.startBLEWatcher(5);
+                    await blue.startBLEWatcher(5);
                     break;
             }
         }
@@ -739,7 +756,8 @@ namespace Lumi
         private async void btnReset_Click(object sender, RoutedEventArgs e)
         {
             await reset();
-            tsbcommandUpdate(TSB.statuses.bootloaderDisconnected, null);
+            tsbStatusUpdate(TSB.statuses.bootloaderDisconnected, null);
+            
         }
 
         private void cmbResetPinSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)

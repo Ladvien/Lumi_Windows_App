@@ -423,8 +423,6 @@ namespace Lumi
                 Debug.WriteLine("TSB.getResetPinAsString failed");
                 return null;
             }
-            
-
         }
 
         private async void RXbufferUpdated(object sender, EventArgs args)
@@ -793,7 +791,8 @@ namespace Lumi
             try
             {
                 serialBuffer.txBuffer = GetBytes("AT+" + getResetPinAsString() + "0");
-                resetTimer.Interval = new TimeSpan(0, 0, 0, 0, 300);
+                resetTimer.Interval = new TimeSpan(0, 0, 0, 0, 700);
+                resetTimer.Tick += ResetTimer_Tick;
                 resetTimer.Start();
             } catch
             {
@@ -801,13 +800,12 @@ namespace Lumi
             }
 
         }
-
         private void ResetTimer_Tick(object sender, object e)
         {
             try
             {
                 resetTimer.Stop();
-                //serialBuffer.txBuffer = GetBytes("AT+" + getResetPinAsString() + "1");
+                serialBuffer.txBuffer = GetBytes("AT+" + getResetPinAsString() + "1");
             } catch
             {
                 Debug.WriteLine("TSB.ResetTimer_Tick() failed");
