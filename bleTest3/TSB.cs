@@ -26,6 +26,15 @@ namespace Lumi
 {
     public class TSB
     {
+
+        int millsecondsDelayForBLEReset = 400;
+
+        public void printCommandInProgress()
+        {
+            Debug.WriteLine(commandInProgress.ToString());
+        }
+
+
         #region devices
         enum DEVICE_SIGNATURE
         {
@@ -668,6 +677,7 @@ namespace Lumi
 
         public void hello()
         {
+            Debug.WriteLine(deviceSelected);
             switch (deviceSelected)
             {
                 case device.serial:
@@ -790,8 +800,9 @@ namespace Lumi
         {
             try
             {
+                updateActionInProgress(TSB.commands.bleReset);
                 serialBuffer.txBuffer = GetBytes("AT+" + getResetPinAsString() + "0");
-                resetTimer.Interval = new TimeSpan(0, 0, 0, 0, 700);
+                resetTimer.Interval = new TimeSpan(0, 0, 0, 0, millsecondsDelayForBLEReset);
                 resetTimer.Tick += ResetTimer_Tick;
                 resetTimer.Start();
             } catch
@@ -805,12 +816,19 @@ namespace Lumi
             try
             {
                 resetTimer.Stop();
+
                 serialBuffer.txBuffer = GetBytes("AT+" + getResetPinAsString() + "1");
+                updateActionInProgress(TSB.commands.none);
             } catch
             {
                 Debug.WriteLine("TSB.ResetTimer_Tick() failed");
             }
-
+            if(resetTimer.IsEnabled == true)
+            {
+                // Without this line then the timer ticks several more times before stopped.  Weird.
+                resetTimer = null;
+            }
+            
         }
 
         public void checkReleaseSuccess()

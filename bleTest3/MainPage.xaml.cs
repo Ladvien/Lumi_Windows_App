@@ -479,11 +479,15 @@ namespace Lumi
 
         private async void btnTsbConnect_Click(object sender, RoutedEventArgs e)
         {
+            tsb.printCommandInProgress();
             if(btnTsbConnect.Content == "Disconnect")
             {
                 setUI(uiSetTo.SerialConnectToTsb);
                 await reset();
                 btnTsbConnect.Content = "Connect to TSB";
+                tsb = new TSB();
+                // Initialize the TSB object.  This is necessary to start SerialDeviceWatcher.
+                tsb.init(serialPorts, mainDisplayScroll, rtbMainDisplay, theOneParagraph, pbSys, serialBuffer, txbOpenFilePath);
             } else
             {
                 btnConnect.IsEnabled = false;
@@ -755,6 +759,11 @@ namespace Lumi
 
         private async void btnReset_Click(object sender, RoutedEventArgs e)
         {
+
+            tsb = new TSB();
+            // Initialize the TSB object.  This is necessary to start SerialDeviceWatcher.
+            tsb.init(serialPorts, mainDisplayScroll, rtbMainDisplay, theOneParagraph, pbSys, serialBuffer, txbOpenFilePath);
+            
             await reset();
             tsbStatusUpdate(TSB.statuses.bootloaderDisconnected, null);
             
